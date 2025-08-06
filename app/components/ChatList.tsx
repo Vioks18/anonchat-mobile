@@ -189,14 +189,7 @@ export const ChatList: React.FC<ChatListProps> = React.memo(({
   }
 
   return (
-    <View style={styles.container}>
-      {validMessages.length === 0 && (
-        <View style={styles.emptyState}>
-          <Text style={[styles.emptyText, { color: currentThemeData.text }]}>
-            Нет сообщений
-          </Text>
-        </View>
-      )}
+    <View style={[styles.container, themedStyles.safe]}>
       <FlatList {...flatListProps} />
     </View>
   );
@@ -251,14 +244,5 @@ const styles = StyleSheet.create({
   errorText: {
     color: '#ff6b6b',
     fontSize: 14,
-  },
-  emptyState: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  emptyText: {
-    fontSize: 16,
-    opacity: 0.6,
   },
 }); 

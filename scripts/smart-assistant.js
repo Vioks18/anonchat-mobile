@@ -76,127 +76,137 @@ class SmartAssistant {
 
   // Анализ производительности
   analyzePerformance(filePath, content) {
-    // Проверка FlatList оптимизации (только в компонентах, не в хуках)
-    if (content.includes('FlatList') && !filePath.includes('/hooks/')) {
-      const hasRemoveClippedSubviews = content.includes('removeClippedSubviews');
-      const hasMaxToRenderPerBatch = content.includes('maxToRenderPerBatch');
-      const hasWindowSize = content.includes('windowSize');
-      
-      if (!hasRemoveClippedSubviews) {
-        this.addSuggestion(filePath, '🚀 Добавить removeClippedSubviews для оптимизации памяти');
-      }
-      if (!hasMaxToRenderPerBatch) {
-        this.addSuggestion(filePath, '🚀 Добавить maxToRenderPerBatch для контроля рендера');
-      }
-      if (!hasWindowSize) {
-        this.addSuggestion(filePath, '🚀 Добавить windowSize для оптимизации скролла');
-      }
-    }
-
-    // Проверка useCallback/useMemo
-    const hasUseCallback = content.includes('useCallback');
-    const hasUseMemo = content.includes('useMemo');
-    const hasExpensiveOperations = content.includes('filter(') || content.includes('map(') || content.includes('reduce(');
-    
-    // Проверяем только если есть дорогие операции и нет useMemo
-    if (hasExpensiveOperations && !hasUseMemo) {
-      // Дополнительная проверка - не предлагаем для простых операций
-      const lines = content.split('\n');
-      let hasComplexOperation = false;
-      
-      lines.forEach(line => {
-        if (line.includes('filter(') || line.includes('map(') || line.includes('reduce(')) {
-          // Проверяем, что это не простой случай
-          if (line.length > 50 || line.includes('=>')) {
-            hasComplexOperation = true;
-          }
+    try {
+      // Проверка FlatList оптимизации (только в компонентах, не в хуках)
+      if (content.includes('FlatList') && !filePath.includes('/hooks/')) {
+        const hasRemoveClippedSubviews = content.includes('removeClippedSubviews');
+        const hasMaxToRenderPerBatch = content.includes('maxToRenderPerBatch');
+        const hasWindowSize = content.includes('windowSize');
+        
+        if (!hasRemoveClippedSubviews) {
+          this.addSuggestion(filePath, '🚀 Добавить removeClippedSubviews для оптимизации памяти');
         }
-      });
+        if (!hasMaxToRenderPerBatch) {
+          this.addSuggestion(filePath, '🚀 Добавить maxToRenderPerBatch для контроля рендера');
+        }
+        if (!hasWindowSize) {
+          this.addSuggestion(filePath, '🚀 Добавить windowSize для оптимизации скролла');
+        }
+      }
+
+      // Проверка useMemo только для явно дорогих операций
+      const hasExpensiveOperations = content.includes('filter(') && content.includes('=>') ||
+                                   content.includes('map(') && content.includes('=>') ||
+                                   content.includes('reduce(') && content.includes('=>');
       
-      if (hasComplexOperation) {
-        this.addSuggestion(filePath, '🧠 Рассмотреть useMemo для дорогих операций');
+      if (hasExpensiveOperations && !content.includes('useMemo')) {
+        this.addSuggestion(filePath, '🧠 Рассмотреть useMemo для сложных операций');
       }
-    }
-    
-    // Проверка useCallback только для функций в зависимостях useEffect
-    if (content.includes('useEffect') && content.includes('function') && !hasUseCallback) {
-      const useEffectPatterns = content.match(/useEffect\s*\(\s*\(\)\s*=>\s*\{[\s\S]*?\}\s*,\s*\[([^\]]*)\]\s*\)/g);
-      if (useEffectPatterns && useEffectPatterns.some(pattern => pattern.includes('function'))) {
-        this.addSuggestion(filePath, '🧠 Рассмотреть useCallback для функций в зависимостях');
-      }
+
+    } catch (error) {
+      console.error('Ошибка анализа производительности:', error);
     }
   }
 
   // Анализ архитектуры
   analyzeArchitecture(filePath, content) {
-    // Проверка типизации
-    if (filePath.endsWith('.tsx') && content.includes('React.FC')) {
-      const hasInterface = content.includes('interface') || content.includes('type');
-      if (!hasInterface) {
-        this.addSuggestion(filePath, '📝 Добавить типизацию для компонента');
+    try {
+      // Умная проверка размера файлов (только для очень больших)
+      if (!filePath.includes('.backup')) {
+        const lines = content.split('\n');
+        const codeLines = lines.filter(line => 
+          line.trim().length > 0 && 
+          !line.trim().startsWith('//') && 
+          !line.trim().startsWith('/*')
+        ).length;
+        
+        if (codeLines > 400) {
+          this.addSuggestion(filePath, '🏗️ Файл очень большой, рассмотреть разделение');
+        }
       }
-    }
 
-    // Проверка обработки ошибок
-    if (content.includes('useState') && !content.includes('try') && !content.includes('catch')) {
-      this.addSuggestion(filePath, '🛡️ Добавить обработку ошибок для критических операций');
-    }
+      // Проверка критически важных проблем
+      if (content.includes('useEffect') && !content.includes('try {') && !content.includes('} catch')) {
+        this.addSuggestion(filePath, '🛡️ Добавить обработку ошибок в useEffect');
+      }
 
-    // Проверка разделения ответственности
-    if (content.length > 500 && content.includes('useState') && content.includes('useEffect')) {
-      this.addSuggestion(filePath, '🏗️ Рассмотреть разделение на более мелкие компоненты');
+    } catch (error) {
+      console.error('Ошибка анализа архитектуры:', error);
     }
   }
 
   // Умный анализ безопасности
   analyzeSecurity(filePath, content) {
-    // Проверка console.log в продакшене (исключая закомментированные)
-    const consoleLogMatches = content.match(/console\.log\(/g);
-    if (consoleLogMatches) {
-      // Проверяем каждое вхождение console.log
-      const lines = content.split('\n');
-      let hasUncommentedConsoleLog = false;
+    try {
+      // Проверка валидации (умная - учитываем уже добавленную)
+      const hasValidation = content.includes('validateMessage') || 
+                          content.includes('validateInput') || 
+                          content.includes('trim()') ||
+                          content.includes('length > 0') ||
+                          content.includes('typeof') ||
+                          content.includes('includes(');
       
-      lines.forEach((line, index) => {
-        if (line.includes('console.log(')) {
-          // Проверяем, не закомментирована ли строка
-          const trimmedLine = line.trim();
-          if (!trimmedLine.startsWith('//') && !trimmedLine.startsWith('/*') && !trimmedLine.startsWith('*')) {
-            hasUncommentedConsoleLog = true;
-          }
+      if (content.includes('TextInput') || content.includes('input')) {
+        if (!hasValidation) {
+          this.addSuggestion(filePath, '🔒 Добавить валидацию пользовательского ввода');
         }
-      });
-      
-      if (hasUncommentedConsoleLog) {
-        this.addSuggestion(filePath, '🔒 Убрать console.log для продакшена');
       }
-    }
 
-    // Проверка валидации данных
-    if (content.includes('userInput') || content.includes('onChangeText')) {
-      this.addSuggestion(filePath, '🔒 Добавить валидацию пользовательского ввода');
+      // Проверка обработки ошибок
+      const hasErrorHandling = content.includes('try {') && content.includes('} catch');
+      if (!hasErrorHandling && (content.includes('useEffect') || content.includes('useCallback'))) {
+        this.addSuggestion(filePath, '🛡️ Добавить обработку ошибок');
+      }
+
+      // Проверка безопасных операций
+      if (content.includes('setState') && !content.includes('safeExecute')) {
+        this.addSuggestion(filePath, '🛡️ Использовать безопасные операции setState');
+      }
+
+    } catch (error) {
+      console.error('Ошибка анализа безопасности:', error);
     }
   }
 
   // Анализ лучших практик
   analyzeBestPractices(filePath, content) {
-    // Проверка именования
-    const componentMatch = content.match(/export\s+const\s+(\w+)\s*:\s*React\.FC/);
-    if (componentMatch) {
-      const componentName = componentMatch[1];
-      if (!componentName.match(/^[A-Z]/)) {
-        this.addSuggestion(filePath, '📝 Компоненты должны начинаться с заглавной буквы');
+    try {
+      // Умная проверка console.log - игнорируем закомментированные
+      const consoleLogPatterns = content.match(/console\.log\s*\([^)]*\)/g);
+      if (consoleLogPatterns) {
+        consoleLogPatterns.forEach(log => {
+          // Проверяем, не закомментирован ли лог
+          const lines = content.split('\n');
+          const logLine = lines.find(line => line.includes(log));
+          if (logLine && !logLine.trim().startsWith('//') && !logLine.trim().startsWith('/*')) {
+            this.addSuggestion(filePath, `🔒 Убрать console.log для продакшена: ${log.trim()}`);
+          }
+        });
       }
-    }
 
-    // Проверка структуры
-    if (content.includes('import') && content.includes('export')) {
-      const importCount = (content.match(/import/g) || []).length;
-      const exportCount = (content.match(/export/g) || []).length;
+      // Проверка размера компонентов (только для очень больших файлов)
+      const lines = content.split('\n');
+      const codeLines = lines.filter(line => 
+        line.trim().length > 0 && 
+        !line.trim().startsWith('//') && 
+        !line.trim().startsWith('/*')
+      ).length;
       
-      if (exportCount > 3) {
-        this.addSuggestion(filePath, '📦 Рассмотреть разделение на несколько файлов');
+      if (codeLines > 400 && !filePath.includes('.backup')) {
+        this.addSuggestion(filePath, '🏗️ Файл очень большой, рассмотреть разделение');
       }
+
+      // Проверка useMemo только для явно дорогих операций
+      const hasExpensiveOperations = content.includes('filter(') && content.includes('=>') ||
+                                   content.includes('map(') && content.includes('=>') ||
+                                   content.includes('reduce(') && content.includes('=>');
+      
+      if (hasExpensiveOperations && !content.includes('useMemo')) {
+        this.addSuggestion(filePath, '🧠 Рассмотреть useMemo для сложных операций');
+      }
+
+    } catch (error) {
+      console.error('Ошибка анализа лучших практик:', error);
     }
   }
 

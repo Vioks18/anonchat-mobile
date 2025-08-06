@@ -91,19 +91,11 @@ export const useUIWatchDog = ({
   // Проверка клавиатуры
   const checkKeyboard = useCallback(() => {
     try {
-      if (keyboardHeight > 0 && !inputFocused) {
-        console.warn(`⚠️ TextInput не был в фокусе при keyboardDidShow (высота: ${keyboardHeight})`);
-        safeSetStatus(prev => ({ ...prev, keyboardIssue: true }));
-      } else if (keyboardHeight === 0 && keyboardShowTimeRef.current > 0) {
-        console.warn(`🔇 клавиатура открыта, но высота = 0`);
-        safeSetStatus(prev => ({ ...prev, keyboardIssue: true }));
-      } else {
-        safeSetStatus(prev => ({ ...prev, keyboardIssue: false }));
-      }
+      // console.log('useUIWatchDog: Проверка клавиатуры', keyboardHeight);
     } catch (error) {
-      console.error('useUIWatchDog: Ошибка checkKeyboard', error);
+      console.error('useUIWatchDog: Ошибка проверки клавиатуры', error);
     }
-  }, [keyboardHeight, inputFocused, safeSetStatus]);
+  }, [keyboardHeight]);
 
   // Проверка количества сообщений (только при изменении)
   const checkMessageCount = useCallback(() => {

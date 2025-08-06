@@ -21,6 +21,9 @@ module.exports = {
       statusBarColor: "#181825"
     },
     scheme: "anonchat-mobile",
+    linking: {
+      prefixes: ["anonchat-mobile://"]
+    },
     web: {
       bundler: "metro",
       output: "static",

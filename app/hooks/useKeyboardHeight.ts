@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Keyboard } from 'react-native';
 
 export const useKeyboardHeight = () => {
@@ -24,29 +24,24 @@ export const useKeyboardHeight = () => {
   // Безопасная обработка показа клавиатуры
   const handleKeyboardShow = useCallback((e: any) => {
     try {
-      if (!e || !e.endCoordinates) {
-        console.warn('useKeyboardHeight: Неполные данные события клавиатуры');
-        setHasError(true);
-        return;
+      if (e && e.endCoordinates) {
+        setKeyboardHeight(e.endCoordinates.height);
+        // console.log('useKeyboardHeight: Клавиатура показана', e.endCoordinates.height);
       }
-
-      const height = e.endCoordinates.height;
-      safeSetKeyboardHeight(height);
     } catch (error) {
       console.error('useKeyboardHeight: Ошибка обработки показа клавиатуры', error);
-      setHasError(true);
     }
-  }, [safeSetKeyboardHeight]);
+  }, []);
 
   // Безопасная обработка скрытия клавиатуры
   const handleKeyboardHide = useCallback(() => {
     try {
-      safeSetKeyboardHeight(0);
+      setKeyboardHeight(0);
+      // console.log('useKeyboardHeight: Клавиатура скрыта');
     } catch (error) {
       console.error('useKeyboardHeight: Ошибка обработки скрытия клавиатуры', error);
-      setHasError(true);
     }
-  }, [safeSetKeyboardHeight]);
+  }, []);
 
   useEffect(() => {
     let keyboardDidShowListener: any = null;

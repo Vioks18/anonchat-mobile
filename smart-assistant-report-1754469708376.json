@@ -1,0 +1,294 @@
+{
+  "timestamp": "2025-08-06T08:41:48.376Z",
+  "analysis": {
+    "issues": [],
+    "suggestions": [
+      {
+        "file": "app/components/ChatCore.tsx",
+        "message": "🏗️ Файл слишком большой, рассмотреть разделение",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:41:48.344Z"
+      },
+      {
+        "file": "app/components/ChatCore.tsx",
+        "message": "🎣 Много хуков, рассмотреть вынос логики в кастомные хуки",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:41:48.345Z"
+      },
+      {
+        "file": "app/components/ChatInput.tsx",
+        "message": "🎣 Много хуков, рассмотреть вынос логики в кастомные хуки",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:41:48.348Z"
+      },
+      {
+        "file": "app/components/ChatList.tsx",
+        "message": "🎣 Много хуков, рассмотреть вынос логики в кастомные хуки",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:41:48.349Z"
+      },
+      {
+        "file": "app/components/ChatMessage.tsx",
+        "message": "🎣 Много хуков, рассмотреть вынос логики в кастомные хуки",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:41:48.349Z"
+      },
+      {
+        "file": "app/components/DevHUD.tsx",
+        "message": "🔒 Добавить валидацию пользовательского ввода",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:41:48.350Z"
+      },
+      {
+        "file": "app/components/DevHUD.tsx",
+        "message": "🔒 Добавить валидацию пользовательского ввода",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:41:48.350Z"
+      },
+      {
+        "file": "app/components/Header.tsx",
+        "message": "🎣 Много хуков, рассмотреть вынос логики в кастомные хуки",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:41:48.350Z"
+      },
+      {
+        "file": "app/components/Header.tsx",
+        "message": "🔒 Добавить валидацию пользовательского ввода",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:41:48.350Z"
+      },
+      {
+        "file": "app/components/MessageInput.tsx",
+        "message": "🎣 Много хуков, рассмотреть вынос логики в кастомные хуки",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:41:48.351Z"
+      },
+      {
+        "file": "app/components/ThemeSelector.tsx",
+        "message": "🎣 Много хуков, рассмотреть вынос логики в кастомные хуки",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:41:48.352Z"
+      },
+      {
+        "file": "app/components/ThemeSelector.tsx",
+        "message": "🔒 Добавить валидацию пользовательского ввода",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:41:48.352Z"
+      },
+      {
+        "file": "app/components/UIErrorBoundary.tsx",
+        "message": "🚀 Рассмотреть useCallback для обработчиков событий",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:41:48.353Z"
+      },
+      {
+        "file": "app/components/UIErrorBoundary.tsx",
+        "message": "🛡️ Использовать безопасные операции setState",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:41:48.353Z"
+      },
+      {
+        "file": "app/hooks/useBotProvider.ts",
+        "message": "🚀 Рассмотреть React.memo для оптимизации рендера",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:41:48.353Z"
+      },
+      {
+        "file": "app/hooks/useBotProvider.ts",
+        "message": "🎣 Много хуков, рассмотреть вынос логики в кастомные хуки",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:41:48.353Z"
+      },
+      {
+        "file": "app/hooks/useKeyboardHeight.ts",
+        "message": "🚀 Рассмотреть React.memo для оптимизации рендера",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:41:48.354Z"
+      },
+      {
+        "file": "app/hooks/useKeyboardHeight.ts",
+        "message": "🎣 Много хуков, рассмотреть вынос логики в кастомные хуки",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:41:48.354Z"
+      },
+      {
+        "file": "app/hooks/useKeyboardHeight.ts",
+        "message": "🔒 Убрать console.log для продакшена: console.log('useKeyboardHeight: Слушатели клавиатуры добавлены')",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:41:48.354Z"
+      },
+      {
+        "file": "app/hooks/useKeyboardHeight.ts",
+        "message": "🔒 Убрать console.log для продакшена: console.log('useKeyboardHeight: Слушатели клавиатуры удалены')",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:41:48.354Z"
+      },
+      {
+        "file": "app/hooks/useMessageStore.ts",
+        "message": "🧠 Рассмотреть useMemo для дорогих операций",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:41:48.354Z"
+      },
+      {
+        "file": "app/hooks/useMessageStore.ts",
+        "message": "🚀 Рассмотреть React.memo для оптимизации рендера",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:41:48.354Z"
+      },
+      {
+        "file": "app/hooks/useMessageStore.ts",
+        "message": "🎣 Много хуков, рассмотреть вынос логики в кастомные хуки",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:41:48.354Z"
+      },
+      {
+        "file": "app/hooks/useMessageStore.ts",
+        "message": "🔒 Убрать console.log для продакшена: console.log('addBotMessage: Сообщение бота добавлено', newMessage.id)",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:41:48.354Z"
+      },
+      {
+        "file": "app/hooks/useMessageStore.ts",
+        "message": "🔒 Убрать console.log для продакшена: console.log('updateMessage: Сообщение обновлено', id)",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:41:48.354Z"
+      },
+      {
+        "file": "app/hooks/useMessageStore.ts",
+        "message": "🔒 Убрать console.log для продакшена: console.log('removeMessage: Сообщение удалено', id)",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:41:48.354Z"
+      },
+      {
+        "file": "app/hooks/useMessageStore.ts",
+        "message": "🔒 Убрать console.log для продакшена: console.log('addReaction: Реакция добавлена', messageId, reaction)",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:41:48.355Z"
+      },
+      {
+        "file": "app/hooks/useMessageStore.ts",
+        "message": "🔒 Убрать console.log для продакшена: console.log('reset: Store сброшен')",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:41:48.355Z"
+      },
+      {
+        "file": "app/hooks/useMessageStore.ts",
+        "message": "🧠 Рассмотреть useMemo для дорогих операций",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:41:48.355Z"
+      },
+      {
+        "file": "app/hooks/useUIWatchDog.ts",
+        "message": "🚀 Рассмотреть React.memo для оптимизации рендера",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:41:48.355Z"
+      },
+      {
+        "file": "app/hooks/useUIWatchDog.ts",
+        "message": "🎣 Много хуков, рассмотреть вынос логики в кастомные хуки",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:41:48.356Z"
+      },
+      {
+        "file": "app/hooks/useUIWatchDog.ts",
+        "message": "🔒 Убрать console.log для продакшена: console.log('useUIWatchDog: Слушатели клавиатуры добавлены')",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:41:48.356Z"
+      },
+      {
+        "file": "app/hooks/useUIWatchDog.ts",
+        "message": "🔒 Убрать console.log для продакшена: console.log('useUIWatchDog: Слушатели клавиатуры удалены')",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:41:48.356Z"
+      },
+      {
+        "file": "app/hooks/useUIWatchDog.ts",
+        "message": "🔒 Убрать console.log для продакшена: console.log('useUIWatchDog: Проверка scrollToEnd')",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:41:48.356Z"
+      },
+      {
+        "file": "app/hooks/useUIWatchDog.ts",
+        "message": "🔒 Добавить валидацию пользовательского ввода",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:41:48.356Z"
+      },
+      {
+        "file": "app/screens/ChatScreen.backup.tsx",
+        "message": "🎣 Много хуков, рассмотреть вынос логики в кастомные хуки",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:41:48.357Z"
+      },
+      {
+        "file": "app/screens/ChatScreen.tsx",
+        "message": "🚀 Рассмотреть React.memo для оптимизации рендера",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:41:48.358Z"
+      },
+      {
+        "file": "app/screens/ChatScreen.tsx",
+        "message": "🎣 Много хуков, рассмотреть вынос логики в кастомные хуки",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:41:48.358Z"
+      },
+      {
+        "file": "app/providers/FakeSocketProvider.tsx",
+        "message": "🚀 Рассмотреть React.memo для оптимизации рендера",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:41:48.359Z"
+      },
+      {
+        "file": "app/providers/FakeSocketProvider.tsx",
+        "message": "🎣 Много хуков, рассмотреть вынос логики в кастомные хуки",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:41:48.359Z"
+      },
+      {
+        "file": "app/providers/FakeSocketProvider.tsx",
+        "message": "🛡️ Добавить обработку ошибок",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:41:48.359Z"
+      },
+      {
+        "file": "app/providers/FakeSocketProvider.tsx",
+        "message": "🛡️ Добавить try-catch для обработки ошибок",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:41:48.359Z"
+      },
+      {
+        "file": "app/context/ChatLogicProvider.tsx",
+        "message": "🚀 Рассмотреть React.memo для оптимизации рендера",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:41:48.359Z"
+      },
+      {
+        "file": "app/context/ChatLogicProvider.tsx",
+        "message": "🏗️ Файл слишком большой, рассмотреть разделение",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:41:48.359Z"
+      },
+      {
+        "file": "app/context/ChatLogicProvider.tsx",
+        "message": "🎣 Много хуков, рассмотреть вынос логики в кастомные хуки",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:41:48.359Z"
+      },
+      {
+        "file": "app/utils/formatTimestamp.ts",
+        "message": "🚀 Рассмотреть React.memo для оптимизации рендера",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:41:48.360Z"
+      },
+      {
+        "file": "app/utils/haptics.ts",
+        "message": "🚀 Рассмотреть React.memo для оптимизации рендера",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:41:48.360Z"
+      }
+    ],
+    "architecture": {},
+    "performance": {},
+    "security": {},
+    "bestPractices": []
+  }
+}

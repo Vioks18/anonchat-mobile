@@ -46,17 +46,12 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
   
   addMessage: (text: string) => {
     try {
-      if (!validateMessage(text)) {
-        console.warn('addMessage: Невалидный текст сообщения');
-        return;
-      }
-
       const newMessage: Message = {
-        id: generateId(),
+        id: Date.now().toString(),
         text: text.trim(),
         sender: "me",
         timestamp: Date.now(),
-        status: "sent", // Сразу "sent" для простоты
+        status: "sending",
         reactions: [],
       };
       
@@ -64,9 +59,34 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
         messages: [...state.messages, newMessage]
       }));
       
-      console.log('addMessage: Сообщение добавлено', newMessage.id);
+      // Имитация отправки
+      setTimeout(() => {
+        set((state) => ({
+          messages: state.messages.map((msg) =>
+            msg.id === newMessage.id ? { ...msg, status: "sent" } : msg
+          )
+        }));
+        
+        setTimeout(() => {
+          set((state) => ({
+            messages: state.messages.map((msg) =>
+              msg.id === newMessage.id ? { ...msg, status: "delivered" } : msg
+            )
+          }));
+          
+          setTimeout(() => {
+            set((state) => ({
+              messages: state.messages.map((msg) =>
+                msg.id === newMessage.id ? { ...msg, status: "read" } : msg
+              )
+            }));
+          }, 1000);
+        }, 500);
+      }, 1000);
+      
+      // console.log('useMessageStore: Сообщение добавлено', text);
     } catch (error) {
-      console.error('addMessage: Ошибка добавления сообщения', error);
+      console.error('useMessageStore: Ошибка добавления сообщения', error);
     }
   },
 

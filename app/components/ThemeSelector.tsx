@@ -182,7 +182,7 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = React.memo(({
 
       // Проверяем, что тема изменилась
       if (themeKey === currentTheme) {
-        console.log('ThemeSelector: Тема уже выбрана', themeKey);
+        // console.log('ThemeSelector: Тема уже выбрана', themeKey);
         onClose();
         return;
       }

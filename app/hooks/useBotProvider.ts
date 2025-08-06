@@ -65,25 +65,19 @@ export const useBotProvider = () => {
   // Устанавливаем интервал (5-10 секунд случайно) - мемоизирована
   const startInterval = useCallback(() => {
     try {
-      // Очищаем предыдущий интервал
-      stopInterval();
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
       
-      const delay = Math.random() * 5000 + 5000; // 5-10 секунд
-      
-      intervalRef.current = setTimeout(() => {
-        try {
-          if (isBotEnabled) {
-            sendBotMessage();
-            startInterval(); // Рекурсивно устанавливаем следующий интервал
-          }
-        } catch (error) {
-          console.error('useBotProvider: Ошибка в интервале бота', error);
+      intervalRef.current = setInterval(() => {
+        if (isBotEnabled) {
+          sendBotMessage();
         }
-      }, delay);
+      }, 5000 + Math.random() * 10000); // 5-15 секунд
       
-      console.log('useBotProvider: Интервал бота установлен', delay);
+      // console.log('useBotProvider: Интервал запущен');
     } catch (error) {
-      console.error('useBotProvider: Ошибка установки интервала бота', error);
+      console.error('useBotProvider: Ошибка запуска интервала', error);
     }
   }, [isBotEnabled, sendBotMessage]);
 
@@ -91,12 +85,12 @@ export const useBotProvider = () => {
   const stopInterval = useCallback(() => {
     try {
       if (intervalRef.current) {
-        clearTimeout(intervalRef.current);
+        clearInterval(intervalRef.current);
         intervalRef.current = null;
-        console.log('useBotProvider: Интервал бота очищен');
+        // console.log('useBotProvider: Интервал остановлен');
       }
     } catch (error) {
-      console.error('useBotProvider: Ошибка очистки интервала бота', error);
+      console.error('useBotProvider: Ошибка остановки интервала', error);
     }
   }, []);
 

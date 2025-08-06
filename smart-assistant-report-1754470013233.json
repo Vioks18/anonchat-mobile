@@ -1,0 +1,120 @@
+{
+  "timestamp": "2025-08-06T08:46:53.233Z",
+  "analysis": {
+    "issues": [],
+    "suggestions": [
+      {
+        "file": "app/components/ChatCore.tsx",
+        "message": "🏗️ Файл очень большой, рассмотреть разделение",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:46:53.196Z"
+      },
+      {
+        "file": "app/components/ChatCore.tsx",
+        "message": "🏗️ Файл очень большой, рассмотреть разделение",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:46:53.199Z"
+      },
+      {
+        "file": "app/components/DevHUD.tsx",
+        "message": "🔒 Добавить валидацию пользовательского ввода",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:46:53.203Z"
+      },
+      {
+        "file": "app/components/UIErrorBoundary.tsx",
+        "message": "🛡️ Использовать безопасные операции setState",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:46:53.208Z"
+      },
+      {
+        "file": "app/hooks/useKeyboardHeight.ts",
+        "message": "🔒 Убрать console.log для продакшена: console.log('useKeyboardHeight: Слушатели клавиатуры добавлены')",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:46:53.209Z"
+      },
+      {
+        "file": "app/hooks/useKeyboardHeight.ts",
+        "message": "🔒 Убрать console.log для продакшена: console.log('useKeyboardHeight: Слушатели клавиатуры удалены')",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:46:53.209Z"
+      },
+      {
+        "file": "app/hooks/useMessageStore.ts",
+        "message": "🧠 Рассмотреть useMemo для сложных операций",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:46:53.210Z"
+      },
+      {
+        "file": "app/hooks/useMessageStore.ts",
+        "message": "🔒 Убрать console.log для продакшена: console.log('addBotMessage: Сообщение бота добавлено', newMessage.id)",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:46:53.211Z"
+      },
+      {
+        "file": "app/hooks/useMessageStore.ts",
+        "message": "🔒 Убрать console.log для продакшена: console.log('updateMessage: Сообщение обновлено', id)",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:46:53.211Z"
+      },
+      {
+        "file": "app/hooks/useMessageStore.ts",
+        "message": "🔒 Убрать console.log для продакшена: console.log('removeMessage: Сообщение удалено', id)",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:46:53.211Z"
+      },
+      {
+        "file": "app/hooks/useMessageStore.ts",
+        "message": "🔒 Убрать console.log для продакшена: console.log('addReaction: Реакция добавлена', messageId, reaction)",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:46:53.211Z"
+      },
+      {
+        "file": "app/hooks/useMessageStore.ts",
+        "message": "🔒 Убрать console.log для продакшена: console.log('reset: Store сброшен')",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:46:53.211Z"
+      },
+      {
+        "file": "app/hooks/useMessageStore.ts",
+        "message": "🧠 Рассмотреть useMemo для сложных операций",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:46:53.211Z"
+      },
+      {
+        "file": "app/hooks/useUIWatchDog.ts",
+        "message": "🔒 Убрать console.log для продакшена: console.log('useUIWatchDog: Слушатели клавиатуры добавлены')",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:46:53.212Z"
+      },
+      {
+        "file": "app/hooks/useUIWatchDog.ts",
+        "message": "🔒 Убрать console.log для продакшена: console.log('useUIWatchDog: Слушатели клавиатуры удалены')",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:46:53.212Z"
+      },
+      {
+        "file": "app/hooks/useUIWatchDog.ts",
+        "message": "🔒 Убрать console.log для продакшена: console.log('useUIWatchDog: Проверка scrollToEnd')",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:46:53.212Z"
+      },
+      {
+        "file": "app/providers/FakeSocketProvider.tsx",
+        "message": "🛡️ Добавить обработку ошибок в useEffect",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:46:53.215Z"
+      },
+      {
+        "file": "app/providers/FakeSocketProvider.tsx",
+        "message": "🛡️ Добавить обработку ошибок",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:46:53.215Z"
+      }
+    ],
+    "architecture": {},
+    "performance": {},
+    "security": {},
+    "bestPractices": []
+  }
+}

@@ -4,16 +4,15 @@ import {
   Keyboard,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { THEMES } from '../constants/themes';
 import { useMessageStore } from '../hooks/useMessageStore';
 import { ChatInput } from './ChatInput';
 import { ChatList } from './ChatList';
-import { THEMES } from './ThemeSelector';
-
-// Используем THEMES из ThemeSelector
 
 interface ChatCoreProps {
   // Минимальные пропсы для изоляции
@@ -40,7 +39,6 @@ export const ChatCore: React.FC<ChatCoreProps> = React.memo(({ onSendMessage, on
   
   // Состояния для тем
   const [currentTheme, setCurrentTheme] = useState("dark");
-  const [showThemeSelector, setShowThemeSelector] = useState(false);
 
   // Применение текущей темы - оптимизировано с useMemo
   const currentThemeData = useMemo(() => {
@@ -51,28 +49,31 @@ export const ChatCore: React.FC<ChatCoreProps> = React.memo(({ onSendMessage, on
       return THEMES.dark;
     }
   }, [currentTheme]);
-  
-  // Состояния для меню
-  const [showMenu, setShowMenu] = useState(false);
-  const [isSearching, setIsSearching] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  
+
   const [inputText, setInputText] = useState("");
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [inputFocused, setInputFocused] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showThemeSelector, setShowThemeSelector] = useState(false);
 
-  // Мемоизированные стили контейнера
-  const containerStyle = useMemo(() => [
-    styles.container, 
-    { backgroundColor: currentThemeData.bg }
-  ], [currentThemeData.bg]);
-
-  // Мемоизированные стили header
-  const headerStyle = useMemo(() => [
-    styles.header, 
-    { backgroundColor: currentThemeData.headerBg }
-  ], [currentThemeData.headerBg]);
-
+  // Создаем themedStyles для передачи в компоненты
+  const themedStyles = useMemo(() => ({
+    safe: { backgroundColor: currentThemeData.bg },
+    header: { backgroundColor: currentThemeData.headerBg },
+    headerText: { color: currentThemeData.text },
+    bubbleMe: { backgroundColor: currentThemeData.accent },
+    bubbleOther: { backgroundColor: currentThemeData.bubbleOther },
+    bubbleText: { color: currentThemeData.text },
+    timestamp: { color: currentThemeData.text },
+    statusDelivered: { color: currentThemeData.text },
+    statusRead: { color: currentThemeData.accent },
+    inputContainer: { backgroundColor: currentThemeData.inputBg, marginBottom: keyboardHeight },
+    input: { color: currentThemeData.text, backgroundColor: currentThemeData.inputBg },
+    sendButton: { backgroundColor: currentThemeData.accent },
+  }), [currentThemeData, keyboardHeight]);
+  
   // UI WatchDog для мониторинга стабильности (пока отключен)
   // const { status: watchDogStatus } = useUIWatchDog({
   //   flatListRef: { current: null } as any, // Временное решение
@@ -130,7 +131,7 @@ export const ChatCore: React.FC<ChatCoreProps> = React.memo(({ onSendMessage, on
         }
       });
 
-      console.log('ChatCore: Слушатели клавиатуры добавлены');
+      // console.log('ChatCore: Слушатели клавиатуры добавлены');
     } catch (error) {
       console.error('ChatCore: Ошибка добавления слушателей клавиатуры', error);
       onError?.(error as Error);
@@ -140,7 +141,7 @@ export const ChatCore: React.FC<ChatCoreProps> = React.memo(({ onSendMessage, on
       try {
         keyboardDidShowListener?.remove();
         keyboardDidHideListener?.remove();
-        console.log('ChatCore: Слушатели клавиатуры удалены');
+        // console.log('ChatCore: Слушатели клавиатуры удалены');
       } catch (error) {
         console.error('ChatCore: Ошибка удаления слушателей клавиатуры', error);
       }
@@ -174,7 +175,7 @@ export const ChatCore: React.FC<ChatCoreProps> = React.memo(({ onSendMessage, on
       // Уведомляем внешнюю логику
       onSendMessage?.(trimmedText);
       
-      console.log('ChatCore: Сообщение отправлено', trimmedText);
+      // console.log('ChatCore: Сообщение отправлено', trimmedText);
     }, 'sendMessage');
   }, [inputText, onSendMessage, safeExecute, addMessage, safeSetState]);
 
@@ -182,68 +183,62 @@ export const ChatCore: React.FC<ChatCoreProps> = React.memo(({ onSendMessage, on
   const handleMenuToggle = useCallback(() => {
     safeExecute(() => {
       setShowMenu(!showMenu);
+      // console.log('ChatCore: Menu toggled', !showMenu);
     }, 'toggleMenu');
   }, [showMenu, safeExecute]);
 
+  // Безопасная обработка поиска
   const handleSearchToggle = useCallback(() => {
     safeExecute(() => {
-      setIsSearching(true);
+      setIsSearching(!isSearching);
       setShowMenu(false);
+      // console.log('ChatCore: Search toggled', !isSearching);
     }, 'toggleSearch');
-  }, [safeExecute]);
+  }, [isSearching, safeExecute]);
 
+  // Безопасная обработка тем
   const handleThemeToggle = useCallback(() => {
     safeExecute(() => {
+      setShowThemeSelector(!showThemeSelector);
       setShowMenu(false);
-      setShowThemeSelector(true);
-    }, 'toggleTheme');
-  }, [safeExecute]);
+      // console.log('ChatCore: Theme selector toggled', !showThemeSelector);
+    }, 'toggleThemeSelector');
+  }, [showThemeSelector, safeExecute]);
 
+  // Безопасная обработка бота
   const handleBotToggle = useCallback(() => {
     safeExecute(() => {
       onToggleBot?.();
       setShowMenu(false);
+      // console.log('ChatCore: Bot toggled');
     }, 'toggleBot');
   }, [onToggleBot, safeExecute]);
 
+  // Безопасная обработка закрытия поиска
   const handleSearchClose = useCallback(() => {
     safeExecute(() => {
       setIsSearching(false);
       setSearchQuery("");
+      // console.log('ChatCore: Search closed');
     }, 'closeSearch');
   }, [safeExecute]);
 
+  // Безопасная обработка закрытия тем
   const handleThemeClose = useCallback(() => {
     safeExecute(() => {
       setShowThemeSelector(false);
-    }, 'closeTheme');
+      // console.log('ChatCore: Theme selector closed');
+    }, 'closeThemeSelector');
   }, [safeExecute]);
 
+  // Безопасная обработка выбора темы
   const handleThemeSelect = useCallback((theme: string) => {
     safeExecute(() => {
       setCurrentTheme(theme);
+      setShowThemeSelector(false);
+      // console.log('ChatCore: Theme selected', theme);
     }, 'selectTheme');
   }, [safeExecute]);
-
-  // Мемоизированные пропсы для ChatList
-  const chatListProps = useMemo(() => ({
-    messages: filteredMessages as any,
-    currentThemeData,
-    onScrollToEnd: () => {
-      // Скролл обрабатывается внутри ChatList
-    },
-  }), [filteredMessages, currentThemeData]);
-
-  // Мемоизированные пропсы для ChatInput
-  const chatInputProps = useMemo(() => ({
-    inputText,
-    setInputText,
-    onSendMessage: handleSendMessage,
-    keyboardHeight,
-    currentThemeData,
-    inputFocused,
-    setInputFocused,
-  }), [inputText, handleSendMessage, keyboardHeight, currentThemeData, inputFocused]);
 
   // Fallback UI при ошибках
   if (!messages) {
@@ -258,18 +253,64 @@ export const ChatCore: React.FC<ChatCoreProps> = React.memo(({ onSendMessage, on
 
   try {
     return (
-      <SafeAreaView style={containerStyle}>
-        <View style={styles.container}>
+      <SafeAreaView style={[styles.container, themedStyles.safe]}>
+        <View style={[styles.container, themedStyles.safe]}>
           {/* Заголовок */}
-          <View style={headerStyle}>
-            <Text style={styles.headerText}>Axora Chat</Text>
-            <TouchableOpacity 
-              style={styles.menuButton}
-              onPress={handleMenuToggle}
-              activeOpacity={0.7}
-            >
-              <Ionicons name="ellipsis-vertical" size={20} color="#fff" />
-            </TouchableOpacity>
+          <View style={[styles.header, themedStyles.header]}>
+            {(() => {
+              try {
+                if (!isSearching) {
+                  return (
+                    <>
+                      <Text style={[styles.headerText, themedStyles.headerText]}>Axora Chat</Text>
+                      <TouchableOpacity 
+                        style={styles.menuButton}
+                        onPress={handleMenuToggle}
+                        activeOpacity={0.7}
+                      >
+                        <Ionicons name="ellipsis-vertical" size={20} color="#fff" />
+                      </TouchableOpacity>
+                    </>
+                  );
+                } else {
+                  return (
+                    <View style={styles.searchContainer}>
+                      <TextInput
+                        style={styles.searchInput}
+                        value={searchQuery}
+                        onChangeText={setSearchQuery}
+                        placeholder="Поиск сообщений..."
+                        placeholderTextColor="#888"
+                        autoFocus
+                        returnKeyType="search"
+                      />
+                      <TouchableOpacity 
+                        style={styles.searchCloseButton}
+                        onPress={handleSearchClose}
+                        activeOpacity={0.7}
+                      >
+                        <Ionicons name="close" size={20} color="#fff" />
+                      </TouchableOpacity>
+                    </View>
+                  );
+                }
+              } catch (error) {
+                console.error('ChatCore: Ошибка рендеринга header', error);
+                // Fallback - простой header
+                return (
+                  <>
+                    <Text style={[styles.headerText, themedStyles.headerText]}>Axora Chat</Text>
+                    <TouchableOpacity 
+                      style={styles.menuButton}
+                      onPress={handleMenuToggle}
+                      activeOpacity={0.7}
+                    >
+                      <Ionicons name="ellipsis-vertical" size={20} color="#fff" />
+                    </TouchableOpacity>
+                  </>
+                );
+              }
+            })()}
           </View>
 
           {/* Список сообщений */}
@@ -277,8 +318,9 @@ export const ChatCore: React.FC<ChatCoreProps> = React.memo(({ onSendMessage, on
             messages={filteredMessages}
             onSendMessage={handleSendMessage}
             onError={onError}
-            themedStyles={currentThemeData}
+            themedStyles={themedStyles}
             styles={styles}
+            currentThemeData={currentThemeData}
           />
 
           {/* Поле ввода */}
@@ -292,16 +334,97 @@ export const ChatCore: React.FC<ChatCoreProps> = React.memo(({ onSendMessage, on
             setInputFocused={setInputFocused}
           />
 
-          {/* DevHUD для отладки */}
-          {__DEV__ && (
-            <View style={styles.devHUD}>
-              <Text style={styles.devText}>
-                Сообщений: {messages.length} | 
-                Клавиатура: {keyboardHeight}px | 
-                Фокус: {inputFocused ? 'Да' : 'Нет'}
-              </Text>
-            </View>
-          )}
+          {/* Меню */}
+          {showMenu && (() => {
+            try {
+              return (
+                <TouchableOpacity 
+                  style={styles.menuOverlay}
+                  onPress={() => setShowMenu(false)}
+                  activeOpacity={1}
+                >
+                  <TouchableOpacity 
+                    style={styles.menuContent}
+                    onPress={() => {}}
+                    activeOpacity={1}
+                  >
+                    <TouchableOpacity 
+                      style={styles.menuItem}
+                      onPress={handleSearchToggle}
+                      activeOpacity={0.7}
+                    >
+                      <Ionicons name="search" size={20} color="#fff" />
+                      <Text style={styles.menuItemText}>Поиск</Text>
+                    </TouchableOpacity>
+                    
+                    <TouchableOpacity 
+                      style={styles.menuItem}
+                      onPress={handleThemeToggle}
+                      activeOpacity={0.7}
+                    >
+                      <Ionicons name="color-palette" size={20} color="#fff" />
+                      <Text style={styles.menuItemText}>Темы</Text>
+                    </TouchableOpacity>
+                    
+                    <TouchableOpacity 
+                      style={styles.menuItem}
+                      onPress={handleBotToggle}
+                      activeOpacity={0.7}
+                    >
+                      <Ionicons name={isBotEnabled ? "chatbubble" : "chatbubble-outline"} size={20} color="#fff" />
+                      <Text style={styles.menuItemText}>
+                        {isBotEnabled ? "Отключить бота" : "Включить бота"}
+                      </Text>
+                    </TouchableOpacity>
+                  </TouchableOpacity>
+                </TouchableOpacity>
+              );
+            } catch (error) {
+              console.error('ChatCore: Ошибка рендеринга меню', error);
+              return null;
+            }
+          })()}
+
+          {/* Селектор тем */}
+          {showThemeSelector && (() => {
+            try {
+              return (
+                <TouchableOpacity 
+                  style={styles.themeOverlay}
+                  onPress={handleThemeClose}
+                  activeOpacity={1}
+                >
+                  <TouchableOpacity 
+                    style={styles.themeContent}
+                    onPress={() => {}}
+                    activeOpacity={1}
+                  >
+                    <Text style={styles.themeTitle}>Выберите тему</Text>
+                    {Object.entries(THEMES).map(([key, theme]) => (
+                      <TouchableOpacity 
+                        key={key}
+                        style={[
+                          styles.themeOption,
+                          currentTheme === key && styles.themeOptionSelected
+                        ]}
+                        onPress={() => handleThemeSelect(key)}
+                        activeOpacity={0.7}
+                      >
+                        <View style={[styles.themePreview, { backgroundColor: theme.bg }]}>
+                          <View style={[styles.themePreviewHeader, { backgroundColor: theme.headerBg }]} />
+                          <View style={[styles.themePreviewBubble, { backgroundColor: theme.accent }]} />
+                        </View>
+                        <Text style={styles.themeOptionText}>{theme.name}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </TouchableOpacity>
+                </TouchableOpacity>
+              );
+            } catch (error) {
+              console.error('ChatCore: Ошибка рендеринга селектора тем', error);
+              return null;
+            }
+          })()}
         </View>
       </SafeAreaView>
     );
@@ -336,11 +459,15 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 8,
     borderBottomWidth: 0,
     shadowColor: "#6c5ce7",
     shadowOpacity: 0.12,
     shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
     elevation: 8,
+    zIndex: 100,
   },
   headerText: {
     fontSize: 28,
@@ -361,16 +488,15 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    marginLeft: 16,
+    backgroundColor: "rgba(255,255,255,0.1)",
+    borderRadius: 20,
   },
   searchInput: {
     flex: 1,
     fontSize: 16,
     color: "#fff",
-    paddingHorizontal: 12,
     paddingVertical: 8,
-    backgroundColor: "rgba(255,255,255,0.1)",
-    borderRadius: 16,
+    paddingHorizontal: 12,
     marginRight: 8,
   },
   searchCloseButton: {
@@ -380,6 +506,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.1)",
     justifyContent: "center",
     alignItems: "center",
+    marginLeft: 4,
   },
   menuOverlay: {
     position: 'absolute',
@@ -578,15 +705,12 @@ const styles = StyleSheet.create({
       },
            themePreviewHeader: {
         height: 8,
-        borderTopLeftRadius: 6,
-        borderTopRightRadius: 6,
+        width: '100%',
       },
       themePreviewBubble: {
-        width: 20,
-        height: 12,
-        borderRadius: 6,
-        marginTop: 4,
-        marginLeft: 4,
+        flex: 1,
+        margin: 4,
+        borderRadius: 4,
       },
            themeOptionText: {
         flex: 1,
@@ -594,18 +718,30 @@ const styles = StyleSheet.create({
         color: "#fff",
         fontFamily: "Poppins-Regular",
       },
-  devHUD: {
+  themeOverlay: {
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
-    backgroundColor: 'rgba(0,0,0,0.7)',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    zIndex: 1000,
+    bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 2000,
   },
-  devText: {
+  themeContent: {
+    backgroundColor: "#23234d",
+    borderRadius: 16,
+    padding: 20,
+    margin: 20,
+    maxWidth: 300,
+    width: '100%',
+  },
+  themeTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
     color: '#fff',
-    fontSize: 12,
+    textAlign: 'center',
+    marginBottom: 20,
   },
 }); 
