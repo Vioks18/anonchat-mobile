@@ -15,7 +15,7 @@ interface ChatMessageProps {
   styles: any;
 }
 
-export const ChatMessage: React.FC<ChatMessageProps> = React.memo(({
+const ChatMessageInner: React.FC<ChatMessageProps> = React.memo(({
   item,
   handlePress,
   handleLongPress,
@@ -208,6 +208,13 @@ export const ChatMessage: React.FC<ChatMessageProps> = React.memo(({
       </View>
     </TouchableOpacity>
   );
+
 });
 
-ChatMessage.displayName = 'ChatMessage'; 
+ChatMessageInner.displayName = 'ChatMessage';
+
+// Экспортируем как default для Expo Router
+export default ChatMessageInner;
+
+// Также экспортируем как named export для обратной совместимости
+export const ChatMessage = ChatMessageInner; 

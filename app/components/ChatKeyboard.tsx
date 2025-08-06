@@ -28,7 +28,7 @@ interface ChatKeyboardProviderProps {
   children: React.ReactNode;
 }
 
-export const ChatKeyboardProvider: React.FC<ChatKeyboardProviderProps> = React.memo(({ children }) => {
+const ChatKeyboardProviderInner: React.FC<ChatKeyboardProviderProps> = React.memo(({ children }) => {
   // Состояние клавиатуры
   const [keyboardHeight, setKeyboardHeight] = React.useState(0);
 
@@ -136,4 +136,10 @@ export const ChatKeyboardProvider: React.FC<ChatKeyboardProviderProps> = React.m
   }
 });
 
-ChatKeyboardProvider.displayName = 'ChatKeyboardProvider';
+ChatKeyboardProviderInner.displayName = 'ChatKeyboardProvider';
+
+// Экспортируем как default для Expo Router
+export default ChatKeyboardProviderInner;
+
+// Также экспортируем как named export для обратной совместимости
+export const ChatKeyboardProvider = ChatKeyboardProviderInner;

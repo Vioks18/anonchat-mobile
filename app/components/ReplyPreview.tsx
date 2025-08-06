@@ -10,7 +10,7 @@ interface ReplyPreviewProps {
   themedStyles: any;
 }
 
-export const ReplyPreview: React.FC<ReplyPreviewProps> = React.memo(({
+const ReplyPreviewInner: React.FC<ReplyPreviewProps> = React.memo(({
   replyTo,
   setReplyTo,
   styles,
@@ -74,4 +74,10 @@ export const ReplyPreview: React.FC<ReplyPreviewProps> = React.memo(({
   }
 });
 
-ReplyPreview.displayName = 'ReplyPreview'; 
+ReplyPreviewInner.displayName = 'ReplyPreview';
+
+// Экспортируем как default для Expo Router
+export default ReplyPreviewInner;
+
+// Также экспортируем как named export для обратной совместимости
+export const ReplyPreview = ReplyPreviewInner; 

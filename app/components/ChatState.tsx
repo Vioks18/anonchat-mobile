@@ -46,7 +46,7 @@ interface ChatStateProviderProps {
   children: React.ReactNode;
 }
 
-export const ChatStateProvider: React.FC<ChatStateProviderProps> = React.memo(({ children }) => {
+const ChatStateProviderInner: React.FC<ChatStateProviderProps> = React.memo(({ children }) => {
   // Состояние ввода
   const [inputText, setInputText] = React.useState("");
   const [inputFocused, setInputFocused] = React.useState(false);
@@ -215,4 +215,10 @@ export const ChatStateProvider: React.FC<ChatStateProviderProps> = React.memo(({
   }
 });
 
-ChatStateProvider.displayName = 'ChatStateProvider';
+ChatStateProviderInner.displayName = 'ChatStateProvider';
+
+// Экспортируем как default для Expo Router
+export default ChatStateProviderInner;
+
+// Также экспортируем как named export для обратной совместимости
+export const ChatStateProvider = ChatStateProviderInner;

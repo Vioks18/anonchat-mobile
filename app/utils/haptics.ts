@@ -22,4 +22,7 @@ export const triggerHaptic = async (type: 'light' | 'medium' | 'heavy' | 'succes
   } catch (error) {
     // Игнорируем ошибки haptic feedback
   }
-}; 
+};
+
+// Default export для Expo Router
+export default triggerHaptic; 

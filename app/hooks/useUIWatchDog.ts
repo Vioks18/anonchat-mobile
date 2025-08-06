@@ -266,3 +266,6 @@ export const useUIWatchDog = ({
     forceCheck,
   };
 }; 
+
+// Default export для Expo Router
+export default useUIWatchDog; 

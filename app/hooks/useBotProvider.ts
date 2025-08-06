@@ -138,3 +138,6 @@ export const useBotProvider = () => {
     toggleBot,
   };
 }; 
+
+// Default export для Expo Router
+export default useBotProvider; 

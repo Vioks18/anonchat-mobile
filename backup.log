@@ -23,3 +23,9 @@
 [2025-08-06 22:41:58] [INFO] Current branch: main
 [2025-08-06 22:41:58] [INFO] Creating commit: 📚 Добавлена документация для Git бэкап скрипта
 [2025-08-06 22:41:58] [INFO] Adding files to index...
+[2025-08-06 22:41:58] [INFO] Creating commit...
+[2025-08-06 22:41:59] [SUCCESS] Commit created successfully
+[2025-08-06 22:41:59] [INFO] Pushing changes to branch: main
+[2025-08-06 22:42:03] [SUCCESS] Changes pushed successfully
+[2025-08-06 22:42:03] [SUCCESS] === Git backup completed successfully ===
+[2025-08-06 22:42:03] [SUCCESS] Backup completed successfully

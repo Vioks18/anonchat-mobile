@@ -79,4 +79,7 @@ export const useKeyboardHeight = () => {
     hasError,
     isKeyboardVisible: keyboardHeight > 0
   };
-}; 
+};
+
+// Default export для Expo Router
+export default useKeyboardHeight; 

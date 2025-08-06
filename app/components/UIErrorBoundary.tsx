@@ -13,7 +13,7 @@ interface State {
   errorInfo?: React.ErrorInfo;
 }
 
-export class UIErrorBoundary extends Component<Props, State> {
+class UIErrorBoundaryInner extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = { hasError: false };
@@ -133,4 +133,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-}); 
+});
+
+// Экспортируем как default для Expo Router
+export default UIErrorBoundaryInner;
+
+// Также экспортируем как named export для обратной совместимости
+export const UIErrorBoundary = UIErrorBoundaryInner;

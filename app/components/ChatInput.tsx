@@ -13,7 +13,7 @@ interface ChatInputProps {
   setInputFocused: (focused: boolean) => void;
 }
 
-export const ChatInput: React.FC<ChatInputProps> = React.memo(({
+const ChatInputInner: React.FC<ChatInputProps> = React.memo(({
   inputText,
   setInputText,
   onSendMessage,
@@ -172,7 +172,13 @@ export const ChatInput: React.FC<ChatInputProps> = React.memo(({
   );
 });
 
-ChatInput.displayName = 'ChatInput';
+ChatInputInner.displayName = 'ChatInput';
+
+// Экспортируем как default для Expo Router
+export default ChatInputInner;
+
+// Также экспортируем как named export для обратной совместимости
+export const ChatInput = ChatInputInner;
 
 const styles = StyleSheet.create({
   inputContainer: {

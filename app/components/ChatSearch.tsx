@@ -16,7 +16,7 @@ interface ChatSearchProps {
   };
 }
 
-export const ChatSearch: React.FC<ChatSearchProps> = React.memo(({
+const ChatSearchInner: React.FC<ChatSearchProps> = React.memo(({
   isSearching,
   searchQuery,
   onSearchToggle,
@@ -93,7 +93,7 @@ export const ChatSearch: React.FC<ChatSearchProps> = React.memo(({
   );
 });
 
-ChatSearch.displayName = 'ChatSearch';
+ChatSearchInner.displayName = 'ChatSearch';
 
 const styles = StyleSheet.create({
   header: {
@@ -137,3 +137,9 @@ const styles = StyleSheet.create({
     marginLeft: 16,
   },
 });
+
+// Экспортируем как default для Expo Router
+export default ChatSearchInner;
+
+// Также экспортируем как named export для обратной совместимости
+export const ChatSearch = ChatSearchInner;

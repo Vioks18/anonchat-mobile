@@ -13,7 +13,7 @@ interface ChatListProps {
   onScrollToEnd?: () => void;
 }
 
-export const ChatList: React.FC<ChatListProps> = React.memo(({
+const ChatListInner: React.FC<ChatListProps> = React.memo(({
   messages,
   onSendMessage,
   onError,
@@ -236,7 +236,7 @@ export const ChatList: React.FC<ChatListProps> = React.memo(({
   );
 });
 
-ChatList.displayName = 'ChatList';
+ChatListInner.displayName = 'ChatList';
 
 const styles = StyleSheet.create({
   container: {
@@ -370,4 +370,10 @@ const styles = StyleSheet.create({
     color: '#ff6b6b',
     fontSize: 14,
   },
-}); 
+});
+
+// Экспортируем как default для Expo Router
+export default ChatListInner;
+
+// Также экспортируем как named export для обратной совместимости
+export const ChatList = ChatListInner;

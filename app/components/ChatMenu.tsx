@@ -20,7 +20,7 @@ interface ChatMenuProps {
   };
 }
 
-export const ChatMenu: React.FC<ChatMenuProps> = React.memo(({
+const ChatMenuInner: React.FC<ChatMenuProps> = React.memo(({
   showMenu,
   isSearching,
   searchQuery,
@@ -153,7 +153,7 @@ export const ChatMenu: React.FC<ChatMenuProps> = React.memo(({
   );
 });
 
-ChatMenu.displayName = 'ChatMenu';
+ChatMenuInner.displayName = 'ChatMenu';
 
 const styles = StyleSheet.create({
   header: {
@@ -230,4 +230,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+
 });
+
+// Экспортируем как default для Expo Router
+export default ChatMenuInner;
+
+// Также экспортируем как named export для обратной совместимости
+export const ChatMenu = ChatMenuInner;

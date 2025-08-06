@@ -248,3 +248,6 @@ export class InputValidator {
     return validationResult.warnings[0];
   }
 }
+
+// Default export для Expo Router
+export default InputValidator;

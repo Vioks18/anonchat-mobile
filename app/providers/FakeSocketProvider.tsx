@@ -60,3 +60,6 @@ export const FakeSocketProvider: React.FC<FakeSocketProviderProps> = ({ children
 
   return <>{children}</>;
 }; 
+
+// Default export для Expo Router
+export default FakeSocketProvider; 

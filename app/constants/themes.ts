@@ -68,4 +68,7 @@ export const THEMES = {
 };
 
 export const ACCENT = "#6c5ce7";
-export const BG_DARK = "#181825"; 
+export const BG_DARK = "#181825";
+
+// Default export для Expo Router
+export default THEMES; 

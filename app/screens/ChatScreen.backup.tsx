@@ -1,12 +1,12 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-    Alert,
-    Animated,
-    FlatList,
-    SafeAreaView,
-    StyleSheet,
-    TouchableOpacity,
-    View
+  Alert,
+  Animated,
+  FlatList,
+  SafeAreaView,
+  StyleSheet,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import { ChatMessage } from '../components/ChatMessage';
 import { Header } from '../components/Header';
@@ -17,7 +17,7 @@ import { useKeyboardHeight } from '../hooks/useKeyboardHeight';
 import { Message } from '../types/message';
 import { triggerHaptic } from '../utils/haptics';
 
-export const ChatScreen: React.FC = () => {
+const ChatScreenInner: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
@@ -466,7 +466,7 @@ export const ChatScreen: React.FC = () => {
           setInput={setInput}
           sendMessage={sendMessage}
           isSending={isSending}
-          keyboardHeight={keyboardHeight}
+          keyboardHeight={keyboardHeight.keyboardHeight}
           themedStyles={themedStyles}
           styles={styles}
         />
@@ -766,4 +766,10 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 8,
     borderTopRightRadius: 8,
   },
-}); 
+});
+
+// Экспортируем как default для Expo Router
+export default ChatScreenInner;
+
+// Также экспортируем как named export для обратной совместимости
+export const ChatScreen = ChatScreenInner;

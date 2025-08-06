@@ -92,7 +92,7 @@ interface ThemeSelectorProps {
   onClose: () => void;
 }
 
-export const ThemeSelector: React.FC<ThemeSelectorProps> = React.memo(({
+const ThemeSelectorInner: React.FC<ThemeSelectorProps> = React.memo(({
   visible,
   currentTheme,
   onSelectTheme,
@@ -265,7 +265,7 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = React.memo(({
   );
 });
 
-ThemeSelector.displayName = 'ThemeSelector';
+ThemeSelectorInner.displayName = 'ThemeSelector';
 
 const styles = StyleSheet.create({
   modalOverlay: {
@@ -330,5 +330,12 @@ const styles = StyleSheet.create({
   },
 });
 
+// Экспортируем как default для Expo Router
+export default ThemeSelectorInner;
+
+// Также экспортируем как named export для обратной совместимости
+export const ThemeSelector = ThemeSelectorInner;
+
+// Экспортируем темы
 export { THEMES };
 

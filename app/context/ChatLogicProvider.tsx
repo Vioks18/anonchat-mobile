@@ -402,3 +402,6 @@ export const useChatLogic = () => {
   }
   return context;
 }; 
+
+// Default export для Expo Router
+export default ChatLogicProvider; 

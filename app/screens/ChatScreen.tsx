@@ -1,62 +1,33 @@
-import React, { useCallback } from 'react';
-import { Alert, StyleSheet } from 'react-native';
-import { ChatCore } from '../components/ChatCore';
-import { UIErrorBoundary } from '../components/UIErrorBoundary';
-import { ChatLogicProvider, useChatLogic } from '../context/ChatLogicProvider';
+import React, { useState } from 'react';
+import ChatCore from '../components/ChatCore';
 import { useBotProvider } from '../hooks/useBotProvider';
+import { useDevBotCommands } from '../hooks/useDevBotCommands';
 
-interface ChatScreenProps {
-  // Добавьте пропсы здесь
-}
-
-
-// Компонент для отображения дополнительных функций (может крашиться)
-const ChatFeatures: React.FC = () => {
-  const { state, addMessage, addReaction, deleteMessage } = useChatLogic();
+const ChatScreenInner: React.FC = () => {
+  // Состояния для ботов
   const { isBotEnabled, toggleBot } = useBotProvider();
+  const { handleCommand, setFlatListRef } = useDevBotCommands();
+  const [inputText, setInputText] = useState('');
 
-  const handleSendMessage = useCallback((text: string) => {
-    try {
-      addMessage(text);
-    } catch (error) {
-      console.error('ChatFeatures: Error sending message', error);
-      Alert.alert('Ошибка', 'Не удалось отправить сообщение');
+  // Обработка отправки сообщения
+  const handleSendMessage = (text: string) => {
+    // Проверяем, не является ли это командой DevBot
+    if (text.startsWith('/')) {
+      const isCommand = handleCommand(text);
+      if (isCommand) {
+        return; // Команда обработана, не отправляем в чат
+      }
     }
-  }, [addMessage]);
-
-  const handleError = useCallback((error: Error) => {
-    console.error('ChatFeatures: Error caught', error);
-    // Ошибки в логике не ломают UI
-  }, []);
+    
+    // Обычное сообщение - ChatCore сам обработает отправку
+  };
 
   return (
     <ChatCore 
-      onSendMessage={handleSendMessage}
-      onError={handleError}
       isBotEnabled={isBotEnabled}
       onToggleBot={toggleBot}
+      onSendMessage={handleSendMessage}
     />
-  );
-};
-
-// Главный компонент с защитной архитектурой
-const ChatScreenInner: React.FC = () => {
-  const handleLogicError = useCallback((error: Error) => {
-    console.error('ChatScreen: Logic error caught', error);
-    // Логируем ошибки логики, но UI продолжает работать
-  }, []);
-
-  const handleUIError = useCallback((error: Error, errorInfo: React.ErrorInfo) => {
-    console.error('ChatScreen: UI error caught', error, errorInfo);
-    // Критические ошибки UI логируются
-  }, []);
-
-  return (
-    <UIErrorBoundary onError={handleUIError}>
-      <ChatLogicProvider onError={handleLogicError}>
-        <ChatFeatures />
-      </ChatLogicProvider>
-    </UIErrorBoundary>
   );
 };
 
@@ -65,22 +36,3 @@ export default ChatScreenInner;
 
 // Также экспортируем как named export для обратной совместимости
 export const ChatScreen = ChatScreenInner;
-
-// Стили для fallback компонентов
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#181825',
-  },
-  fallbackContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  fallbackText: {
-    color: '#fff',
-    fontSize: 16,
-    textAlign: 'center',
-  },
-}); 

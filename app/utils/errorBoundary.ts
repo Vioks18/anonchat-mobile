@@ -200,3 +200,6 @@ export const useErrorMonitor = () => {
 
   return { addError, getStats, isStable };
 };
+
+// Default export для Expo Router
+export default errorMonitor;

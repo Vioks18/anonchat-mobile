@@ -13,7 +13,7 @@ interface DevHUDProps {
   };
 }
 
-export const DevHUD: React.FC<DevHUDProps> = React.memo(({ status }) => {
+const DevHUDInner: React.FC<DevHUDProps> = React.memo(({ status }) => {
   // Безопасная проверка статуса
   const safeStatus = React.useMemo(() => {
     try {
@@ -111,7 +111,7 @@ export const DevHUD: React.FC<DevHUDProps> = React.memo(({ status }) => {
   }
 });
 
-DevHUD.displayName = 'DevHUD';
+DevHUDInner.displayName = 'DevHUD';
 
 const styles = StyleSheet.create({
   container: {
@@ -171,4 +171,10 @@ const styles = StyleSheet.create({
     fontSize: 9,
     marginLeft: 4,
   },
-}); 
+});
+
+// Экспортируем как default для Expo Router
+export default DevHUDInner;
+
+// Также экспортируем как named export для обратной совместимости
+export const DevHUD = DevHUDInner; 

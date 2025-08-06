@@ -23,7 +23,7 @@ interface HeaderProps {
   setShowDeleteOptions: (show: boolean) => void;
 }
 
-export const Header: React.FC<HeaderProps> = React.memo(({
+const HeaderInner: React.FC<HeaderProps> = React.memo(({
   isSearching,
   searchQuery,
   setSearchQuery,
@@ -245,6 +245,13 @@ export const Header: React.FC<HeaderProps> = React.memo(({
     console.error('Header: Ошибка рендеринга', error);
     return null;
   }
+
 });
 
-Header.displayName = 'Header'; 
+HeaderInner.displayName = 'Header';
+
+// Экспортируем как default для Expo Router
+export default HeaderInner;
+
+// Также экспортируем как named export для обратной совместимости
+export const Header = HeaderInner; 

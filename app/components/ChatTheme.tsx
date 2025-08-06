@@ -30,7 +30,7 @@ interface ChatThemeProviderProps {
   children: React.ReactNode;
 }
 
-export const ChatThemeProvider: React.FC<ChatThemeProviderProps> = React.memo(({ children }) => {
+const ChatThemeProviderInner: React.FC<ChatThemeProviderProps> = React.memo(({ children }) => {
   // Состояние темы
   const [currentTheme, setCurrentTheme] = React.useState("dark");
 
@@ -133,4 +133,10 @@ export const ChatThemeProvider: React.FC<ChatThemeProviderProps> = React.memo(({
   }
 });
 
-ChatThemeProvider.displayName = 'ChatThemeProvider';
+ChatThemeProviderInner.displayName = 'ChatThemeProvider';
+
+// Экспортируем как default для Expo Router
+export default ChatThemeProviderInner;
+
+// Также экспортируем как named export для обратной совместимости
+export const ChatThemeProvider = ChatThemeProviderInner;

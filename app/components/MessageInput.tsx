@@ -12,7 +12,7 @@ interface MessageInputProps {
   styles: any;
 }
 
-export const MessageInput: React.FC<MessageInputProps> = React.memo(({
+const MessageInputInner: React.FC<MessageInputProps> = React.memo(({
   input,
   setInput,
   sendMessage,
@@ -95,4 +95,10 @@ export const MessageInput: React.FC<MessageInputProps> = React.memo(({
   }
 });
 
-MessageInput.displayName = 'MessageInput'; 
+MessageInputInner.displayName = 'MessageInput';
+
+// Экспортируем как default для Expo Router
+export default MessageInputInner;
+
+// Также экспортируем как named export для обратной совместимости
+export const MessageInput = MessageInputInner; 

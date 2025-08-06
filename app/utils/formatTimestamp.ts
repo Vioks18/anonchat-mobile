@@ -33,3 +33,6 @@ export const formatTimestamp = (timestamp: number) => {
     return '--:--';
   }
 }; 
+
+// Default export для Expo Router
+export default formatTimestamp; 

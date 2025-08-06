@@ -299,3 +299,6 @@ export const useMessageSelectors = () => {
     };
   }
 }; 
+
+// Default export для Expo Router
+export default useMessageStore; 

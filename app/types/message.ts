@@ -6,4 +6,7 @@ export interface Message {
   status: "sending" | "sent" | "delivered" | "read";
   reactions: string[];
   replyTo?: Message;
-} 
+}
+
+// Default export для Expo Router
+export default Message; 

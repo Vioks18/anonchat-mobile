@@ -1,3 +1,27 @@
+/**
+ * ⚠️  ВАЖНО: НЕ ТРОГАТЬ ЭТОТ ФАЙЛ! ⚠️
+ * 
+ * ChatCore.tsx - СТАБИЛЬНАЯ ВЕРСИЯ
+ * 
+ * 🚫 НЕ ДОБАВЛЯТЬ:
+ * - Сложную функциональность
+ * - Новые состояния
+ * - Дополнительные компоненты
+ * 
+ * ✅ РАБОТАЕТ:
+ * - Отправка сообщений
+ * - Отображение сообщений
+ * - Темы
+ * - Защитная система
+ * 
+ * 📝 ПРАВИЛА:
+ * 1. Только исправление критических багов
+ * 2. Никаких новых фич
+ * 3. Сохранять стабильность
+ * 
+ * 🔒 ЗАЩИЩЕНО ОТ ИЗМЕНЕНИЙ
+ */
+
 import { Ionicons } from '@expo/vector-icons';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
@@ -166,26 +190,19 @@ const ChatCoreInner: React.FC<ChatCoreProps> = ({ onSendMessage, onError, isBotE
   const flatListRef = useRef<FlatList>(null);
 
   // WatchDog для мониторинга UI с защитой
-  const watchDogResult = React.useMemo(() => {
-    try {
-      return useUIWatchDog({
-        flatListRef,
-        messageCount: messages.length,
-        keyboardHeight,
-        inputFocused,
-        onScrollToEnd: () => {
-          try {
-            flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
-          } catch (error) {
-            addError(error instanceof Error ? error : new Error(String(error)), 'ChatCore', ErrorSeverity.LOW);
-          }
-        },
-      });
-    } catch (error) {
-      addError(error instanceof Error ? error : new Error(String(error)), 'ChatCore', ErrorSeverity.HIGH);
-      return { status: 'error', updateScrollPosition: () => {}, forceCheck: () => {} };
-    }
-  }, [messages.length, keyboardHeight, inputFocused, addError]);
+  const watchDogResult = useUIWatchDog({
+    flatListRef,
+    messageCount: messages.length,
+    keyboardHeight,
+    inputFocused,
+    onScrollToEnd: () => {
+      try {
+        flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+      } catch (error) {
+        addError(error instanceof Error ? error : new Error(String(error)), 'ChatCore', ErrorSeverity.LOW);
+      }
+    },
+  });
 
   const { status: watchDogStatus, updateScrollPosition, forceCheck } = watchDogResult;
 
@@ -238,10 +255,20 @@ const ChatCoreInner: React.FC<ChatCoreProps> = ({ onSendMessage, onError, isBotE
     };
   }, [safeExecute, addError]);
 
+
+
   // Безопасная отправка сообщения
   const handleSendMessage = useCallback(() => {
     safeExecute(() => {
       if (inputText.trim() === "") return;
+
+      // Проверяем, не является ли это командой DevBot
+      if (inputText.trim().startsWith('/')) {
+        // Команда DevBot - передаем внешней логике
+        onSendMessage?.(inputText.trim());
+        setInputText("");
+        return;
+      }
 
       // Используем addMessage из store
       addMessage(inputText.trim());
