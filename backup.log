@@ -13,3 +13,13 @@
 [2025-08-06 22:40:40] [INFO] Generated commit message: Auto backup - 2025-08-06 22:40:40
 [2025-08-06 22:40:40] [INFO] Creating commit: Auto backup - 2025-08-06 22:40:40
 [2025-08-06 22:40:40] [INFO] Adding files to index...
+[2025-08-06 22:40:40] [INFO] Creating commit...
+[2025-08-06 22:40:40] [SUCCESS] Commit created successfully
+[2025-08-06 22:40:40] [INFO] Pushing changes to branch: main
+[2025-08-06 22:40:44] [SUCCESS] Changes pushed successfully
+[2025-08-06 22:40:44] [SUCCESS] === Git backup completed successfully ===
+[2025-08-06 22:40:44] [SUCCESS] Backup completed successfully
+[2025-08-06 22:41:58] [INFO] === Starting Git backup for AnonChat ===
+[2025-08-06 22:41:58] [INFO] Current branch: main
+[2025-08-06 22:41:58] [INFO] Creating commit: 📚 Добавлена документация для Git бэкап скрипта
+[2025-08-06 22:41:58] [INFO] Adding files to index...
