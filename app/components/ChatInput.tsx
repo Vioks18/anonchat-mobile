@@ -172,6 +172,8 @@ export const ChatInput: React.FC<ChatInputProps> = React.memo(({
   );
 });
 
+ChatInput.displayName = 'ChatInput';
+
 const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: 'row',

@@ -208,4 +208,6 @@ export const ChatMessage: React.FC<ChatMessageProps> = React.memo(({
       </View>
     </TouchableOpacity>
   );
-}); 
+});
+
+ChatMessage.displayName = 'ChatMessage'; 

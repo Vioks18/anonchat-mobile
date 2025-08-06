@@ -265,6 +265,8 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = React.memo(({
   );
 });
 
+ThemeSelector.displayName = 'ThemeSelector';
+
 const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,

@@ -4,16 +4,14 @@ import {
   Keyboard,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useMessageStore } from '../hooks/useMessageStore';
-import { useUIWatchDog } from '../hooks/useUIWatchDog';
 import { ChatInput } from './ChatInput';
 import { ChatList } from './ChatList';
-import { THEMES, ThemeSelector } from './ThemeSelector';
+import { THEMES } from './ThemeSelector';
 
 // Используем THEMES из ThemeSelector
 
@@ -75,16 +73,16 @@ export const ChatCore: React.FC<ChatCoreProps> = React.memo(({ onSendMessage, on
     { backgroundColor: currentThemeData.headerBg }
   ], [currentThemeData.headerBg]);
 
-  // WatchDog для мониторинга UI (временно отключен для рефакторинга)
-  const { status: watchDogStatus, updateScrollPosition, forceCheck } = useUIWatchDog({
-    flatListRef: { current: null } as any, // Временное решение
-    messageCount: messages.length,
-    keyboardHeight,
-    inputFocused,
-    onScrollToEnd: () => {
-      // Скролл теперь обрабатывается в ChatList
-    },
-  });
+  // UI WatchDog для мониторинга стабильности (пока отключен)
+  // const { status: watchDogStatus } = useUIWatchDog({
+  //   flatListRef: { current: null } as any, // Временное решение
+  //   messageCount: messages.length,
+  //   keyboardHeight,
+  //   inputFocused,
+  //   onScrollToEnd: () => {
+  //     // Скролл теперь обрабатывается в ChatList
+  //   },
+  // });
 
   // Безопасная обработка ошибок - мемоизирована
   const safeExecute = useCallback((fn: () => void, errorMessage: string) => {
@@ -147,7 +145,7 @@ export const ChatCore: React.FC<ChatCoreProps> = React.memo(({ onSendMessage, on
         console.error('ChatCore: Ошибка удаления слушателей клавиатуры', error);
       }
     };
-  }, []); // Убираем зависимости, которые создают новые функции
+  }, [onError]); // Добавляем onError в зависимости
 
   // Безопасная отправка сообщения - мемоизирована
   const handleSendMessage = useCallback(() => {
@@ -258,106 +256,69 @@ export const ChatCore: React.FC<ChatCoreProps> = React.memo(({ onSendMessage, on
     );
   }
 
-  return (
-    <SafeAreaView style={containerStyle} edges={["top", "bottom"]}>
-      <View style={styles.flex}>
-        {/* Header */}
-        <View style={headerStyle}>
-          {!isSearching ? (
-            <>
-              <Text style={styles.headerText}>Axora</Text>
-              <TouchableOpacity 
-                style={styles.menuButton}
-                onPress={handleMenuToggle}
-                activeOpacity={0.7}
-              >
-                <Ionicons name="ellipsis-vertical" size={20} color="#fff" />
-              </TouchableOpacity>
-            </>
-          ) : (
-            <View style={styles.searchContainer}>
-              <TextInput
-                style={styles.searchInput}
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-                placeholder="Поиск сообщений..."
-                placeholderTextColor="#888"
-                autoFocus
-                returnKeyType="search"
-              />
-              <TouchableOpacity 
-                style={styles.searchCloseButton}
-                onPress={handleSearchClose}
-                activeOpacity={0.7}
-              >
-                <Ionicons name="close" size={20} color="#fff" />
-              </TouchableOpacity>
+  try {
+    return (
+      <SafeAreaView style={containerStyle}>
+        <View style={styles.container}>
+          {/* Заголовок */}
+          <View style={headerStyle}>
+            <Text style={styles.headerText}>Axora Chat</Text>
+            <TouchableOpacity 
+              style={styles.menuButton}
+              onPress={handleMenuToggle}
+              activeOpacity={0.7}
+            >
+              <Ionicons name="ellipsis-vertical" size={20} color="#fff" />
+            </TouchableOpacity>
+          </View>
+
+          {/* Список сообщений */}
+          <ChatList
+            messages={filteredMessages}
+            onSendMessage={handleSendMessage}
+            onError={onError}
+            themedStyles={currentThemeData}
+            styles={styles}
+          />
+
+          {/* Поле ввода */}
+          <ChatInput
+            inputText={inputText}
+            setInputText={setInputText}
+            onSendMessage={handleSendMessage}
+            keyboardHeight={keyboardHeight}
+            currentThemeData={currentThemeData}
+            inputFocused={inputFocused}
+            setInputFocused={setInputFocused}
+          />
+
+          {/* DevHUD для отладки */}
+          {__DEV__ && (
+            <View style={styles.devHUD}>
+              <Text style={styles.devText}>
+                Сообщений: {messages.length} | 
+                Клавиатура: {keyboardHeight}px | 
+                Фокус: {inputFocused ? 'Да' : 'Нет'}
+              </Text>
             </View>
           )}
         </View>
-
-        {/* Меню */}
-        {showMenu && (
-          <TouchableOpacity 
-            style={styles.menuOverlay}
-            onPress={() => setShowMenu(false)}
-            activeOpacity={1}
-          >
-            <TouchableOpacity 
-              style={styles.menuContent}
-              onPress={() => {}}
-              activeOpacity={1}
-            >
-              <TouchableOpacity 
-                style={styles.menuItem}
-                onPress={handleSearchToggle}
-                activeOpacity={0.7}
-              >
-                <Ionicons name="search" size={20} color="#fff" />
-                <Text style={styles.menuItemText}>Поиск сообщений</Text>
-              </TouchableOpacity>
-              <TouchableOpacity 
-                style={styles.menuItem}
-                onPress={handleThemeToggle}
-                activeOpacity={0.7}
-              >
-                <Ionicons name="color-palette-outline" size={20} color="#fff" />
-                <Text style={styles.menuItemText}>Темы</Text>
-              </TouchableOpacity>
-              <TouchableOpacity 
-                style={styles.menuItem}
-                onPress={handleBotToggle}
-                activeOpacity={0.7}
-              >
-                <Ionicons name={isBotEnabled ? "chatbubble" : "chatbubble-outline"} size={20} color="#fff" />
-                <Text style={styles.menuItemText}>
-                  {isBotEnabled ? "Отключить бота" : "Включить бота"}
-                </Text>
-              </TouchableOpacity>
-            </TouchableOpacity>
-          </TouchableOpacity>
-        )}
-
-        {/* Модальное окно выбора темы */}
-        <ThemeSelector
-          visible={showThemeSelector}
-          currentTheme={currentTheme}
-          onSelectTheme={handleThemeSelect}
-          onClose={handleThemeClose}
-        />
-
-        {/* Список сообщений - критически важный компонент */}
-        <ChatList {...chatListProps} />
-
-        {/* Строка ввода - критически важный компонент */}
-        <ChatInput {...chatInputProps} />
-      </View>
-      
-      {/* DevHUD для отображения статуса WatchDog (временно отключен) */}
-      {/* <DevHUD status={watchDogStatus} /> */}
-    </SafeAreaView>
-  );
+      </SafeAreaView>
+    );
+  } catch (error) {
+    console.error('ChatCore: Критическая ошибка рендеринга', error);
+    onError?.(error as Error);
+    return (
+      <SafeAreaView style={styles.fallbackContainer}>
+        <Text style={styles.fallbackText}>
+          Произошла ошибка. Попробуйте перезапустить приложение.
+        </Text>
+      </SafeAreaView>
+    );
+  }
 });
+
+ChatCore.displayName = 'ChatCore';
 
 // Изолированные стили - не зависят от внешних тем
 const styles = StyleSheet.create({
@@ -633,4 +594,18 @@ const styles = StyleSheet.create({
         color: "#fff",
         fontFamily: "Poppins-Regular",
       },
+  devHUD: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    zIndex: 1000,
+  },
+  devText: {
+    color: '#fff',
+    fontSize: 12,
+  },
 }); 

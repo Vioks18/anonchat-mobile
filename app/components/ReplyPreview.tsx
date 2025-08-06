@@ -10,7 +10,7 @@ interface ReplyPreviewProps {
   themedStyles: any;
 }
 
-export const ReplyPreview: React.FC<ReplyPreviewProps> = ({
+export const ReplyPreview: React.FC<ReplyPreviewProps> = React.memo(({
   replyTo,
   setReplyTo,
   styles,
@@ -72,4 +72,6 @@ export const ReplyPreview: React.FC<ReplyPreviewProps> = ({
     console.error('ReplyPreview: Ошибка рендеринга', error);
     return null;
   }
-}; 
+});
+
+ReplyPreview.displayName = 'ReplyPreview'; 

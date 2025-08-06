@@ -1,26 +1,26 @@
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { Alert, FlatList, StyleSheet, Text, View } from 'react-native';
-
-interface Message {
-  id: string;
-  text: string;
-  sender: "me" | "other";
-  timestamp: number;
-  status?: "sending" | "sent" | "error";
-}
+import { Message } from '../types/message';
 
 interface ChatListProps {
   messages: Message[];
-  currentThemeData: any;
+  onSendMessage: () => void;
+  onError?: (error: Error) => void;
+  themedStyles: any;
+  styles: any;
+  currentThemeData?: any;
   onScrollToEnd?: () => void;
 }
 
 export const ChatList: React.FC<ChatListProps> = React.memo(({
   messages,
+  onSendMessage,
+  onError,
+  themedStyles,
+  styles,
   currentThemeData,
   onScrollToEnd
 }) => {
-  const flatListRef = useRef<FlatList>(null);
   const [hasError, setHasError] = useState(false);
 
   // Валидация сообщения - мемоизирована
@@ -201,6 +201,8 @@ export const ChatList: React.FC<ChatListProps> = React.memo(({
     </View>
   );
 });
+
+ChatList.displayName = 'ChatList';
 
 const styles = StyleSheet.create({
   container: {

@@ -13,7 +13,7 @@ interface DevHUDProps {
   };
 }
 
-export const DevHUD: React.FC<DevHUDProps> = ({ status }) => {
+export const DevHUD: React.FC<DevHUDProps> = React.memo(({ status }) => {
   // Безопасная проверка статуса
   const safeStatus = React.useMemo(() => {
     try {
@@ -109,7 +109,9 @@ export const DevHUD: React.FC<DevHUDProps> = ({ status }) => {
     console.error('DevHUD: Ошибка рендеринга', error);
     return null;
   }
-};
+});
+
+DevHUD.displayName = 'DevHUD';
 
 const styles = StyleSheet.create({
   container: {

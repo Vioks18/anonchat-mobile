@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { TextInput, TouchableOpacity, View } from 'react-native';
 
 interface MessageInputProps {
@@ -12,7 +12,7 @@ interface MessageInputProps {
   styles: any;
 }
 
-export const MessageInput: React.FC<MessageInputProps> = ({
+export const MessageInput: React.FC<MessageInputProps> = React.memo(({
   input,
   setInput,
   sendMessage,
@@ -21,6 +21,13 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   themedStyles,
   styles,
 }) => {
+  // Мемоизированные стили кнопки отправки
+  const sendButtonStyle = useMemo(() => [
+    themedStyles.sendButton, 
+    isSending && styles.sendButtonDisabled,
+    input.trim() === "" && styles.sendButtonInactive
+  ], [themedStyles.sendButton, styles.sendButtonDisabled, styles.sendButtonInactive, isSending, input]);
+
   // Безопасная обработка изменения текста
   const handleTextChange = useCallback((text: string) => {
     try {
@@ -73,11 +80,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
           autoCapitalize="sentences"
         />
         <TouchableOpacity
-          style={[
-            themedStyles.sendButton, 
-            isSending && styles.sendButtonDisabled,
-            input.trim() === "" && styles.sendButtonInactive
-          ]}
+          style={sendButtonStyle}
           activeOpacity={0.7}
           onPress={handleSendMessage}
           disabled={isSending || input.trim() === ""}
@@ -90,4 +93,6 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     console.error('MessageInput: Ошибка рендеринга', error);
     return null;
   }
-}; 
+});
+
+MessageInput.displayName = 'MessageInput'; 

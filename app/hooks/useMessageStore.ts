@@ -1,17 +1,5 @@
 import { create } from 'zustand';
-
-// Сохраняем существующую структуру сообщений
-interface Message {
-  id: string;
-  text: string;
-  sender: "me" | "other";
-  timestamp: number;
-  status?: "sending" | "sent" | "delivered" | "error";
-  reactions?: string[];
-  replyTo?: string;
-  editedAt?: number;
-  deletedAt?: number;
-}
+import { Message } from '../types/message';
 
 interface MessageStore {
   messages: Message[];
@@ -69,6 +57,7 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
         sender: "me",
         timestamp: Date.now(),
         status: "sent", // Сразу "sent" для простоты
+        reactions: [],
       };
       
       set((state) => ({
@@ -94,6 +83,7 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
         sender: "other",
         timestamp: Date.now(),
         status: "sent",
+        reactions: [],
       };
       
       set((state) => ({

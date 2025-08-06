@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Animated, Text, TextInput, TouchableOpacity } from 'react-native';
 
 interface HeaderProps {
@@ -23,7 +23,7 @@ interface HeaderProps {
   setShowDeleteOptions: (show: boolean) => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({
+export const Header: React.FC<HeaderProps> = React.memo(({
   isSearching,
   searchQuery,
   setSearchQuery,
@@ -43,6 +43,49 @@ export const Header: React.FC<HeaderProps> = ({
   setShowReactions,
   setShowDeleteOptions,
 }) => {
+  // Мемоизированные стили анимации
+  const headerStyle = useMemo(() => [
+    themedStyles.header,
+    {
+      transform: [{
+        translateY: headerAnimation.interpolate({
+          inputRange: [0, 1],
+          outputRange: [0, -10],
+        })
+      }],
+      opacity: headerAnimation.interpolate({
+        inputRange: [0, 1],
+        outputRange: [1, 0.8],
+      })
+    }
+  ], [themedStyles.header, headerAnimation]);
+
+  const searchContainerStyle = useMemo(() => [
+    styles.searchContainer,
+    {
+      transform: [{
+        scaleX: searchAnimation.interpolate({
+          inputRange: [0, 1],
+          outputRange: [0.8, 1],
+        })
+      }],
+      opacity: searchAnimation
+    }
+  ], [styles.searchContainer, searchAnimation]);
+
+  const headerButtonsStyle = useMemo(() => [
+    styles.headerButtons,
+    {
+      transform: [{
+        scale: selectionAnimation.interpolate({
+          inputRange: [0, 1],
+          outputRange: [0.8, 1],
+        })
+      }],
+      opacity: selectionAnimation
+    }
+  ], [styles.headerButtons, selectionAnimation]);
+
   // Безопасная обработка меню
   const handleMenuToggle = useCallback(() => {
     try {
@@ -130,23 +173,7 @@ export const Header: React.FC<HeaderProps> = ({
 
   try {
     return (
-      <Animated.View 
-        style={[
-          themedStyles.header,
-          {
-            transform: [{
-              translateY: headerAnimation.interpolate({
-                inputRange: [0, 1],
-                outputRange: [0, -10],
-              })
-            }],
-            opacity: headerAnimation.interpolate({
-              inputRange: [0, 1],
-              outputRange: [1, 0.8],
-            })
-          }
-        ]}
-      >
+      <Animated.View style={headerStyle}>
         {!isSearching ? (
           <>
             <Text style={themedStyles.headerText}>Axora</Text>
@@ -161,20 +188,7 @@ export const Header: React.FC<HeaderProps> = ({
             )}
           </>
         ) : (
-          <Animated.View 
-            style={[
-              styles.searchContainer,
-              {
-                transform: [{
-                  scaleX: searchAnimation.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [0.8, 1],
-                  })
-                }],
-                opacity: searchAnimation
-              }
-            ]}
-          >
+          <Animated.View style={searchContainerStyle}>
             <TextInput
               style={styles.searchInput}
               value={searchQuery}
@@ -194,20 +208,7 @@ export const Header: React.FC<HeaderProps> = ({
           </Animated.View>
         )}
         {selectedMessages.size > 0 && (
-          <Animated.View 
-            style={[
-              styles.headerButtons,
-              {
-                transform: [{
-                  scale: selectionAnimation.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [0.8, 1],
-                  })
-                }],
-                opacity: selectionAnimation
-              }
-            ]}
-          >
+          <Animated.View style={headerButtonsStyle}>
             <TouchableOpacity 
               style={styles.headerButton} 
               onPress={handleDelete}
@@ -244,4 +245,6 @@ export const Header: React.FC<HeaderProps> = ({
     console.error('Header: Ошибка рендеринга', error);
     return null;
   }
-}; 
+});
+
+Header.displayName = 'Header'; 
