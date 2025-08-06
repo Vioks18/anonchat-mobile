@@ -34,16 +34,28 @@ export const FakeSocketProvider: React.FC<FakeSocketProviderProps> = ({ children
   const intervalRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    // console.log('FakeSocketProvider: Бот включен, запускаем интервал');
-    const interval = setInterval(() => {
-      const randomMessage = botMessages[Math.floor(Math.random() * botMessages.length)];
-      addBotMessage(randomMessage);
-    }, 5000 + Math.random() * 10000); // 5-15 секунд
-    
-    return () => {
-      clearInterval(interval);
-      // console.log('FakeSocketProvider: Интервал бота очищен');
-    };
+    try {
+      // console.log('FakeSocketProvider: Бот включен, запускаем интервал');
+      const interval = setInterval(() => {
+        try {
+          const randomMessage = botMessages[Math.floor(Math.random() * botMessages.length)];
+          addBotMessage(randomMessage);
+        } catch (error) {
+          console.error('FakeSocketProvider: Ошибка отправки сообщения бота', error);
+        }
+      }, 5000 + Math.random() * 10000); // 5-15 секунд
+      
+      return () => {
+        try {
+          clearInterval(interval);
+          // console.log('FakeSocketProvider: Интервал бота очищен');
+        } catch (error) {
+          console.error('FakeSocketProvider: Ошибка очистки интервала', error);
+        }
+      };
+    } catch (error) {
+      console.error('FakeSocketProvider: Ошибка в useEffect', error);
+    }
   }, [addBotMessage]);
 
   return <>{children}</>;

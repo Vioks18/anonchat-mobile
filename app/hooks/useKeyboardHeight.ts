@@ -52,7 +52,7 @@ export const useKeyboardHeight = () => {
       keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', handleKeyboardShow);
       keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', handleKeyboardHide);
 
-      console.log('useKeyboardHeight: Слушатели клавиатуры добавлены');
+      // console.log('useKeyboardHeight: Слушатели клавиатуры добавлены');
     } catch (error) {
       console.error('useKeyboardHeight: Ошибка добавления слушателей клавиатуры', error);
       setHasError(true);
@@ -67,7 +67,7 @@ export const useKeyboardHeight = () => {
         if (keyboardDidHideListener?.remove) {
           keyboardDidHideListener.remove();
         }
-        console.log('useKeyboardHeight: Слушатели клавиатуры удалены');
+        // console.log('useKeyboardHeight: Слушатели клавиатуры удалены');
       } catch (error) {
         console.error('useKeyboardHeight: Ошибка удаления слушателей клавиатуры', error);
       }

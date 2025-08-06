@@ -1,3 +1,4 @@
+import React from 'react';
 import { create } from 'zustand';
 import { Message } from '../types/message';
 
@@ -110,7 +111,7 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
         messages: [...state.messages, newMessage]
       }));
       
-      console.log('addBotMessage: Сообщение бота добавлено', newMessage.id);
+      // console.log('addBotMessage: Сообщение бота добавлено', newMessage.id);
     } catch (error) {
       console.error('addBotMessage: Ошибка добавления сообщения бота', error);
     }
@@ -129,7 +130,7 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
         )
       }));
       
-      console.log('updateMessage: Сообщение обновлено', id);
+      // console.log('updateMessage: Сообщение обновлено', id);
     } catch (error) {
       console.error('updateMessage: Ошибка обновления сообщения', error);
     }
@@ -146,7 +147,7 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
         messages: state.messages.filter(msg => msg.id !== id)
       }));
       
-      console.log('removeMessage: Сообщение удалено', id);
+      // console.log('removeMessage: Сообщение удалено', id);
     } catch (error) {
       console.error('removeMessage: Ошибка удаления сообщения', error);
     }
@@ -177,7 +178,7 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
         })
       }));
       
-      console.log('addReaction: Реакция добавлена', messageId, reaction);
+      // console.log('addReaction: Реакция добавлена', messageId, reaction);
     } catch (error) {
       console.error('addReaction: Ошибка добавления реакции', error);
     }
@@ -186,7 +187,7 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
   reset: () => {
     try {
       set({ messages: initialMessages });
-      console.log('reset: Store сброшен');
+      // console.log('reset: Store сброшен');
     } catch (error) {
       console.error('reset: Ошибка сброса store', error);
     }
@@ -275,15 +276,17 @@ export const useMessageSelectors = () => {
   try {
     const store = useMessageStore();
     
-    return {
-      // Мемоизированные селекторы
+    // Мемоизированные селекторы для сложных операций
+    const memoizedSelectors = React.useMemo(() => ({
       getMessageById: (id: string) => store.getMessageById(id),
       getMessagesBySender: (sender: "me" | "other") => store.getMessagesBySender(sender),
       getMessagesWithReactions: () => store.getMessagesWithReactions(),
       getMessagesByStatus: (status: Message["status"]) => store.getMessagesByStatus(status),
       getMessageCount: () => store.getMessageCount(),
       getLatestMessage: () => store.getLatestMessage(),
-    };
+    }), [store]);
+    
+    return memoizedSelectors;
   } catch (error) {
     console.error('useMessageSelectors: Ошибка создания селекторов', error);
     return {

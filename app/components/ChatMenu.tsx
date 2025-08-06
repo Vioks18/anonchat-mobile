@@ -1,14 +1,17 @@
 import { Ionicons } from '@expo/vector-icons';
 import React, { useCallback } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 interface ChatMenuProps {
   showMenu: boolean;
   isSearching: boolean;
+  searchQuery: string;
   showThemeSelector: boolean;
   isBotEnabled: boolean;
   onMenuToggle: () => void;
   onSearchToggle: () => void;
+  onSearchClose: () => void;
+  onSearchChange: (text: string) => void;
   onThemeToggle: () => void;
   onBotToggle: () => void;
   themedStyles: {
@@ -20,10 +23,13 @@ interface ChatMenuProps {
 export const ChatMenu: React.FC<ChatMenuProps> = React.memo(({
   showMenu,
   isSearching,
+  searchQuery,
   showThemeSelector,
   isBotEnabled,
   onMenuToggle,
   onSearchToggle,
+  onSearchClose,
+  onSearchChange,
   onThemeToggle,
   onBotToggle,
   themedStyles
@@ -60,72 +66,90 @@ export const ChatMenu: React.FC<ChatMenuProps> = React.memo(({
     }
   }, [onBotToggle]);
 
-  if (!showMenu) {
-    return (
-      <View style={[styles.header, themedStyles.header]}>
-        <Text style={[styles.headerText, themedStyles.headerText]}>Axora Chat</Text>
-        <TouchableOpacity
-          style={styles.menuButton}
-          onPress={handleMenuToggle}
-          activeOpacity={0.7}
-        >
-          <Ionicons name="menu" size={24} color="#fff" />
-        </TouchableOpacity>
-      </View>
-    );
-  }
-
   return (
-    <View style={[styles.header, themedStyles.header]}>
-      <View style={styles.menuContainer}>
-        <TouchableOpacity
-          style={[styles.menuOption, isSearching && styles.activeOption]}
-          onPress={handleSearchToggle}
-          activeOpacity={0.7}
-        >
-          <Ionicons 
-            name={isSearching ? "search" : "search-outline"} 
-            size={20} 
-            color="#fff" 
-          />
-          <Text style={[styles.menuText, themedStyles.headerText]}>Поиск</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.menuOption, showThemeSelector && styles.activeOption]}
-          onPress={handleThemeToggle}
-          activeOpacity={0.7}
-        >
-          <Ionicons 
-            name={showThemeSelector ? "color-palette" : "color-palette-outline"} 
-            size={20} 
-            color="#fff" 
-          />
-          <Text style={[styles.menuText, themedStyles.headerText]}>Темы</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.menuOption, isBotEnabled && styles.activeOption]}
-          onPress={handleBotToggle}
-          activeOpacity={0.7}
-        >
-          <Ionicons 
-            name={isBotEnabled ? "chatbubble" : "chatbubble-outline"} 
-            size={20} 
-            color="#fff" 
-          />
-          <Text style={[styles.menuText, themedStyles.headerText]}>Бот</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.closeButton}
-          onPress={handleMenuToggle}
-          activeOpacity={0.7}
-        >
-          <Ionicons name="close" size={24} color="#fff" />
-        </TouchableOpacity>
+    <>
+      <View style={[styles.header, themedStyles.header]}>
+        {!isSearching ? (
+          <>
+            <Text style={[styles.headerText, themedStyles.headerText]}>Axora Chat</Text>
+            <TouchableOpacity
+              style={styles.menuButton}
+              onPress={handleMenuToggle}
+              activeOpacity={0.7}
+            >
+              <Ionicons name="menu" size={24} color="#fff" />
+            </TouchableOpacity>
+          </>
+        ) : (
+          <View style={styles.searchContainer}>
+            <TextInput
+              style={styles.searchInput}
+              value={searchQuery}
+              onChangeText={onSearchChange}
+              placeholder="Поиск сообщений..."
+              placeholderTextColor="#888"
+              autoFocus
+              returnKeyType="search"
+            />
+            <TouchableOpacity 
+              style={styles.searchCloseButton}
+              onPress={onSearchClose}
+              activeOpacity={0.7}
+            >
+              <Ionicons name="close" size={20} color="#fff" />
+            </TouchableOpacity>
+          </View>
+        )}
       </View>
-    </View>
+
+      {/* Модальное окно меню */}
+      {showMenu && (
+        <TouchableOpacity 
+          style={styles.menuOverlay}
+          onPress={handleMenuToggle}
+          activeOpacity={1}
+        >
+          <TouchableOpacity 
+            style={styles.menuContent}
+            onPress={() => {}}
+            activeOpacity={1}
+          >
+            <TouchableOpacity 
+              style={styles.menuItem}
+              onPress={handleSearchToggle}
+              activeOpacity={0.7}
+            >
+              <Ionicons name="search" size={20} color="#fff" />
+              <Text style={styles.menuItemText}>Поиск сообщений</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              style={styles.menuItem}
+              onPress={handleThemeToggle}
+              activeOpacity={0.7}
+            >
+              <Ionicons name="color-palette-outline" size={20} color="#fff" />
+              <Text style={styles.menuItemText}>Темы</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              style={styles.menuItem}
+              onPress={handleBotToggle}
+              activeOpacity={0.7}
+            >
+              <Ionicons 
+                name={isBotEnabled ? "chatbubble" : "chatbubble-outline"} 
+                size={20} 
+                color="#fff" 
+              />
+              <Text style={styles.menuItemText}>
+                {isBotEnabled ? "Отключить бота" : "Включить бота"}
+              </Text>
+            </TouchableOpacity>
+          </TouchableOpacity>
+        </TouchableOpacity>
+      )}
+    </>
   );
 });
 
@@ -148,28 +172,62 @@ const styles = StyleSheet.create({
   menuButton: {
     padding: 8,
   },
-  menuContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
+  menuOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    zIndex: 1000,
   },
-  menuOption: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    marginRight: 8,
+  menuContent: {
+    position: 'absolute',
+    top: 70,
+    right: 16,
+    backgroundColor: "#23234d",
+    borderRadius: 12,
+    padding: 8,
+    shadowColor: "#000",
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 8,
+    minWidth: 200,
+  },
+  menuItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     borderRadius: 8,
   },
-  activeOption: {
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+  menuItemText: {
+    color: "#fff",
+    fontSize: 16,
+    marginLeft: 12,
   },
-  menuText: {
-    marginLeft: 4,
-    fontSize: 14,
+  searchContainer: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    marginLeft: 16,
   },
-  closeButton: {
-    padding: 8,
-    marginLeft: 'auto',
+  searchInput: {
+    flex: 1,
+    fontSize: 16,
+    color: "#fff",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    backgroundColor: "rgba(255,255,255,0.1)",
+    borderRadius: 16,
+    marginRight: 8,
+  },
+  searchCloseButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "rgba(255,255,255,0.1)",
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

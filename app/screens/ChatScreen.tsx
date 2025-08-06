@@ -40,7 +40,7 @@ const ChatFeatures: React.FC = () => {
 };
 
 // Главный компонент с защитной архитектурой
-export const ChatScreen: React.FC = () => {
+const ChatScreenInner: React.FC = () => {
   const handleLogicError = useCallback((error: Error) => {
     console.error('ChatScreen: Logic error caught', error);
     // Логируем ошибки логики, но UI продолжает работать
@@ -59,6 +59,12 @@ export const ChatScreen: React.FC = () => {
     </UIErrorBoundary>
   );
 };
+
+// Экспортируем как default для Expo Router
+export default ChatScreenInner;
+
+// Также экспортируем как named export для обратной совместимости
+export const ChatScreen = ChatScreenInner;
 
 // Стили для fallback компонентов
 const styles = StyleSheet.create({

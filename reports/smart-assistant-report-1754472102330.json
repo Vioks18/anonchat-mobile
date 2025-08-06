@@ -1,0 +1,24 @@
+{
+  "timestamp": "2025-08-06T09:21:42.330Z",
+  "analysis": {
+    "issues": [],
+    "suggestions": [
+      {
+        "file": "app/components/ChatCore.tsx",
+        "message": "🏗️ Файл очень большой, рассмотреть разделение",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T09:21:42.298Z"
+      },
+      {
+        "file": "app/components/ChatCore.tsx",
+        "message": "🏗️ Файл очень большой, рассмотреть разделение",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T09:21:42.303Z"
+      }
+    ],
+    "architecture": {},
+    "performance": {},
+    "security": {},
+    "bestPractices": []
+  }
+}

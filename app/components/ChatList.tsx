@@ -1,6 +1,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { Alert, FlatList, StyleSheet, Text, View } from 'react-native';
 import { Message } from '../types/message';
+import { ChatMessage } from './ChatMessage';
 
 interface ChatListProps {
   messages: Message[];
@@ -22,6 +23,8 @@ export const ChatList: React.FC<ChatListProps> = React.memo(({
   onScrollToEnd
 }) => {
   const [hasError, setHasError] = useState(false);
+  const [selectedMessages, setSelectedMessages] = useState<Set<string>>(new Set());
+  const [showReactions, setShowReactions] = useState<string | null>(null);
 
   // Валидация сообщения - мемоизирована
   const validateMessage = useCallback((message: Message): boolean => {
@@ -100,6 +103,50 @@ export const ChatList: React.FC<ChatListProps> = React.memo(({
     }
   }, [validateMessage]);
 
+  // Обработчики для ChatMessage
+  const handlePress = useCallback((messageId: string) => {
+    try {
+      setSelectedMessages(prev => {
+        const newSet = new Set(prev);
+        if (newSet.has(messageId)) {
+          newSet.delete(messageId);
+        } else {
+          newSet.add(messageId);
+        }
+        return newSet;
+      });
+    } catch (error) {
+      console.error('ChatList: Ошибка обработки нажатия', error);
+    }
+  }, []);
+
+  const handleLongPress = useCallback((messageId: string) => {
+    try {
+      setShowReactions(prev => prev === messageId ? null : messageId);
+    } catch (error) {
+      console.error('ChatList: Ошибка обработки долгого нажатия', error);
+    }
+  }, []);
+
+  const addReaction = useCallback((messageId: string, reaction: string) => {
+    try {
+      // Здесь можно добавить логику добавления реакции
+      console.log('Добавлена реакция:', reaction, 'к сообщению:', messageId);
+      setShowReactions(null);
+    } catch (error) {
+      console.error('ChatList: Ошибка добавления реакции', error);
+    }
+  }, []);
+
+  const removeReaction = useCallback((messageId: string) => {
+    try {
+      // Здесь можно добавить логику удаления реакции
+      console.log('Удалена реакция из сообщения:', messageId);
+    } catch (error) {
+      console.error('ChatList: Ошибка удаления реакции', error);
+    }
+  }, []);
+
   // Безопасный рендер сообщения - мемоизирован
   const renderMessage = useCallback(({ item }: { item: Message }) => {
     try {
@@ -112,24 +159,18 @@ export const ChatList: React.FC<ChatListProps> = React.memo(({
         );
       }
 
-      const isMe = item.sender === "me";
-      
       return (
-        <View style={[styles.messageContainer, isMe ? styles.messageMe : styles.messageOther]}>
-          <View style={[
-            styles.bubble, 
-            isMe 
-              ? { ...styles.bubbleMe, backgroundColor: currentThemeData.bubbleMe }
-              : { ...styles.bubbleOther, backgroundColor: currentThemeData.bubbleOther }
-          ]}>
-            <Text style={[styles.messageText, { color: currentThemeData.text }]}>{item.text}</Text>
-            {item.status && (
-              <Text style={[styles.statusText, { color: currentThemeData.text }]}>
-                {item.status === 'sending' ? '⏳' : item.status === 'sent' ? '✓' : '✗'}
-              </Text>
-            )}
-          </View>
-        </View>
+        <ChatMessage
+          item={item}
+          handlePress={handlePress}
+          handleLongPress={handleLongPress}
+          removeReaction={removeReaction}
+          addReaction={addReaction}
+          showReactions={showReactions}
+          selectedMessages={selectedMessages}
+          themedStyles={themedStyles}
+          styles={styles}
+        />
       );
     } catch (error) {
       console.error('ChatList: Error rendering message', error);
@@ -140,7 +181,7 @@ export const ChatList: React.FC<ChatListProps> = React.memo(({
         </View>
       );
     }
-  }, [currentThemeData, validateMessage]);
+  }, [validateMessage, handlePress, handleLongPress, removeReaction, addReaction, showReactions, selectedMessages, themedStyles, styles]);
 
   // Безопасная обработка ошибок FlatList - мемоизирована
   const handleError = useCallback((error: any) => {
@@ -221,11 +262,29 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 20,
   },
+  bubbleContainer: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    marginVertical: 4,
+  },
+  bubbleContainerOther: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    marginVertical: 4,
+  },
   bubbleMe: {
     borderBottomRightRadius: 4,
   },
   bubbleOther: {
     borderBottomLeftRadius: 4,
+  },
+  bubbleSelected: {
+    borderWidth: 2,
+    borderColor: '#6c5ce7',
+  },
+  bubbleSelectedOther: {
+    borderWidth: 2,
+    borderColor: '#6c5ce7',
   },
   messageText: {
     fontSize: 16,
@@ -236,6 +295,72 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 4,
     textAlign: 'right',
+  },
+  statusSending: {
+    fontSize: 12,
+    color: '#666',
+  },
+  statusSent: {
+    fontSize: 12,
+    color: '#666',
+  },
+  messageContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  statusContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  reactionsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginTop: 4,
+  },
+  reaction: {
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    marginRight: 4,
+    marginBottom: 4,
+  },
+  reactionText: {
+    fontSize: 12,
+  },
+  reactionsPopup: {
+    position: 'absolute',
+    bottom: 40,
+    backgroundColor: '#23234d',
+    borderRadius: 12,
+    padding: 8,
+    flexDirection: 'row',
+    shadowColor: "#000",
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  reactionsPopupRight: {
+    right: 0,
+  },
+  reactionButton: {
+    padding: 8,
+    marginHorizontal: 2,
+  },
+  reactionButtonText: {
+    fontSize: 16,
+  },
+  replyPreview: {
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    padding: 8,
+    borderRadius: 8,
+    marginBottom: 8,
+  },
+  replyPreviewText: {
+    fontSize: 12,
+    color: '#ccc',
   },
   errorMessage: {
     padding: 16,

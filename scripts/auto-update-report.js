@@ -3,7 +3,7 @@ const path = require('path');
 
 class ReportUpdater {
   constructor() {
-    this.reportPath = 'PROGRESS_REPORT.md';
+    this.reportPath = '../docs/PROGRESS_REPORT.md';
     this.lastUpdate = new Date().toISOString();
   }
 

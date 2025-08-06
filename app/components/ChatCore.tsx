@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
+  FlatList,
   Keyboard,
   StyleSheet,
   Text,
@@ -9,10 +10,79 @@ import {
   View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { THEMES } from '../constants/themes';
 import { useMessageStore } from '../hooks/useMessageStore';
-import { ChatInput } from './ChatInput';
-import { ChatList } from './ChatList';
+import { useUIWatchDog } from '../hooks/useUIWatchDog';
+import { ErrorSeverity, useErrorMonitor } from '../utils/errorBoundary';
+
+// Темы
+const THEMES = {
+  dark: {
+    name: "Темная",
+    accent: "#6c5ce7",
+    bg: "#181825",
+    headerBg: "#23234d",
+    bubbleMe: "#6c5ce7",
+    bubbleOther: "#23234d",
+    text: "#fff",
+    inputBg: "#23234d",
+    border: "#282850",
+  },
+  ocean: {
+    name: "Океан",
+    accent: "#00b894",
+    bg: "#0a1929",
+    headerBg: "#1a3a5f",
+    bubbleMe: "#00b894",
+    bubbleOther: "#1a3a5f",
+    text: "#fff",
+    inputBg: "#1a3a5f",
+    border: "#2d5a8a",
+  },
+  sunset: {
+    name: "Закат",
+    accent: "#e17055",
+    bg: "#2d1b1b",
+    headerBg: "#4a2c2c",
+    bubbleMe: "#e17055",
+    bubbleOther: "#4a2c2c",
+    text: "#fff",
+    inputBg: "#4a2c2c",
+    border: "#6b3e3e",
+  },
+  forest: {
+    name: "Лес",
+    accent: "#00b894",
+    bg: "#0f1a0f",
+    headerBg: "#1a3a1a",
+    bubbleMe: "#00b894",
+    bubbleOther: "#1a3a1a",
+    text: "#fff",
+    inputBg: "#1a3a1a",
+    border: "#2d5a2d",
+  },
+  purple: {
+    name: "Фиолетовая",
+    accent: "#a29bfe",
+    bg: "#2d1b69",
+    headerBg: "#4a2c8a",
+    bubbleMe: "#a29bfe",
+    bubbleOther: "#4a2c8a",
+    text: "#fff",
+    inputBg: "#4a2c8a",
+    border: "#6b3eb3",
+  },
+  neon: {
+    name: "Неон",
+    accent: "#00d2d3",
+    bg: "#0a0a0a",
+    headerBg: "#1a1a1a",
+    bubbleMe: "#00d2d3",
+    bubbleOther: "#1a1a1a",
+    text: "#fff",
+    inputBg: "#1a1a1a",
+    border: "#2d2d2d",
+  }
+};
 
 interface ChatCoreProps {
   // Минимальные пропсы для изоляции
@@ -22,223 +92,212 @@ interface ChatCoreProps {
   onToggleBot?: () => void;
 }
 
-export const ChatCore: React.FC<ChatCoreProps> = React.memo(({ onSendMessage, onError, isBotEnabled = false, onToggleBot }) => {
-  // Подключаем Zustand store для сообщений
-  const messages = useMessageStore((s) => s.messages);
-  const addMessage = useMessageStore((s) => s.addMessage);
+// Fallback компонент для критических ошибок
+const ChatCoreFallback: React.FC<{ error?: string }> = ({ error }) => (
+  <SafeAreaView style={styles.fallbackContainer}>
+    <View style={styles.fallbackContent}>
+      <Ionicons name="warning" size={48} color="#ff6b6b" />
+      <Text style={styles.fallbackTitle}>Ошибка приложения</Text>
+      <Text style={styles.fallbackText}>
+        {error || "Произошла критическая ошибка. Попробуйте перезапустить приложение."}
+      </Text>
+      <TouchableOpacity 
+        style={styles.fallbackButton}
+        onPress={() => {
+          // Попытка перезагрузки
+          console.log('ChatCore: Попытка перезагрузки...');
+        }}
+      >
+        <Text style={styles.fallbackButtonText}>Перезапустить</Text>
+      </TouchableOpacity>
+    </View>
+  </SafeAreaView>
+);
+
+// Улучшенный ChatCore с защитой
+const ChatCoreInner: React.FC<ChatCoreProps> = ({ onSendMessage, onError, isBotEnabled = false, onToggleBot }) => {
+  // Используем систему мониторинга ошибок
+  const { addError, getStats, isStable } = useErrorMonitor();
+  
+  // Состояние для отслеживания критических ошибок
+  const [hasCriticalError, setHasCriticalError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string>('');
+  
+  // Подключаем Zustand store для сообщений с защитой
+  const messages = useMessageStore((s) => s?.messages || []);
+  const addMessage = useMessageStore((s) => s?.addMessage || (() => {}));
   
   // Отфильтрованные сообщения для правильного порядка (при inverted={true} нужен обратный порядок)
-  const filteredMessages = useMemo(() => {
+  const filteredMessages = React.useMemo(() => {
     try {
+      if (!Array.isArray(messages)) {
+        addError(new Error('messages не является массивом'), 'ChatCore', ErrorSeverity.MEDIUM);
+        return [];
+      }
       return [...messages].reverse();
     } catch (error) {
-      console.error('ChatCore: Ошибка фильтрации сообщений', error);
+      addError(error instanceof Error ? error : new Error(String(error)), 'ChatCore', ErrorSeverity.HIGH);
       return [];
     }
-  }, [messages]);
+  }, [messages, addError]);
   
-  // Состояния для тем
+  // Состояния для тем с защитой
   const [currentTheme, setCurrentTheme] = useState("dark");
+  const [showThemeSelector, setShowThemeSelector] = useState(false);
 
-  // Применение текущей темы - оптимизировано с useMemo
-  const currentThemeData = useMemo(() => {
+  // Применение текущей темы с защитой
+  const currentThemeData = React.useMemo(() => {
     try {
       return THEMES[currentTheme as keyof typeof THEMES] || THEMES.dark;
     } catch (error) {
-      console.error('ChatCore: Ошибка получения темы', error);
+      addError(error instanceof Error ? error : new Error(String(error)), 'ChatCore', ErrorSeverity.MEDIUM);
       return THEMES.dark;
     }
-  }, [currentTheme]);
-
-  const [inputText, setInputText] = useState("");
-  const [keyboardHeight, setKeyboardHeight] = useState(0);
-  const [inputFocused, setInputFocused] = useState(false);
+  }, [currentTheme, addError]);
+  
+  // Состояния для меню
   const [showMenu, setShowMenu] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [showThemeSelector, setShowThemeSelector] = useState(false);
-
-  // Создаем themedStyles для передачи в компоненты
-  const themedStyles = useMemo(() => ({
-    safe: { backgroundColor: currentThemeData.bg },
-    header: { backgroundColor: currentThemeData.headerBg },
-    headerText: { color: currentThemeData.text },
-    bubbleMe: { backgroundColor: currentThemeData.accent },
-    bubbleOther: { backgroundColor: currentThemeData.bubbleOther },
-    bubbleText: { color: currentThemeData.text },
-    timestamp: { color: currentThemeData.text },
-    statusDelivered: { color: currentThemeData.text },
-    statusRead: { color: currentThemeData.accent },
-    inputContainer: { backgroundColor: currentThemeData.inputBg, marginBottom: keyboardHeight },
-    input: { color: currentThemeData.text, backgroundColor: currentThemeData.inputBg },
-    sendButton: { backgroundColor: currentThemeData.accent },
-  }), [currentThemeData, keyboardHeight]);
   
-  // UI WatchDog для мониторинга стабильности (пока отключен)
-  // const { status: watchDogStatus } = useUIWatchDog({
-  //   flatListRef: { current: null } as any, // Временное решение
-  //   messageCount: messages.length,
-  //   keyboardHeight,
-  //   inputFocused,
-  //   onScrollToEnd: () => {
-  //     // Скролл теперь обрабатывается в ChatList
-  //   },
-  // });
+  const [inputText, setInputText] = useState("");
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const [inputFocused, setInputFocused] = useState(false);
+  const flatListRef = useRef<FlatList>(null);
 
-  // Безопасная обработка ошибок - мемоизирована
-  const safeExecute = useCallback((fn: () => void, errorMessage: string) => {
+  // WatchDog для мониторинга UI с защитой
+  const watchDogResult = React.useMemo(() => {
+    try {
+      return useUIWatchDog({
+        flatListRef,
+        messageCount: messages.length,
+        keyboardHeight,
+        inputFocused,
+        onScrollToEnd: () => {
+          try {
+            flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+          } catch (error) {
+            addError(error instanceof Error ? error : new Error(String(error)), 'ChatCore', ErrorSeverity.LOW);
+          }
+        },
+      });
+    } catch (error) {
+      addError(error instanceof Error ? error : new Error(String(error)), 'ChatCore', ErrorSeverity.HIGH);
+      return { status: 'error', updateScrollPosition: () => {}, forceCheck: () => {} };
+    }
+  }, [messages.length, keyboardHeight, inputFocused, addError]);
+
+  const { status: watchDogStatus, updateScrollPosition, forceCheck } = watchDogResult;
+
+  // Улучшенная безопасная обработка ошибок
+  const safeExecute = useCallback((fn: () => void, errorMessage: string, severity: ErrorSeverity = ErrorSeverity.MEDIUM) => {
     try {
       fn();
     } catch (error) {
-      console.error(`ChatCore Error: ${errorMessage}`, error);
-      onError?.(error as Error);
+      const errorObj = error instanceof Error ? error : new Error(String(error));
+      addError(errorObj, 'ChatCore', severity);
+      
+      // Проверяем на критические ошибки
+      if (severity === ErrorSeverity.CRITICAL || errorObj.message.includes('critical')) {
+        setHasCriticalError(true);
+        setErrorMessage(errorObj.message);
+      }
+      
+      onError?.(errorObj);
     }
-  }, [onError]);
+  }, [onError, addError]);
 
-  // Безопасная установка состояния - мемоизирована
-  const safeSetState = useCallback((setter: (value: any) => void, value: any, errorMessage: string) => {
-    try {
-      setter(value);
-    } catch (error) {
-      console.error(`ChatCore: ${errorMessage}`, error);
-      onError?.(error as Error);
-    }
-  }, [onError]);
-
-  // Обработка клавиатуры для Android - мемоизирована
+  // Обработка клавиатуры для Android с защитой
   useEffect(() => {
-    let keyboardDidShowListener: any = null;
-    let keyboardDidHideListener: any = null;
+    let keyboardDidShowListener: any;
+    let keyboardDidHideListener: any;
 
     try {
       keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', (e) => {
-        try {
-          if (e && e.endCoordinates) {
-            setKeyboardHeight(e.endCoordinates.height);
-          }
-        } catch (error) {
-          console.error('ChatCore: Ошибка обработки keyboardDidShow', error);
-          onError?.(error as Error);
-        }
+        safeExecute(() => {
+          setKeyboardHeight(e.endCoordinates.height);
+        }, 'keyboardDidShow', ErrorSeverity.LOW);
       });
 
       keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
-        try {
+        safeExecute(() => {
           setKeyboardHeight(0);
-        } catch (error) {
-          console.error('ChatCore: Ошибка обработки keyboardDidHide', error);
-          onError?.(error as Error);
-        }
+        }, 'keyboardDidHide', ErrorSeverity.LOW);
       });
-
-      // console.log('ChatCore: Слушатели клавиатуры добавлены');
     } catch (error) {
-      console.error('ChatCore: Ошибка добавления слушателей клавиатуры', error);
-      onError?.(error as Error);
+      addError(error instanceof Error ? error : new Error(String(error)), 'ChatCore', ErrorSeverity.MEDIUM);
     }
 
     return () => {
       try {
         keyboardDidShowListener?.remove();
         keyboardDidHideListener?.remove();
-        // console.log('ChatCore: Слушатели клавиатуры удалены');
       } catch (error) {
-        console.error('ChatCore: Ошибка удаления слушателей клавиатуры', error);
+        addError(error instanceof Error ? error : new Error(String(error)), 'ChatCore', ErrorSeverity.LOW);
       }
     };
-  }, [onError]); // Добавляем onError в зависимости
+  }, [safeExecute, addError]);
 
-  // Безопасная отправка сообщения - мемоизирована
+  // Безопасная отправка сообщения
   const handleSendMessage = useCallback(() => {
     safeExecute(() => {
-      // Валидация ввода
-      const trimmedText = inputText.trim();
-      if (trimmedText === "") return;
-      
-      // Проверка длины сообщения
-      if (trimmedText.length > 1000) {
-        console.warn('ChatCore: Сообщение слишком длинное');
-        return;
-      }
-      
-      // Проверка на спам (повторяющиеся символы)
-      const spamPattern = /(.)\1{10,}/;
-      if (spamPattern.test(trimmedText)) {
-        console.warn('ChatCore: Обнаружен спам');
-        return;
-      }
+      if (inputText.trim() === "") return;
 
       // Используем addMessage из store
-      addMessage(trimmedText);
-      safeSetState(setInputText, "", 'очистка inputText');
+      addMessage(inputText.trim());
+      setInputText("");
       
       // Уведомляем внешнюю логику
-      onSendMessage?.(trimmedText);
+      onSendMessage?.(inputText.trim());
       
-      // console.log('ChatCore: Сообщение отправлено', trimmedText);
-    }, 'sendMessage');
-  }, [inputText, onSendMessage, safeExecute, addMessage, safeSetState]);
+      // Безопасный скролл вниз (при inverted={true} это scrollToOffset)
+      setTimeout(() => {
+        safeExecute(() => {
+          flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+        }, 'scrollToEnd', ErrorSeverity.LOW);
+      }, 100);
+    }, 'sendMessage', ErrorSeverity.MEDIUM);
+  }, [inputText, onSendMessage, safeExecute, addMessage]);
 
-  // Безопасная обработка меню - мемоизирована
-  const handleMenuToggle = useCallback(() => {
-    safeExecute(() => {
-      setShowMenu(!showMenu);
-      // console.log('ChatCore: Menu toggled', !showMenu);
-    }, 'toggleMenu');
-  }, [showMenu, safeExecute]);
+  // Безопасный рендер сообщения с защитой
+  const renderMessage = useCallback(({ item }: { item: any }) => {
+    try {
+      // Валидация сообщения
+      if (!item || typeof item !== 'object') {
+        addError(new Error('Невалидное сообщение'), 'ChatCore', ErrorSeverity.LOW);
+        return null;
+      }
 
-  // Безопасная обработка поиска
-  const handleSearchToggle = useCallback(() => {
-    safeExecute(() => {
-      setIsSearching(!isSearching);
-      setShowMenu(false);
-      // console.log('ChatCore: Search toggled', !isSearching);
-    }, 'toggleSearch');
-  }, [isSearching, safeExecute]);
+      const isMe = item.sender === "me";
+      
+      return (
+        <View style={[styles.messageContainer, isMe ? styles.messageMe : styles.messageOther]}>
+          <View style={[
+            styles.bubble, 
+            isMe 
+              ? { ...styles.bubbleMe, backgroundColor: currentThemeData.bubbleMe }
+              : { ...styles.bubbleOther, backgroundColor: currentThemeData.bubbleOther }
+          ]}>
+            <Text style={[styles.messageText, { color: currentThemeData.text }]}>
+              {item.text || 'Пустое сообщение'}
+            </Text>
+          </View>
+        </View>
+      );
+    } catch (error) {
+      addError(error instanceof Error ? error : new Error(String(error)), 'ChatCore', ErrorSeverity.MEDIUM);
+      return (
+        <View style={styles.errorMessage}>
+          <Text style={styles.errorText}>Ошибка отображения сообщения</Text>
+        </View>
+      );
+    }
+  }, [currentThemeData, addError]);
 
-  // Безопасная обработка тем
-  const handleThemeToggle = useCallback(() => {
-    safeExecute(() => {
-      setShowThemeSelector(!showThemeSelector);
-      setShowMenu(false);
-      // console.log('ChatCore: Theme selector toggled', !showThemeSelector);
-    }, 'toggleThemeSelector');
-  }, [showThemeSelector, safeExecute]);
-
-  // Безопасная обработка бота
-  const handleBotToggle = useCallback(() => {
-    safeExecute(() => {
-      onToggleBot?.();
-      setShowMenu(false);
-      // console.log('ChatCore: Bot toggled');
-    }, 'toggleBot');
-  }, [onToggleBot, safeExecute]);
-
-  // Безопасная обработка закрытия поиска
-  const handleSearchClose = useCallback(() => {
-    safeExecute(() => {
-      setIsSearching(false);
-      setSearchQuery("");
-      // console.log('ChatCore: Search closed');
-    }, 'closeSearch');
-  }, [safeExecute]);
-
-  // Безопасная обработка закрытия тем
-  const handleThemeClose = useCallback(() => {
-    safeExecute(() => {
-      setShowThemeSelector(false);
-      // console.log('ChatCore: Theme selector closed');
-    }, 'closeThemeSelector');
-  }, [safeExecute]);
-
-  // Безопасная обработка выбора темы
-  const handleThemeSelect = useCallback((theme: string) => {
-    safeExecute(() => {
-      setCurrentTheme(theme);
-      setShowThemeSelector(false);
-      // console.log('ChatCore: Theme selected', theme);
-    }, 'selectTheme');
-  }, [safeExecute]);
+  // Критическая ошибка - показываем fallback
+  if (hasCriticalError) {
+    return <ChatCoreFallback error={errorMessage} />;
+  }
 
   // Fallback UI при ошибках
   if (!messages) {
@@ -251,197 +310,218 @@ export const ChatCore: React.FC<ChatCoreProps> = React.memo(({ onSendMessage, on
     );
   }
 
-  try {
-    return (
-      <SafeAreaView style={[styles.container, themedStyles.safe]}>
-        <View style={[styles.container, themedStyles.safe]}>
-          {/* Заголовок */}
-          <View style={[styles.header, themedStyles.header]}>
-            {(() => {
-              try {
-                if (!isSearching) {
-                  return (
-                    <>
-                      <Text style={[styles.headerText, themedStyles.headerText]}>Axora Chat</Text>
-                      <TouchableOpacity 
-                        style={styles.menuButton}
-                        onPress={handleMenuToggle}
-                        activeOpacity={0.7}
-                      >
-                        <Ionicons name="ellipsis-vertical" size={20} color="#fff" />
-                      </TouchableOpacity>
-                    </>
-                  );
-                } else {
-                  return (
-                    <View style={styles.searchContainer}>
-                      <TextInput
-                        style={styles.searchInput}
-                        value={searchQuery}
-                        onChangeText={setSearchQuery}
-                        placeholder="Поиск сообщений..."
-                        placeholderTextColor="#888"
-                        autoFocus
-                        returnKeyType="search"
-                      />
-                      <TouchableOpacity 
-                        style={styles.searchCloseButton}
-                        onPress={handleSearchClose}
-                        activeOpacity={0.7}
-                      >
-                        <Ionicons name="close" size={20} color="#fff" />
-                      </TouchableOpacity>
-                    </View>
-                  );
-                }
-              } catch (error) {
-                console.error('ChatCore: Ошибка рендеринга header', error);
-                // Fallback - простой header
-                return (
-                  <>
-                    <Text style={[styles.headerText, themedStyles.headerText]}>Axora Chat</Text>
-                    <TouchableOpacity 
-                      style={styles.menuButton}
-                      onPress={handleMenuToggle}
-                      activeOpacity={0.7}
-                    >
-                      <Ionicons name="ellipsis-vertical" size={20} color="#fff" />
-                    </TouchableOpacity>
-                  </>
-                );
-              }
-            })()}
-          </View>
-
-          {/* Список сообщений */}
-          <ChatList
-            messages={filteredMessages}
-            onSendMessage={handleSendMessage}
-            onError={onError}
-            themedStyles={themedStyles}
-            styles={styles}
-            currentThemeData={currentThemeData}
-          />
-
-          {/* Поле ввода */}
-          <ChatInput
-            inputText={inputText}
-            setInputText={setInputText}
-            onSendMessage={handleSendMessage}
-            keyboardHeight={keyboardHeight}
-            currentThemeData={currentThemeData}
-            inputFocused={inputFocused}
-            setInputFocused={setInputFocused}
-          />
-
-          {/* Меню */}
-          {showMenu && (() => {
-            try {
-              return (
-                <TouchableOpacity 
-                  style={styles.menuOverlay}
-                  onPress={() => setShowMenu(false)}
-                  activeOpacity={1}
-                >
-                  <TouchableOpacity 
-                    style={styles.menuContent}
-                    onPress={() => {}}
-                    activeOpacity={1}
-                  >
-                    <TouchableOpacity 
-                      style={styles.menuItem}
-                      onPress={handleSearchToggle}
-                      activeOpacity={0.7}
-                    >
-                      <Ionicons name="search" size={20} color="#fff" />
-                      <Text style={styles.menuItemText}>Поиск</Text>
-                    </TouchableOpacity>
-                    
-                    <TouchableOpacity 
-                      style={styles.menuItem}
-                      onPress={handleThemeToggle}
-                      activeOpacity={0.7}
-                    >
-                      <Ionicons name="color-palette" size={20} color="#fff" />
-                      <Text style={styles.menuItemText}>Темы</Text>
-                    </TouchableOpacity>
-                    
-                    <TouchableOpacity 
-                      style={styles.menuItem}
-                      onPress={handleBotToggle}
-                      activeOpacity={0.7}
-                    >
-                      <Ionicons name={isBotEnabled ? "chatbubble" : "chatbubble-outline"} size={20} color="#fff" />
-                      <Text style={styles.menuItemText}>
-                        {isBotEnabled ? "Отключить бота" : "Включить бота"}
-                      </Text>
-                    </TouchableOpacity>
-                  </TouchableOpacity>
-                </TouchableOpacity>
-              );
-            } catch (error) {
-              console.error('ChatCore: Ошибка рендеринга меню', error);
-              return null;
-            }
-          })()}
-
-          {/* Селектор тем */}
-          {showThemeSelector && (() => {
-            try {
-              return (
-                <TouchableOpacity 
-                  style={styles.themeOverlay}
-                  onPress={handleThemeClose}
-                  activeOpacity={1}
-                >
-                  <TouchableOpacity 
-                    style={styles.themeContent}
-                    onPress={() => {}}
-                    activeOpacity={1}
-                  >
-                    <Text style={styles.themeTitle}>Выберите тему</Text>
-                    {Object.entries(THEMES).map(([key, theme]) => (
-                      <TouchableOpacity 
-                        key={key}
-                        style={[
-                          styles.themeOption,
-                          currentTheme === key && styles.themeOptionSelected
-                        ]}
-                        onPress={() => handleThemeSelect(key)}
-                        activeOpacity={0.7}
-                      >
-                        <View style={[styles.themePreview, { backgroundColor: theme.bg }]}>
-                          <View style={[styles.themePreviewHeader, { backgroundColor: theme.headerBg }]} />
-                          <View style={[styles.themePreviewBubble, { backgroundColor: theme.accent }]} />
-                        </View>
-                        <Text style={styles.themeOptionText}>{theme.name}</Text>
-                      </TouchableOpacity>
-                    ))}
-                  </TouchableOpacity>
-                </TouchableOpacity>
-              );
-            } catch (error) {
-              console.error('ChatCore: Ошибка рендеринга селектора тем', error);
-              return null;
-            }
-          })()}
+  return (
+    <SafeAreaView style={[styles.container, { backgroundColor: currentThemeData.bg }]} edges={["top", "bottom"]}>
+      <View style={styles.flex}>
+        {/* Header */}
+        <View style={[styles.header, { backgroundColor: currentThemeData.headerBg }]}>
+          {!isSearching ? (
+            <>
+              <Text style={styles.headerText}>Axora</Text>
+              <TouchableOpacity 
+                style={styles.menuButton}
+                onPress={() => setShowMenu(!showMenu)}
+                activeOpacity={0.7}
+              >
+                <Ionicons name="ellipsis-vertical" size={20} color="#fff" />
+              </TouchableOpacity>
+            </>
+          ) : (
+            <View style={styles.searchContainer}>
+              <TextInput
+                style={styles.searchInput}
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                placeholder="Поиск сообщений..."
+                placeholderTextColor="#888"
+                autoFocus
+                returnKeyType="search"
+              />
+              <TouchableOpacity 
+                style={styles.searchCloseButton}
+                onPress={() => {
+                  setIsSearching(false);
+                  setSearchQuery("");
+                }}
+                activeOpacity={0.7}
+              >
+                <Ionicons name="close" size={20} color="#fff" />
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
-      </SafeAreaView>
-    );
-  } catch (error) {
-    console.error('ChatCore: Критическая ошибка рендеринга', error);
-    onError?.(error as Error);
-    return (
-      <SafeAreaView style={styles.fallbackContainer}>
-        <Text style={styles.fallbackText}>
-          Произошла ошибка. Попробуйте перезапустить приложение.
-        </Text>
-      </SafeAreaView>
-    );
-  }
-});
 
-ChatCore.displayName = 'ChatCore';
+                {/* Меню */}
+        {showMenu && (
+          <TouchableOpacity 
+            style={styles.menuOverlay}
+            onPress={() => setShowMenu(false)}
+            activeOpacity={1}
+          >
+            <TouchableOpacity 
+              style={styles.menuContent}
+              onPress={() => {}}
+              activeOpacity={1}
+            >
+              <TouchableOpacity 
+                style={styles.menuItem}
+                onPress={() => {
+                  setIsSearching(true);
+                  setShowMenu(false);
+                }}
+                activeOpacity={0.7}
+              >
+                <Ionicons name="search" size={20} color="#fff" />
+                <Text style={styles.menuItemText}>Поиск сообщений</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={styles.menuItem}
+                onPress={() => {
+                  setShowMenu(false);
+                  setShowThemeSelector(true);
+                }}
+                activeOpacity={0.7}
+              >
+                <Ionicons name="color-palette-outline" size={20} color="#fff" />
+                <Text style={styles.menuItemText}>Темы</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={styles.menuItem}
+                onPress={() => {
+                  onToggleBot?.();
+                  setShowMenu(false);
+                }}
+                activeOpacity={0.7}
+              >
+                <Ionicons name={isBotEnabled ? "chatbubble" : "chatbubble-outline"} size={20} color="#fff" />
+                <Text style={styles.menuItemText}>
+                  {isBotEnabled ? "Отключить бота" : "Включить бота"}
+                </Text>
+              </TouchableOpacity>
+            </TouchableOpacity>
+          </TouchableOpacity>
+        )}
+
+        {/* Модальное окно выбора темы */}
+        {showThemeSelector && (
+          <View style={styles.themeModal}>
+            <TouchableOpacity 
+              style={styles.themeModalOverlay}
+              onPress={() => setShowThemeSelector(false)}
+              activeOpacity={1}
+            >
+              <TouchableOpacity 
+                style={styles.themeModalContent}
+                onPress={() => {}}
+                activeOpacity={1}
+              >
+                <Text style={styles.themeModalTitle}>Выберите тему</Text>
+                {Object.entries(THEMES).map(([key, theme]) => (
+                  <TouchableOpacity 
+                    key={key}
+                    style={[
+                      styles.themeOption,
+                      currentTheme === key && styles.themeOptionSelected
+                    ]}
+                    onPress={() => {
+                      setCurrentTheme(key);
+                      setShowThemeSelector(false);
+                    }}
+                    activeOpacity={0.7}
+                  >
+                    <View style={[styles.themePreview, { backgroundColor: theme.bg }]}>
+                      <View style={[styles.themePreviewHeader, { backgroundColor: theme.headerBg }]} />
+                      <View style={[styles.themePreviewBubble, { backgroundColor: theme.bubbleMe }]} />
+                    </View>
+                    <Text style={styles.themeOptionText}>{theme.name}</Text>
+                    {currentTheme === key && (
+                      <Ionicons name="checkmark-circle" size={20} color={theme.accent} />
+                    )}
+                  </TouchableOpacity>
+                ))}
+              </TouchableOpacity>
+            </TouchableOpacity>
+          </View>
+        )}
+
+                 {/* Список сообщений - критически важный компонент */}
+         <FlatList
+           ref={flatListRef}
+           data={filteredMessages}
+           renderItem={renderMessage}
+           keyExtractor={(item) => item.id || Math.random().toString()}
+           style={styles.messagesList}
+           showsVerticalScrollIndicator={false}
+           keyboardShouldPersistTaps="handled"
+           removeClippedSubviews={true}
+           maxToRenderPerBatch={10}
+           windowSize={10}
+           initialNumToRender={10}
+           inverted={true}
+           onLayout={() => {
+             // Безопасная обработка layout
+           }}
+         />
+
+        {/* Строка ввода - критически важный компонент */}
+        <View style={[
+          styles.inputContainer, 
+          { 
+            marginBottom: keyboardHeight,
+            backgroundColor: currentThemeData.inputBg,
+            borderTopColor: currentThemeData.border
+          }
+        ]}>
+          <TextInput
+            style={[
+              styles.textInput,
+              { 
+                backgroundColor: currentThemeData.inputBg,
+                color: currentThemeData.text,
+                borderColor: currentThemeData.border
+              }
+            ]}
+            value={inputText}
+            onChangeText={setInputText}
+            placeholder="Введите сообщение..."
+            placeholderTextColor="#aaa"
+            onSubmitEditing={handleSendMessage}
+            returnKeyType="send"
+            multiline={true}
+            maxLength={1000}
+            blurOnSubmit={false}
+            keyboardType="default"
+            autoCorrect={true}
+            autoCapitalize="sentences"
+            onFocus={() => setInputFocused(true)}
+            onBlur={() => setInputFocused(false)}
+          />
+          <TouchableOpacity
+            style={[
+              styles.sendButton, 
+              { backgroundColor: currentThemeData.accent },
+              !inputText.trim() && styles.sendButtonDisabled
+            ]}
+            onPress={handleSendMessage}
+            disabled={!inputText.trim()}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="send-outline" size={22} color="#fff" />
+          </TouchableOpacity>
+        </View>
+      </View>
+      
+      {/* DevHUD для отображения статуса WatchDog (временно отключен) */}
+      {/* <DevHUD status={watchDogStatus} /> */}
+    </SafeAreaView>
+  );
+};
+
+// Экспортируем как default для Expo Router
+export default ChatCoreInner;
+
+// Также экспортируем как named export для обратной совместимости
+export const ChatCore = ChatCoreInner;
 
 // Изолированные стили - не зависят от внешних тем
 const styles = StyleSheet.create({
@@ -459,15 +539,11 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: 16,
-    paddingTop: 8,
-    paddingBottom: 8,
     borderBottomWidth: 0,
     shadowColor: "#6c5ce7",
     shadowOpacity: 0.12,
     shadowRadius: 8,
-    shadowOffset: { width: 0, height: 2 },
     elevation: 8,
-    zIndex: 100,
   },
   headerText: {
     fontSize: 28,
@@ -488,15 +564,16 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(255,255,255,0.1)",
-    borderRadius: 20,
+    marginLeft: 16,
   },
   searchInput: {
     flex: 1,
     fontSize: 16,
     color: "#fff",
-    paddingVertical: 8,
     paddingHorizontal: 12,
+    paddingVertical: 8,
+    backgroundColor: "rgba(255,255,255,0.1)",
+    borderRadius: 16,
     marginRight: 8,
   },
   searchCloseButton: {
@@ -506,7 +583,6 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.1)",
     justifyContent: "center",
     alignItems: "center",
-    marginLeft: 4,
   },
   menuOverlay: {
     position: 'absolute',
@@ -636,10 +712,35 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#181825',
+  },
+  fallbackContent: {
+    alignItems: 'center',
+    padding: 20,
+  },
+  fallbackTitle: {
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginTop: 16,
+    marginBottom: 8,
   },
   fallbackText: {
+    color: '#ccc',
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  fallbackButton: {
+    backgroundColor: '#6c5ce7',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  fallbackButtonText: {
     color: '#fff',
     fontSize: 16,
+    fontWeight: 'bold',
   },
   errorMessage: {
     padding: 8,
@@ -705,12 +806,15 @@ const styles = StyleSheet.create({
       },
            themePreviewHeader: {
         height: 8,
-        width: '100%',
+        borderTopLeftRadius: 6,
+        borderTopRightRadius: 6,
       },
       themePreviewBubble: {
-        flex: 1,
-        margin: 4,
-        borderRadius: 4,
+        width: 20,
+        height: 12,
+        borderRadius: 6,
+        marginTop: 4,
+        marginLeft: 4,
       },
            themeOptionText: {
         flex: 1,
@@ -718,30 +822,4 @@ const styles = StyleSheet.create({
         color: "#fff",
         fontFamily: "Poppins-Regular",
       },
-  themeOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 2000,
-  },
-  themeContent: {
-    backgroundColor: "#23234d",
-    borderRadius: 16,
-    padding: 20,
-    margin: 20,
-    maxWidth: 300,
-    width: '100%',
-  },
-  themeTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#fff',
-    textAlign: 'center',
-    marginBottom: 20,
-  },
 }); 

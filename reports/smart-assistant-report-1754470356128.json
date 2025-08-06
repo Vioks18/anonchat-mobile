@@ -1,0 +1,126 @@
+{
+  "timestamp": "2025-08-06T08:52:36.128Z",
+  "analysis": {
+    "issues": [],
+    "suggestions": [
+      {
+        "file": "app/components/ChatCore.tsx",
+        "message": "🏗️ Файл очень большой, рассмотреть разделение",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:52:36.102Z"
+      },
+      {
+        "file": "app/components/ChatCore.tsx",
+        "message": "🏗️ Файл очень большой, рассмотреть разделение",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:52:36.105Z"
+      },
+      {
+        "file": "app/components/ChatSearch.tsx",
+        "message": "🔒 Добавить валидацию пользовательского ввода",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:52:36.108Z"
+      },
+      {
+        "file": "app/components/DevHUD.tsx",
+        "message": "🔒 Добавить валидацию пользовательского ввода",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:52:36.109Z"
+      },
+      {
+        "file": "app/components/UIErrorBoundary.tsx",
+        "message": "🛡️ Использовать безопасные операции setState",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:52:36.112Z"
+      },
+      {
+        "file": "app/hooks/useKeyboardHeight.ts",
+        "message": "🔒 Убрать console.log для продакшена: console.log('useKeyboardHeight: Слушатели клавиатуры добавлены')",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:52:36.113Z"
+      },
+      {
+        "file": "app/hooks/useKeyboardHeight.ts",
+        "message": "🔒 Убрать console.log для продакшена: console.log('useKeyboardHeight: Слушатели клавиатуры удалены')",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:52:36.113Z"
+      },
+      {
+        "file": "app/hooks/useMessageStore.ts",
+        "message": "🧠 Рассмотреть useMemo для сложных операций",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:52:36.114Z"
+      },
+      {
+        "file": "app/hooks/useMessageStore.ts",
+        "message": "🔒 Убрать console.log для продакшена: console.log('addBotMessage: Сообщение бота добавлено', newMessage.id)",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:52:36.115Z"
+      },
+      {
+        "file": "app/hooks/useMessageStore.ts",
+        "message": "🔒 Убрать console.log для продакшена: console.log('updateMessage: Сообщение обновлено', id)",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:52:36.115Z"
+      },
+      {
+        "file": "app/hooks/useMessageStore.ts",
+        "message": "🔒 Убрать console.log для продакшена: console.log('removeMessage: Сообщение удалено', id)",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:52:36.115Z"
+      },
+      {
+        "file": "app/hooks/useMessageStore.ts",
+        "message": "🔒 Убрать console.log для продакшена: console.log('addReaction: Реакция добавлена', messageId, reaction)",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:52:36.115Z"
+      },
+      {
+        "file": "app/hooks/useMessageStore.ts",
+        "message": "🔒 Убрать console.log для продакшена: console.log('reset: Store сброшен')",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:52:36.115Z"
+      },
+      {
+        "file": "app/hooks/useMessageStore.ts",
+        "message": "🧠 Рассмотреть useMemo для сложных операций",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:52:36.115Z"
+      },
+      {
+        "file": "app/hooks/useUIWatchDog.ts",
+        "message": "🔒 Убрать console.log для продакшена: console.log('useUIWatchDog: Слушатели клавиатуры добавлены')",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:52:36.116Z"
+      },
+      {
+        "file": "app/hooks/useUIWatchDog.ts",
+        "message": "🔒 Убрать console.log для продакшена: console.log('useUIWatchDog: Слушатели клавиатуры удалены')",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:52:36.116Z"
+      },
+      {
+        "file": "app/hooks/useUIWatchDog.ts",
+        "message": "🔒 Убрать console.log для продакшена: console.log('useUIWatchDog: Проверка scrollToEnd')",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:52:36.116Z"
+      },
+      {
+        "file": "app/providers/FakeSocketProvider.tsx",
+        "message": "🛡️ Добавить обработку ошибок в useEffect",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:52:36.118Z"
+      },
+      {
+        "file": "app/providers/FakeSocketProvider.tsx",
+        "message": "🛡️ Добавить обработку ошибок",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T08:52:36.118Z"
+      }
+    ],
+    "architecture": {},
+    "performance": {},
+    "security": {},
+    "bestPractices": []
+  }
+}

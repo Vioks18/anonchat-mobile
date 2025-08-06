@@ -188,7 +188,7 @@ export const useUIWatchDog = ({
         }
       });
 
-      console.log('useUIWatchDog: Слушатели клавиатуры добавлены');
+      // console.log('useUIWatchDog: Слушатели клавиатуры добавлены');
     } catch (error) {
       console.error('useUIWatchDog: Ошибка добавления слушателей клавиатуры', error);
     }
@@ -197,7 +197,7 @@ export const useUIWatchDog = ({
       try {
         keyboardDidShowListener?.remove();
         keyboardDidHideListener?.remove();
-        console.log('useUIWatchDog: Слушатели клавиатуры удалены');
+        // console.log('useUIWatchDog: Слушатели клавиатуры удалены');
       } catch (error) {
         console.error('useUIWatchDog: Ошибка удаления слушателей клавиатуры', error);
       }
@@ -227,7 +227,7 @@ export const useUIWatchDog = ({
       // Проверяем scrollToEnd при добавлении сообщения
       if (messageCount > 0) {
         // Простая проверка без сложной логики
-        console.log('useUIWatchDog: Проверка scrollToEnd');
+        // console.log('useUIWatchDog: Проверка scrollToEnd');
       }
     } catch (error) {
       console.error('useUIWatchDog: Ошибка проверки сообщений', error);

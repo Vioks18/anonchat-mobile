@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import React, { useCallback, useMemo, useState } from 'react';
 import { Alert, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
+import { InputValidator } from '../utils/validation';
 
 interface ChatInputProps {
   inputText: string;
@@ -22,37 +23,31 @@ export const ChatInput: React.FC<ChatInputProps> = React.memo(({
   setInputFocused
 }) => {
   const [validationError, setValidationError] = useState<string | null>(null);
+  const [validationWarning, setValidationWarning] = useState<string | null>(null);
 
-  // Валидация ввода - мемоизирована
+  // Валидация ввода с новой системой - мемоизирована
   const validateInput = useCallback((text: string): boolean => {
     try {
-      // Проверка длины
-      if (text.length > 1000) {
-        setValidationError('Сообщение слишком длинное (максимум 1000 символов)');
+      // Используем новую систему валидации
+      const validationResult = InputValidator.validateMessage(text);
+      
+      // Проверяем на спам
+      const isSpam = InputValidator.checkForSpam(text);
+      if (isSpam) {
+        setValidationError('Обнаружен спам');
         return false;
       }
 
-      // Проверка на спам (повторяющиеся символы)
-      const spamPattern = /(.)\1{10,}/;
-      if (spamPattern.test(text)) {
-        setValidationError('Обнаружен спам (слишком много повторяющихся символов)');
+      if (!validationResult.isValid) {
+        setValidationError(InputValidator.getUserFriendlyError(validationResult));
         return false;
       }
 
-      // Проверка на пустые строки
-      if (text.trim().length === 0) {
-        setValidationError('Сообщение не может быть пустым');
-        return false;
-      }
-
-      // Проверка на специальные символы (опционально)
-      const specialCharsPattern = /[<>{}]/;
-      if (specialCharsPattern.test(text)) {
-        setValidationError('Сообщение содержит недопустимые символы');
-        return false;
-      }
-
+      // Показываем предупреждения
+      const warning = InputValidator.getUserFriendlyWarning(validationResult);
+      setValidationWarning(warning);
       setValidationError(null);
+      
       return true;
     } catch (error) {
       console.error('ChatInput: Ошибка валидации', error);
@@ -64,16 +59,21 @@ export const ChatInput: React.FC<ChatInputProps> = React.memo(({
   // Безопасная обработка изменения текста - мемоизирована
   const handleTextChange = useCallback((text: string) => {
     try {
-      setInputText(text);
+      // Санитизируем текст перед установкой
+      const sanitizedText = InputValidator.sanitizeText(text);
+      setInputText(sanitizedText);
       
-      // Очищаем ошибку при вводе
+      // Очищаем ошибки при вводе
       if (validationError) {
         setValidationError(null);
+      }
+      if (validationWarning) {
+        setValidationWarning(null);
       }
     } catch (error) {
       console.error('ChatInput: Ошибка изменения текста', error);
     }
-  }, [setInputText, validationError]);
+  }, [setInputText, validationError, validationWarning]);
 
   // Безопасная обработка отправки - мемоизирована
   const handleSendMessage = useCallback(() => {
