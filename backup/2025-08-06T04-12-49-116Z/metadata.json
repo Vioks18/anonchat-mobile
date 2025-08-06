@@ -1,0 +1,15 @@
+{
+  "timestamp": "2025-08-06T04:12:49.143Z",
+  "files": [
+    "app/components/ChatCore.tsx",
+    "app/hooks/useMessageStore.ts",
+    "app/screens/ChatScreen.tsx",
+    "app/index.tsx",
+    "app/components/UIErrorBoundary.tsx",
+    "app/context/ChatLogicProvider.tsx",
+    "app.config.js"
+  ],
+  "successCount": 7,
+  "errorCount": 0,
+  "description": "FakeSocketProvider интегрирован в ChatScreen"
+}

@@ -1,0 +1,180 @@
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { FlatList, Keyboard } from 'react-native';
+
+interface UIWatchDogStatus {
+  scrollToEndWorking: boolean;
+  keyboardHeight: number;
+  inputFocused: boolean;
+  messageCount: number;
+  lastScrollY: number;
+  scrollStuck: boolean;
+  keyboardIssue: boolean;
+}
+
+interface UIWatchDogProps {
+  flatListRef: React.RefObject<FlatList | null
+        removeClippedSubviews={true};
+  messageCount: number;
+  keyboardHeight: number;
+  inputFocused: boolean;
+  onScrollToEnd?: () =
+        maxToRenderPerBatch={10} void;
+}
+
+export const useUIWatchDog = ({
+  flatListRef,
+  messageCount,
+  keyboardHeight,
+  inputFocused,
+  onScrollToEnd
+}: UIWatchDogProps) => {
+  const [status, setStatus] = useState<UIWatchDogStatus>({
+    scrollToEndWorking: true,
+    keyboardHeight: 0,
+    inputFocused: false,
+    messageCount: 0,
+    lastScrollY: 0,
+    scrollStuck: false,
+    keyboardIssue: false,
+  });
+
+  const lastScrollYRef = useRef(0);
+  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const keyboardShowTimeRef = useRef<number>(0);
+  const lastMessageCountRef = useRef(0);
+  const lastLogTimeRef = useRef(0);
+
+  // Проверка scrollToEnd
+  const checkScrollToEnd = useCallback(() => {
+    if (!flatListRef.current) return;
+
+    const startTime = Date.now();
+    
+    // Запоминаем текущую позицию скролла
+    const currentOffset = lastScrollYRef.current;
+    
+    // Вызываем scrollToEnd
+    onScrollToEnd?.();
+    
+    // Проверяем результат через 100ms
+    setTimeout(() => {
+      const endTime = Date.now();
+      const duration = endTime - startTime;
+      
+      if (duration > 100) {
+        console.warn(`📡 scrollToEnd не сработал через ${duration}ms`);
+        setStatus(prev => ({ ...prev, scrollToEndWorking: false }));
+      } else {
+        setStatus(prev => ({ ...prev, scrollToEndWorking: true }));
+      }
+    }, 100);
+  }, [flatListRef, onScrollToEnd]);
+
+  // Проверка клавиатуры
+  const checkKeyboard = useCallback(() => {
+    if (keyboardHeight > 0 && !inputFocused) {
+      console.warn(`⚠️ TextInput не был в фокусе при keyboardDidShow (высота: ${keyboardHeight})`);
+      setStatus(prev => ({ ...prev, keyboardIssue: true }));
+    } else if (keyboardHeight === 0 && keyboardShowTimeRef.current > 0) {
+      console.warn(`🔇 клавиатура открыта, но высота = 0`);
+      setStatus(prev => ({ ...prev, keyboardIssue: true }));
+    } else {
+      setStatus(prev => ({ ...prev, keyboardIssue: false }));
+    }
+  }, [keyboardHeight, inputFocused]);
+
+  // Проверка количества сообщений (только при изменении)
+  const checkMessageCount = useCallback(() => {
+    const now = Date.now();
+    // Логируем только если количество изменилось или прошло больше 5 секунд
+    if (messageCount !== lastMessageCountRef.current || (now - lastLogTimeRef.current > 5000)) {
+      if (messageCount === 0) {
+        console.warn(`🔍 Пустой FlatList (сообщений: ${messageCount})`);
+      }
+      lastMessageCountRef.current = messageCount;
+      lastLogTimeRef.current = now;
+    }
+  }, [messageCount]);
+
+  // Проверка застревания скролла
+  const checkScrollStuck = useCallback(() => {
+    if (lastScrollYRef.current === status.lastScrollY && messageCount > 0) {
+      console.warn(`💤 scrollY не изменился после добавления сообщения`);
+      setStatus(prev => ({ ...prev, scrollStuck: true }));
+    } else {
+      setStatus(prev => ({ ...prev, scrollStuck: false }));
+    }
+  }, [messageCount, status.lastScrollY]);
+
+  // Обновление статуса (только при реальных изменениях)
+  useEffect(() => {
+    const newStatus = {
+      keyboardHeight,
+      inputFocused,
+      messageCount,
+      lastScrollY: lastScrollYRef.current,
+    };
+    
+    // Проверяем, действительно ли что-то изменилось
+    if (
+      status.keyboardHeight !== keyboardHeight ||
+      status.inputFocused !== inputFocused ||
+      status.messageCount !== messageCount ||
+      status.lastScrollY !== lastScrollYRef.current
+    ) {
+      setStatus(prev => ({
+        ...prev,
+        ...newStatus,
+      }));
+    }
+  }, [keyboardHeight, inputFocused, messageCount, status.keyboardHeight, status.inputFocused, status.messageCount, status.lastScrollY]);
+
+  // Мониторинг клавиатуры
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', () => {
+      keyboardShowTimeRef.current = Date.now();
+      checkKeyboard();
+    });
+
+    const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
+      keyboardShowTimeRef.current = 0;
+      setStatus(prev => ({ ...prev, keyboardIssue: false }));
+    });
+
+    return () => {
+      keyboardDidShowListener?.remove();
+      keyboardDidHideListener?.remove();
+    };
+  }, [checkKeyboard]);
+
+  // Проверка при изменении количества сообщений
+  useEffect(() => {
+    checkMessageCount();
+    checkScrollStuck();
+    
+    // Проверяем scrollToEnd при добавлении сообщения
+    if (messageCount > 0) {
+      checkScrollToEnd();
+    }
+  }, [messageCount]);
+
+  // Функция для обновления позиции скролла
+  const updateScrollPosition = useCallback((scrollY: number) => {
+    lastScrollYRef.current = scrollY;
+  }, []);
+
+  // Функция для принудительной проверки
+  const forceCheck = useCallback(() => {
+    console.warn('🔍 WatchDog: Принудительная проверка UI');
+    checkScrollToEnd();
+    checkKeyboard();
+    checkMessageCount();
+    checkScrollStuck();
+  }, [checkScrollToEnd, checkKeyboard, checkMessageCount, checkScrollStuck]);
+
+  return {
+    status,
+    updateScrollPosition,
+    forceCheck,
+  };
+}; 

@@ -1,0 +1,103 @@
+{
+  "timestamp": "2025-08-06T05:00:54.256Z",
+  "analysis": {
+    "files": [
+      "app/components/ChatCore.tsx",
+      "app/components/ChatMessage.tsx",
+      "app/components/DevHUD.tsx",
+      "app/components/Header.tsx",
+      "app/components/MessageInput.tsx",
+      "app/components/ReplyPreview.tsx",
+      "app/components/UIErrorBoundary.tsx",
+      "app/hooks/useBotProvider.ts",
+      "app/hooks/useKeyboardHeight.ts",
+      "app/hooks/useMessageStore.ts",
+      "app/hooks/useUIWatchDog.ts",
+      "app/screens/ChatScreen.backup.tsx",
+      "app/screens/ChatScreen.tsx",
+      "app/providers/FakeSocketProvider.tsx",
+      "app/context/ChatLogicProvider.tsx",
+      "app/utils/formatTimestamp.ts",
+      "app/utils/haptics.ts",
+      "app/types/message.ts"
+    ],
+    "imports": {
+      "app/components/ChatCore.tsx": [
+        ";\nimport React, { useCallback, useEffect, useRef, useState } from ",
+        ";\nimport { useMessageStore } from ",
+        ";\n\n// Темы\nconst THEMES = {\n  dark: {\n    name: "
+      ],
+      "app/components/ChatMessage.tsx": [
+        ";\r\nimport { Text, TouchableOpacity, View } from ",
+        ";\r\nimport { formatTimestamp } from "
+      ],
+      "app/components/DevHUD.tsx": [
+        ";\r\nimport { StyleSheet, Text, View } from "
+      ],
+      "app/components/Header.tsx": [
+        ";\r\nimport React from ",
+        ";\r\n\r\ninterface HeaderProps {\r\n  isSearching: boolean;\r\n  searchQuery: string;\r\n  setSearchQuery: (query: string) => void;\r\n  setIsSearching: (searching: boolean) => void;\r\n  selectedMessages: Set<string>;\r\n  setShowMenu: (show: boolean) => void;\r\n  showMenu: boolean;\r\n  headerAnimation: Animated.Value;\r\n  searchAnimation: Animated.Value;\r\n  selectionAnimation: Animated.Value;\r\n  themedStyles: any;\r\n  styles: any;\r\n  deleteMessage: (messageId: string) => void;\r\n  copyMessage: (messageId: string) => void;\r\n  replyToMessage: (messageId: string) => void;\r\n  setSelectedMessages: (messages: Set<string>) => void;\r\n  setShowReactions: (reactions: string | null) => void;\r\n  setShowDeleteOptions: (show: boolean) => void;\r\n}\r\n\r\nexport const Header: React.FC<HeaderProps> = ({\r\n  isSearching,\r\n  searchQuery,\r\n  setSearchQuery,\r\n  setIsSearching,\r\n  selectedMessages,\r\n  setShowMenu,\r\n  showMenu,\r\n  headerAnimation,\r\n  searchAnimation,\r\n  selectionAnimation,\r\n  themedStyles,\r\n  styles,\r\n  deleteMessage,\r\n  copyMessage,\r\n  replyToMessage,\r\n  setSelectedMessages,\r\n  setShowReactions,\r\n  setShowDeleteOptions,\r\n}) => {\r\n  return (\r\n    <Animated.View \r\n      style={[\r\n        themedStyles.header,\r\n        {\r\n          transform: [{\r\n            translateY: headerAnimation.interpolate({\r\n              inputRange: [0, 1],\r\n              outputRange: [0, -10],\r\n            })\r\n          }],\r\n          opacity: headerAnimation.interpolate({\r\n            inputRange: [0, 1],\r\n            outputRange: [1, 0.8],\r\n          })\r\n        }\r\n      ]}\r\n    >\r\n      {!isSearching ? (\r\n        <>\r\n          <Text style={themedStyles.headerText}>Axora</Text>\r\n          {selectedMessages.size === 0 && (\r\n            <TouchableOpacity \r\n              style={styles.menuButton}\r\n              onPress={() => setShowMenu(!showMenu)}\r\n              activeOpacity={0.7}\r\n            >\r\n              <Ionicons name="
+      ],
+      "app/components/MessageInput.tsx": [
+        ";\r\nimport React from ",
+        ";\r\n\r\ninterface MessageInputProps {\r\n  input: string;\r\n  setInput: (text: string) => void;\r\n  sendMessage: () => void;\r\n  isSending: boolean;\r\n  keyboardHeight: number;\r\n  themedStyles: any;\r\n  styles: any;\r\n}\r\n\r\nexport const MessageInput: React.FC<MessageInputProps> = ({\r\n  input,\r\n  setInput,\r\n  sendMessage,\r\n  isSending,\r\n  keyboardHeight,\r\n  themedStyles,\r\n  styles,\r\n}) => {\r\n  return (\r\n    <View style={themedStyles.inputContainer}>\r\n      <TextInput\r\n        style={themedStyles.input}\r\n        value={input}\r\n        onChangeText={setInput}\r\n        placeholder="
+      ],
+      "app/components/ReplyPreview.tsx": [
+        ";\r\nimport React from ",
+        ";\r\nimport { Message } from "
+      ],
+      "app/components/UIErrorBoundary.tsx": [
+        ";\r\nimport { SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from "
+      ],
+      "app/hooks/useBotProvider.ts": [
+        ";\r\nimport { useMessageStore } from "
+      ],
+      "app/hooks/useKeyboardHeight.ts": [
+        ";\r\nimport { Keyboard } from "
+      ],
+      "app/hooks/useMessageStore.ts": [
+        ";\r\n\r\n// Сохраняем существующую структуру сообщений\r\ninterface Message {\r\n  id: string;\r\n  text: string;\r\n  sender: "
+      ],
+      "app/hooks/useUIWatchDog.ts": [
+        ";\r\nimport { FlatList, Keyboard } from "
+      ],
+      "app/screens/ChatScreen.backup.tsx": [
+        ";\r\nimport {\r\n    Alert,\r\n    Animated,\r\n    FlatList,\r\n    SafeAreaView,\r\n    StyleSheet,\r\n    TouchableOpacity,\r\n    View\r\n} from ",
+        ";\r\nimport { Header } from ",
+        ";\r\nimport { ReplyPreview } from ",
+        ";\r\nimport { useKeyboardHeight } from ",
+        ";\r\nimport { triggerHaptic } from "
+      ],
+      "app/screens/ChatScreen.tsx": [
+        ";\r\nimport { Alert, StyleSheet } from ",
+        ";\r\nimport { UIErrorBoundary } from ",
+        ";\r\nimport { useBotProvider } from "
+      ],
+      "app/providers/FakeSocketProvider.tsx": [
+        ";\r\nimport { useMessageStore } from "
+      ],
+      "app/context/ChatLogicProvider.tsx": [
+        ";\r\n\r\n// Типы для логики чата\r\ninterface Message {\r\n  id: string;\r\n  text: string;\r\n  sender: "
+      ],
+      "app/utils/haptics.ts": [
+        ";\r\n\r\nexport const triggerHaptic = async (type: "
+      ]
+    },
+    "dependencies": {},
+    "issues": [
+      "📝 console.log найден в app/hooks/useBotProvider.ts",
+      "📝 console.log найден в app/hooks/useUIWatchDog.ts",
+      "📝 console.log найден в app/providers/FakeSocketProvider.tsx"
+    ],
+    "suggestions": [
+      "🧠 Рассмотреть использование useMemo"
+    ],
+    "performance": {},
+    "architecture": {
+      "stateManagement": "Zustand ✅",
+      "errorHandling": "ErrorBoundary ✅",
+      "monitoring": "WatchDog ✅",
+      "modularity": "Модульная ✅"
+    }
+  }
+}

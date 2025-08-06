@@ -1,0 +1,120 @@
+{
+  "timestamp": "2025-08-06T05:07:25.686Z",
+  "analysis": {
+    "issues": [],
+    "suggestions": [
+      {
+        "file": "app/components/ChatCore.tsx",
+        "message": "🧠 Рассмотреть useMemo для дорогих операций",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T05:07:25.669Z"
+      },
+      {
+        "file": "app/components/ChatCore.tsx",
+        "message": "🏗️ Рассмотреть разделение на более мелкие компоненты",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T05:07:25.671Z"
+      },
+      {
+        "file": "app/components/ChatCore.tsx",
+        "message": "🔒 Добавить валидацию пользовательского ввода",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T05:07:25.671Z"
+      },
+      {
+        "file": "app/components/ChatMessage.tsx",
+        "message": "🧠 Рассмотреть useMemo для дорогих операций",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T05:07:25.672Z"
+      },
+      {
+        "file": "app/components/Header.tsx",
+        "message": "🔒 Добавить валидацию пользовательского ввода",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T05:07:25.673Z"
+      },
+      {
+        "file": "app/components/MessageInput.tsx",
+        "message": "🔒 Добавить валидацию пользовательского ввода",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T05:07:25.673Z"
+      },
+      {
+        "file": "app/hooks/useBotProvider.ts",
+        "message": "🏗️ Рассмотреть разделение на более мелкие компоненты",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T05:07:25.675Z"
+      },
+      {
+        "file": "app/hooks/useKeyboardHeight.ts",
+        "message": "🛡️ Добавить обработку ошибок для критических операций",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T05:07:25.675Z"
+      },
+      {
+        "file": "app/hooks/useKeyboardHeight.ts",
+        "message": "🏗️ Рассмотреть разделение на более мелкие компоненты",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T05:07:25.675Z"
+      },
+      {
+        "file": "app/hooks/useMessageStore.ts",
+        "message": "🧠 Рассмотреть useMemo для дорогих операций",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T05:07:25.676Z"
+      },
+      {
+        "file": "app/hooks/useUIWatchDog.ts",
+        "message": "🚀 Добавить removeClippedSubviews для оптимизации памяти",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T05:07:25.676Z"
+      },
+      {
+        "file": "app/hooks/useUIWatchDog.ts",
+        "message": "🚀 Добавить maxToRenderPerBatch для контроля рендера",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T05:07:25.676Z"
+      },
+      {
+        "file": "app/hooks/useUIWatchDog.ts",
+        "message": "🚀 Добавить windowSize для оптимизации скролла",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T05:07:25.676Z"
+      },
+      {
+        "file": "app/hooks/useUIWatchDog.ts",
+        "message": "🛡️ Добавить обработку ошибок для критических операций",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T05:07:25.676Z"
+      },
+      {
+        "file": "app/hooks/useUIWatchDog.ts",
+        "message": "🏗️ Рассмотреть разделение на более мелкие компоненты",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T05:07:25.676Z"
+      },
+      {
+        "file": "app/screens/ChatScreen.backup.tsx",
+        "message": "🏗️ Рассмотреть разделение на более мелкие компоненты",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T05:07:25.676Z"
+      },
+      {
+        "file": "app/providers/FakeSocketProvider.tsx",
+        "message": "🔒 Убрать console.log для продакшена",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T05:07:25.677Z"
+      },
+      {
+        "file": "app/context/ChatLogicProvider.tsx",
+        "message": "🧠 Рассмотреть useMemo для дорогих операций",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T05:07:25.677Z"
+      }
+    ],
+    "architecture": {},
+    "performance": {},
+    "security": {},
+    "bestPractices": []
+  }
+}

@@ -1,0 +1,115 @@
+import React, { useCallback, useEffect, useRef } from 'react';
+import { Alert, StyleSheet } from 'react-native';
+import { ChatCore } from '../components/ChatCore';
+import { UIErrorBoundary } from '../components/UIErrorBoundary';
+import { ChatLogicProvider, useChatLogic } from '../context/ChatLogicProvider';
+import { useMessageStore } from '../hooks/useMessageStore';
+
+// Сообщения бота для тестирования
+const botMessages = [
+  "Привет! Я бот Axora 🤖",
+  "Как дела?",
+  "Ты ещё тут?",
+  "Нравится чат?",
+  "Скоро выйдет новая фича 😉",
+  "Отличная погода сегодня!",
+  "Что нового?",
+  "Как прошёл день?",
+];
+
+// Компонент для отображения дополнительных функций (может крашиться)
+const ChatFeatures: React.FC = () => {
+  const { state, addMessage, addReaction, deleteMessage } = useChatLogic();
+  const addBotMessage = useMessageStore((s) => s.addBotMessage);
+  const intervalRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Простая имитация FakeSocketProvider прямо здесь
+  useEffect(() => {
+    const sendBotMessage = () => {
+      try {
+        const randomMessage = botMessages[Math.floor(Math.random() * botMessages.length)];
+        addBotMessage(randomMessage);
+        console.log('🤖 Bot message sent:', randomMessage);
+      } catch (error) {
+        console.error('❌ Error sending bot message:', error);
+      }
+    };
+
+    const startInterval = () => {
+      const delay = Math.random() * 5000 + 5000; // 5-10 секунд
+      intervalRef.current = setTimeout(() => {
+        sendBotMessage();
+        startInterval();
+      }, delay);
+    };
+
+    startInterval();
+
+    return () => {
+      if (intervalRef.current) {
+        clearTimeout(intervalRef.current);
+      }
+    };
+  }, [addBotMessage]);
+
+  const handleSendMessage = useCallback((text: string) => {
+    try {
+      addMessage(text);
+    } catch (error) {
+      console.error('ChatFeatures: Error sending message', error);
+      Alert.alert('Ошибка', 'Не удалось отправить сообщение');
+    }
+  }, [addMessage]);
+
+  const handleError = useCallback((error: Error) => {
+    console.error('ChatFeatures: Error caught', error);
+    // Ошибки в логике не ломают UI
+  }, []);
+
+  return (
+    <ChatCore 
+      onSendMessage={handleSendMessage}
+      onError={handleError}
+    />
+  );
+};
+
+// Главный компонент с защитной архитектурой
+export const ChatScreen: React.FC = () => {
+  const handleLogicError = useCallback((error: Error) => {
+    console.error('ChatScreen: Logic error caught', error);
+    // Логируем ошибки логики, но UI продолжает работать
+  }, []);
+
+  const handleUIError = useCallback((error: Error, errorInfo: React.ErrorInfo) => {
+    console.error('ChatScreen: UI error caught', error, errorInfo);
+    // Критические ошибки UI логируются
+  }, []);
+
+  return (
+    <UIErrorBoundary onError={handleUIError}>
+      <ChatLogicProvider onError={handleLogicError}>
+        <ChatFeatures />
+      </ChatLogicProvider>
+    </UIErrorBoundary>
+  );
+};
+
+// Стили для fallback компонентов
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#181825',
+  },
+  fallbackContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  fallbackText: {
+    color: '#fff',
+    fontSize: 16,
+    textAlign: 'center',
+  },
+}); 

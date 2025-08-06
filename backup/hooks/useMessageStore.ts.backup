@@ -1,0 +1,77 @@
+import { create } from 'zustand';
+
+// Сохраняем существующую структуру сообщений
+interface Message {
+  id: string;
+  text: string;
+  sender: "me" | "other";
+  timestamp: number;
+  status?: "sending" | "sent" | "delivered" | "error";
+  reactions?: string[];
+  replyTo?: string;
+  editedAt?: number;
+  deletedAt?: number;
+}
+
+interface MessageStore {
+  messages: Message[];
+  addMessage: (text: string) => void;
+  updateMessage: (id: string, partial: Partial<Message>) => void;
+  removeMessage: (id: string) => void;
+  addReaction: (messageId: string, reaction: string) => void;
+  reset: () => void;
+}
+
+// Инициализируем с пустым массивом сообщений
+const initialMessages: Message[] = [];
+
+export const useMessageStore = create<MessageStore>((set, get) => ({
+  messages: initialMessages,
+  
+  addMessage: (text: string) => {
+    const newMessage: Message = {
+      id: Date.now().toString(),
+      text: text.trim(),
+      sender: "me",
+      timestamp: Date.now(),
+      status: "sent", // Сразу "sent" для простоты
+    };
+    
+    set((state) => ({
+      messages: [...state.messages, newMessage]
+    }));
+  },
+  
+  updateMessage: (id: string, partial: Partial<Message>) => {
+    set((state) => ({
+      messages: state.messages.map(msg => 
+        msg.id === id ? { ...msg, ...partial } : msg
+      )
+    }));
+  },
+  
+  removeMessage: (id: string) => {
+    set((state) => ({
+      messages: state.messages.filter(msg => msg.id !== id)
+    }));
+  },
+  
+  addReaction: (messageId: string, reaction: string) => {
+    set((state) => ({
+      messages: state.messages.map(msg => {
+        if (msg.id === messageId) {
+          const reactions = msg.reactions || [];
+          const newReactions = reactions.includes(reaction) 
+            ? reactions.filter(r => r !== reaction)
+            : [...reactions, reaction];
+          return { ...msg, reactions: newReactions };
+        }
+        return msg;
+      })
+    }));
+  },
+  
+  reset: () => {
+    set({ messages: initialMessages });
+  },
+})); 

@@ -1,7 +1,7 @@
 import { useFonts } from "expo-font";
-import { Stack } from "expo-router";
+import { Stack } from 'expo-router';
 
-export default function RootLayout() {
+export default function Layout() {
   const [fontsLoaded] = useFonts({
     "SpaceMono": require("../assets/fonts/SpaceMono-Regular.ttf"),
     "Poppins-Regular": require("../assets/fonts/Poppins-Regular.ttf"),
@@ -12,5 +12,11 @@ export default function RootLayout() {
     return null;
   }
 
-  return <Stack screenOptions={{ headerShown: false }} />;
+  return (
+    <Stack
+      screenOptions={{
+        headerShown: false,
+      }}
+    />
+  );
 }

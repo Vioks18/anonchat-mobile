@@ -1,0 +1,114 @@
+{
+  "timestamp": "2025-08-06T06:21:30.281Z",
+  "analysis": {
+    "issues": [],
+    "suggestions": [
+      {
+        "file": "app/components/ChatCore.tsx",
+        "message": "🏗️ Рассмотреть разделение на более мелкие компоненты",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T06:21:30.267Z"
+      },
+      {
+        "file": "app/components/ChatCore.tsx",
+        "message": "🔒 Убрать console.log для продакшена",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T06:21:30.269Z"
+      },
+      {
+        "file": "app/components/ChatCore.tsx",
+        "message": "🔒 Добавить валидацию пользовательского ввода",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T06:21:30.269Z"
+      },
+      {
+        "file": "app/components/ChatInput.tsx",
+        "message": "🔒 Добавить валидацию пользовательского ввода",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T06:21:30.269Z"
+      },
+      {
+        "file": "app/components/Header.tsx",
+        "message": "🔒 Добавить валидацию пользовательского ввода",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T06:21:30.270Z"
+      },
+      {
+        "file": "app/components/MessageInput.tsx",
+        "message": "🔒 Добавить валидацию пользовательского ввода",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T06:21:30.270Z"
+      },
+      {
+        "file": "app/components/ThemeSelector.tsx",
+        "message": "🔒 Убрать console.log для продакшена",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T06:21:30.271Z"
+      },
+      {
+        "file": "app/hooks/useBotProvider.ts",
+        "message": "🏗️ Рассмотреть разделение на более мелкие компоненты",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T06:21:30.272Z"
+      },
+      {
+        "file": "app/hooks/useBotProvider.ts",
+        "message": "🔒 Убрать console.log для продакшена",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T06:21:30.272Z"
+      },
+      {
+        "file": "app/hooks/useKeyboardHeight.ts",
+        "message": "🏗️ Рассмотреть разделение на более мелкие компоненты",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T06:21:30.272Z"
+      },
+      {
+        "file": "app/hooks/useKeyboardHeight.ts",
+        "message": "🔒 Убрать console.log для продакшена",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T06:21:30.273Z"
+      },
+      {
+        "file": "app/hooks/useMessageStore.ts",
+        "message": "🧠 Рассмотреть useMemo для дорогих операций",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T06:21:30.273Z"
+      },
+      {
+        "file": "app/hooks/useMessageStore.ts",
+        "message": "🔒 Убрать console.log для продакшена",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T06:21:30.273Z"
+      },
+      {
+        "file": "app/hooks/useUIWatchDog.ts",
+        "message": "🏗️ Рассмотреть разделение на более мелкие компоненты",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T06:21:30.274Z"
+      },
+      {
+        "file": "app/hooks/useUIWatchDog.ts",
+        "message": "🔒 Убрать console.log для продакшена",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T06:21:30.274Z"
+      },
+      {
+        "file": "app/screens/ChatScreen.backup.tsx",
+        "message": "🏗️ Рассмотреть разделение на более мелкие компоненты",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T06:21:30.275Z"
+      },
+      {
+        "file": "app/providers/FakeSocketProvider.tsx",
+        "message": "🔒 Убрать console.log для продакшена",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T06:21:30.276Z"
+      }
+    ],
+    "architecture": {},
+    "performance": {},
+    "security": {},
+    "bestPractices": []
+  }
+}

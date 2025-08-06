@@ -1,0 +1,102 @@
+{
+  "timestamp": "2025-08-06T05:26:31.674Z",
+  "analysis": {
+    "issues": [],
+    "suggestions": [
+      {
+        "file": "app/components/ChatCore.tsx",
+        "message": "🏗️ Рассмотреть разделение на более мелкие компоненты",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T05:26:31.657Z"
+      },
+      {
+        "file": "app/components/ChatCore.tsx",
+        "message": "🔒 Добавить валидацию пользовательского ввода",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T05:26:31.659Z"
+      },
+      {
+        "file": "app/components/ChatInput.tsx",
+        "message": "🔒 Добавить валидацию пользовательского ввода",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T05:26:31.659Z"
+      },
+      {
+        "file": "app/components/ChatMessage.tsx",
+        "message": "🧠 Рассмотреть useMemo для дорогих операций",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T05:26:31.660Z"
+      },
+      {
+        "file": "app/components/Header.tsx",
+        "message": "🔒 Добавить валидацию пользовательского ввода",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T05:26:31.661Z"
+      },
+      {
+        "file": "app/components/MessageInput.tsx",
+        "message": "🔒 Добавить валидацию пользовательского ввода",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T05:26:31.661Z"
+      },
+      {
+        "file": "app/components/ThemeSelector.tsx",
+        "message": "🧠 Рассмотреть useMemo для дорогих операций",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T05:26:31.661Z"
+      },
+      {
+        "file": "app/hooks/useBotProvider.ts",
+        "message": "🏗️ Рассмотреть разделение на более мелкие компоненты",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T05:26:31.662Z"
+      },
+      {
+        "file": "app/hooks/useKeyboardHeight.ts",
+        "message": "🛡️ Добавить обработку ошибок для критических операций",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T05:26:31.662Z"
+      },
+      {
+        "file": "app/hooks/useKeyboardHeight.ts",
+        "message": "🏗️ Рассмотреть разделение на более мелкие компоненты",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T05:26:31.662Z"
+      },
+      {
+        "file": "app/hooks/useMessageStore.ts",
+        "message": "🧠 Рассмотреть useMemo для дорогих операций",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T05:26:31.662Z"
+      },
+      {
+        "file": "app/hooks/useUIWatchDog.ts",
+        "message": "🛡️ Добавить обработку ошибок для критических операций",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T05:26:31.662Z"
+      },
+      {
+        "file": "app/hooks/useUIWatchDog.ts",
+        "message": "🏗️ Рассмотреть разделение на более мелкие компоненты",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T05:26:31.662Z"
+      },
+      {
+        "file": "app/screens/ChatScreen.backup.tsx",
+        "message": "🏗️ Рассмотреть разделение на более мелкие компоненты",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T05:26:31.663Z"
+      },
+      {
+        "file": "app/context/ChatLogicProvider.tsx",
+        "message": "🧠 Рассмотреть useMemo для дорогих операций",
+        "type": "suggestion",
+        "timestamp": "2025-08-06T05:26:31.664Z"
+      }
+    ],
+    "architecture": {},
+    "performance": {},
+    "security": {},
+    "bestPractices": []
+  }
+}
