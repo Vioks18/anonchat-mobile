@@ -43,6 +43,7 @@ export const useBotProvider = () => {
   const sendBotMessage = () => {
     try {
       if (!botMessages || botMessages.length === 0) {
+
         if (__DEV__) console.warn('useBotProvider: Нет доступных сообщений бота');
         return;
       }
@@ -75,7 +76,7 @@ export const useBotProvider = () => {
         }
       }, 5000 + Math.random() * 10000); // 5-15 секунд
       
-if (__DEV__) // console.log('useBotProvider: Интервал запущен');
+      if (__DEV__) { /* console.log('useBotProvider: Интервал запущен'); */ }
     } catch (error) {
       console.error('useBotProvider: Ошибка запуска интервала', error);
     }
@@ -87,7 +88,7 @@ if (__DEV__) // console.log('useBotProvider: Интервал запущен');
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
-if (__DEV__) // console.log('useBotProvider: Интервал остановлен');
+        if (__DEV__) { /* console.log('useBotProvider: Интервал остановлен'); */ }
       }
     } catch (error) {
       console.error('useBotProvider: Ошибка остановки интервала', error);

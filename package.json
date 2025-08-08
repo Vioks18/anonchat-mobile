@@ -23,7 +23,8 @@
     "web": "expo start --web",
     "lint": "expo lint",
     "qa": "node scripts/qa/scan.js",
-    "qa:fix": "node scripts/qa/scan.js --autofix"
+    "qa:fix": "node scripts/qa/scan.js --autofix",
+    "qa:oneclick": "powershell -ExecutionPolicy Bypass -File scripts/qa/quick-fix.ps1"
   },
   "dependencies": {
     "@expo/vector-icons": "^14.1.0",

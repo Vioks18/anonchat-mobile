@@ -93,7 +93,7 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
         }, 500);
       }, 1000);
       
-if (__DEV__) // console.log('useMessageStore: Сообщение добавлено', text);
+      if (__DEV__) { /* console.log('useMessageStore: Сообщение добавлено', text); */ }
     } catch (error) {
       console.error('useMessageStore: Ошибка добавления сообщения', error);
     }
@@ -119,7 +119,7 @@ if (__DEV__) console.warn('addBotMessage: Невалидный текст соо
         messages: [...state.messages, newMessage]
       }));
       
-if (__DEV__) // console.log('addBotMessage: Сообщение бота добавлено', newMessage.id);
+      if (__DEV__) { /* console.log('addBotMessage: Сообщение бота добавлено', newMessage.id); */ }
     } catch (error) {
       console.error('addBotMessage: Ошибка добавления сообщения бота', error);
     }
@@ -138,7 +138,7 @@ if (__DEV__) console.warn('updateMessage: Невалидный ID сообщен
         )
       }));
       
-if (__DEV__) // console.log('updateMessage: Сообщение обновлено', id);
+      if (__DEV__) { /* console.log('updateMessage: Сообщение обновлено', id); */ }
     } catch (error) {
       console.error('updateMessage: Ошибка обновления сообщения', error);
     }
@@ -155,7 +155,7 @@ if (__DEV__) console.warn('removeMessage: Невалидный ID сообщен
         messages: state.messages.filter(msg => msg.id !== id)
       }));
       
-if (__DEV__) // console.log('removeMessage: Сообщение удалено', id);
+      if (__DEV__) { /* console.log('removeMessage: Сообщение удалено', id); */ }
     } catch (error) {
       console.error('removeMessage: Ошибка удаления сообщения', error);
     }
@@ -224,7 +224,7 @@ if (__DEV__) console.warn('removeReaction: Невалидная реакция')
         })
       }));
       
-if (__DEV__) // console.log('removeReaction: Реакция удалена', messageId, reaction);
+      if (__DEV__) { /* console.log('removeReaction: Реакция удалена', messageId, reaction); */ }
     } catch (error) {
       console.error('removeReaction: Ошибка удаления реакции', error);
     }
