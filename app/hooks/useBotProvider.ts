@@ -43,7 +43,7 @@ export const useBotProvider = () => {
   const sendBotMessage = () => {
     try {
       if (!botMessages || botMessages.length === 0) {
-        console.warn('useBotProvider: Нет доступных сообщений бота');
+        if (__DEV__) console.warn('useBotProvider: Нет доступных сообщений бота');
         return;
       }
 
@@ -51,12 +51,12 @@ export const useBotProvider = () => {
       const randomMessage = botMessages[randomIndex];
       
       if (!randomMessage || typeof randomMessage !== 'string') {
-        console.warn('useBotProvider: Невалидное сообщение бота', randomMessage);
+        if (__DEV__) console.warn('useBotProvider: Невалидное сообщение бота', randomMessage);
         return;
       }
 
       addBotMessage(randomMessage);
-      console.warn('🤖 Bot message sent:', randomMessage);
+      if (__DEV__) console.warn('🤖 Bot message sent:', randomMessage);
     } catch (error) {
       console.error('❌ Error sending bot message:', error);
     }
@@ -75,7 +75,7 @@ export const useBotProvider = () => {
         }
       }, 5000 + Math.random() * 10000); // 5-15 секунд
       
-      // console.log('useBotProvider: Интервал запущен');
+if (__DEV__) // console.log('useBotProvider: Интервал запущен');
     } catch (error) {
       console.error('useBotProvider: Ошибка запуска интервала', error);
     }
@@ -87,7 +87,7 @@ export const useBotProvider = () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
-        // console.log('useBotProvider: Интервал остановлен');
+if (__DEV__) // console.log('useBotProvider: Интервал остановлен');
       }
     } catch (error) {
       console.error('useBotProvider: Ошибка остановки интервала', error);
@@ -101,10 +101,10 @@ export const useBotProvider = () => {
       safeSetIsBotEnabled(newState);
       
       if (newState) {
-        console.warn('🤖 Bot enabled');
+        if (__DEV__) console.warn('🤖 Bot enabled');
         startInterval();
       } else {
-        console.warn('🤖 Bot disabled');
+        if (__DEV__) console.warn('🤖 Bot disabled');
         stopInterval();
       }
     } catch (error) {

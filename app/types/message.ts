@@ -9,4 +9,5 @@ export interface Message {
 }
 
 // Default export для Expo Router
-export default Message; 
+const MessageComponent = () => null;
+export default MessageComponent; 

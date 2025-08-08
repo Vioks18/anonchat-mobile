@@ -1,0 +1,86 @@
+{
+  "rules": [
+    {
+      "id": "reactionbar.anchor_guard",
+      "severity": "P0",
+      "type": "mustInclude",
+      "files": ["app/components/reactions/ReactionBar.tsx"],
+      "includes": ["if (!visible || !anchor) return null;"]
+    },
+    {
+      "id": "store.status_read",
+      "severity": "P0",
+      "type": "custom",
+      "files": ["app/hooks/useMessageStore.ts"],
+      "description": "VALID_STATUSES should include 'read'"
+    },
+    {
+      "id": "perf.dev_logs",
+      "severity": "P0",
+      "type": "custom",
+      "files": [
+        "app/hooks/useUIWatchDog.ts",
+        "app/hooks/useMessageStore.ts",
+        "app/hooks/useBotProvider.ts"
+      ],
+      "description": "console.* must be wrapped in if (__DEV__)"
+    },
+    {
+      "id": "chatlist.scroll_close",
+      "severity": "P1",
+      "type": "mustInclude",
+      "files": ["app/components/ChatListWithReactions.tsx"],
+      "includes": ["onScrollBeginDrag={handleScrollBeginDrag}", "close()"]
+    },
+    {
+      "id": "reactionstate.keyboard_close",
+      "severity": "P1",
+      "type": "custom",
+      "files": ["app/hooks/useReactionState.ts"],
+      "description": "Keyboard listeners should close()"
+    },
+    {
+      "id": "perf.memo_bubble",
+      "severity": "P1",
+      "type": "custom",
+      "files": [
+        "app/components/MessageWithReactions.tsx",
+        "app/components/ChatMessage.tsx"
+      ],
+      "description": "Message component wrapped in React.memo"
+    },
+    {
+      "id": "perf.stable_handlers",
+      "severity": "P1",
+      "type": "custom",
+      "files": [
+        "app/components/ChatListWithReactions.tsx",
+        "app/hooks/useReactions.ts"
+      ],
+      "description": "Handlers via useCallback"
+    },
+    {
+      "id": "reactionbar.clamp_flip_safe",
+      "severity": "P2",
+      "type": "custom",
+      "files": ["app/components/reactions/ReactionBar.tsx"],
+      "description": "useSafeAreaInsets + clamp X + flip down"
+    },
+    {
+      "id": "chatlist.doubletap_window",
+      "severity": "P2",
+      "type": "custom",
+      "files": ["app/components/ChatListWithReactions.tsx"],
+      "description": "Double-tap window 220–300ms"
+    },
+    {
+      "id": "deps.unused",
+      "severity": "P2",
+      "type": "custom",
+      "files": ["package.json"],
+      "description": "List unused deps"
+    }
+  ]
+}
+
+

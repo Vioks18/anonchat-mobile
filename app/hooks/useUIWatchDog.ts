@@ -55,7 +55,7 @@ export const useUIWatchDog = ({
   const checkScrollToEnd = useCallback(() => {
     try {
       if (!flatListRef.current) {
-        console.warn('useUIWatchDog: flatListRef.current отсутствует');
+        if (__DEV__) console.warn('useUIWatchDog: flatListRef.current отсутствует');
         return;
       }
 
@@ -74,7 +74,7 @@ export const useUIWatchDog = ({
           const duration = endTime - startTime;
           
           if (duration > 100) {
-            console.warn(`📡 scrollToEnd не сработал через ${duration}ms`);
+            if (__DEV__) console.warn(`📡 scrollToEnd не сработал через ${duration}ms`);
             safeSetStatus(prev => ({ ...prev, scrollToEndWorking: false }));
           } else {
             safeSetStatus(prev => ({ ...prev, scrollToEndWorking: true }));
@@ -91,7 +91,7 @@ export const useUIWatchDog = ({
   // Проверка клавиатуры
   const checkKeyboard = useCallback(() => {
     try {
-      // console.log('useUIWatchDog: Проверка клавиатуры', keyboardHeight);
+if (__DEV__) // console.log('useUIWatchDog: Проверка клавиатуры', keyboardHeight);
     } catch (error) {
       console.error('useUIWatchDog: Ошибка проверки клавиатуры', error);
     }
@@ -103,8 +103,8 @@ export const useUIWatchDog = ({
       const now = Date.now();
       // Логируем только если количество изменилось или прошло больше 5 секунд
       if (messageCount !== lastMessageCountRef.current || (now - lastLogTimeRef.current > 5000)) {
-        if (messageCount === 0) {
-          console.warn(`🔍 Пустой FlatList (сообщений: ${messageCount})`);
+        if (__DEV__ && messageCount === 0) {
+if (__DEV__) console.warn(`🔍 Пустой FlatList (сообщений: ${messageCount})`);
         }
         lastMessageCountRef.current = messageCount;
         lastLogTimeRef.current = now;
@@ -118,7 +118,7 @@ export const useUIWatchDog = ({
   const checkScrollStuck = useCallback(() => {
     try {
       if (lastScrollYRef.current === status.lastScrollY && messageCount > 0) {
-        console.warn(`💤 scrollY не изменился после добавления сообщения`);
+        if (__DEV__) console.warn(`💤 scrollY не изменился после добавления сообщения`);
         safeSetStatus(prev => ({ ...prev, scrollStuck: true }));
       } else {
         safeSetStatus(prev => ({ ...prev, scrollStuck: false }));
@@ -166,10 +166,10 @@ export const useUIWatchDog = ({
           keyboardShowTimeRef.current = Date.now();
           // Вызываем checkKeyboard напрямую без зависимости
           if (keyboardHeight > 0 && !inputFocused) {
-            console.warn(`⚠️ TextInput не был в фокусе при keyboardDidShow (высота: ${keyboardHeight})`);
+            if (__DEV__) console.warn(`⚠️ TextInput не был в фокусе при keyboardDidShow (высота: ${keyboardHeight})`);
             setStatus(prev => ({ ...prev, keyboardIssue: true }));
           } else if (keyboardHeight === 0 && keyboardShowTimeRef.current > 0) {
-            console.warn(`🔇 клавиатура открыта, но высота = 0`);
+            if (__DEV__) console.warn(`🔇 клавиатура открыта, но высота = 0`);
             setStatus(prev => ({ ...prev, keyboardIssue: true }));
           } else {
             setStatus(prev => ({ ...prev, keyboardIssue: false }));
@@ -188,7 +188,7 @@ export const useUIWatchDog = ({
         }
       });
 
-      // console.log('useUIWatchDog: Слушатели клавиатуры добавлены');
+if (__DEV__) // console.log('useUIWatchDog: Слушатели клавиатуры добавлены');
     } catch (error) {
       console.error('useUIWatchDog: Ошибка добавления слушателей клавиатуры', error);
     }
@@ -197,7 +197,7 @@ export const useUIWatchDog = ({
       try {
         keyboardDidShowListener?.remove();
         keyboardDidHideListener?.remove();
-        // console.log('useUIWatchDog: Слушатели клавиатуры удалены');
+if (__DEV__) // console.log('useUIWatchDog: Слушатели клавиатуры удалены');
       } catch (error) {
         console.error('useUIWatchDog: Ошибка удаления слушателей клавиатуры', error);
       }
@@ -210,15 +210,15 @@ export const useUIWatchDog = ({
       // Вызываем функции напрямую без зависимостей
       const now = Date.now();
       if (messageCount !== lastMessageCountRef.current || (now - lastLogTimeRef.current > 5000)) {
-        if (messageCount === 0) {
-          console.warn(`🔍 Пустой FlatList (сообщений: ${messageCount})`);
+        if (__DEV__ && messageCount === 0) {
+if (__DEV__) console.warn(`🔍 Пустой FlatList (сообщений: ${messageCount})`);
         }
         lastMessageCountRef.current = messageCount;
         lastLogTimeRef.current = now;
       }
 
       if (lastScrollYRef.current === status.lastScrollY && messageCount > 0) {
-        console.warn(`💤 scrollY не изменился после добавления сообщения`);
+        if (__DEV__) console.warn(`💤 scrollY не изменился после добавления сообщения`);
         setStatus(prev => ({ ...prev, scrollStuck: true }));
       } else {
         setStatus(prev => ({ ...prev, scrollStuck: false }));
@@ -227,7 +227,7 @@ export const useUIWatchDog = ({
       // Проверяем scrollToEnd при добавлении сообщения
       if (messageCount > 0) {
         // Простая проверка без сложной логики
-        // console.log('useUIWatchDog: Проверка scrollToEnd');
+if (__DEV__) // console.log('useUIWatchDog: Проверка scrollToEnd');
       }
     } catch (error) {
       console.error('useUIWatchDog: Ошибка проверки сообщений', error);
@@ -240,7 +240,7 @@ export const useUIWatchDog = ({
       if (typeof scrollY === 'number' && scrollY >= 0) {
         lastScrollYRef.current = scrollY;
       } else {
-        console.warn('useUIWatchDog: Невалидная позиция скролла', scrollY);
+if (__DEV__) console.warn('useUIWatchDog: Невалидная позиция скролла', scrollY);
       }
     } catch (error) {
       console.error('useUIWatchDog: Ошибка обновления позиции скролла', error);
@@ -250,7 +250,7 @@ export const useUIWatchDog = ({
   // Функция для принудительной проверки
   const forceCheck = useCallback(() => {
     try {
-      console.warn('🔍 WatchDog: Принудительная проверка UI');
+      if (__DEV__) console.warn('🔍 WatchDog: Принудительная проверка UI');
       checkScrollToEnd();
       checkKeyboard();
       checkMessageCount();

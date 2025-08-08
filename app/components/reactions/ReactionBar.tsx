@@ -1,154 +1,164 @@
-import React, { useEffect, useRef } from 'react';
-import {
-  Animated,
-  Dimensions,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import React from 'react';
+import { Animated, Dimensions, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { THEMES } from '../../constants/themes';
+import { useMessageStore } from '../../hooks/useMessageStore';
 import { ReactionAnchor } from '../../hooks/useReactionState';
-import { Message } from '../../types/message';
 import ActionsBar from './ActionsBar';
-import { EmojiType, ReactionBarProps } from './types';
+import { EmojiType } from './types';
 
-const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+const AVAILABLE_REACTIONS: { key: EmojiType; icon: keyof typeof Ionicons.glyphMap }[] = [
+  { key: '👍', icon: 'thumbs-up-outline' },
+  { key: '❤️', icon: 'heart-outline' },
+  { key: '😂', icon: 'happy-outline' },
+  { key: '😮', icon: 'alert-circle-outline' },
+  { key: '😢', icon: 'sad-outline' },
+  { key: '😡', icon: 'flame-outline' },
+];
 
-const AVAILABLE_REACTIONS: EmojiType[] = ['👍', '❤️', '😂', '😮', '😢', '😡'];
-
-interface ReactionBarPropsWithTheme extends ReactionBarProps {
-  currentThemeData?: any;
-  visible?: boolean;
-  anchor?: ReactionAnchor | null;
-  getActions?: (message: Message) => any[];
-  message?: Message;
+interface ReactionBarProps {
+  visible: boolean;
+  anchor: ReactionAnchor | null;
+  onClose: () => void;
+  selectedMessageId?: string | null;
+  getActions?: (message: any) => any[]; // подготовка под меню
 }
 
-const ReactionBar: React.FC<ReactionBarPropsWithTheme> = ({
+const ReactionBar: React.FC<ReactionBarProps> = ({
   visible,
   anchor,
   onClose,
-  onReactionSelect,
-  currentThemeData,
-  getActions,
-  message,
+  selectedMessageId,
+  getActions
 }) => {
   const insets = useSafeAreaInsets();
-  const scaleAnim = useRef(new Animated.Value(0)).current;
-  const opacityAnim = useRef(new Animated.Value(0)).current;
+  const currentTheme = useMessageStore((s: any) => s.currentTheme || 'dark') as keyof typeof THEMES;
+  const addReaction = useMessageStore((s: any) => s.addReaction);
+  const getMessageById = useMessageStore((s: any) => s.getMessageById);
+  const [measuredWidth, setMeasuredWidth] = React.useState<number | null>(null);
 
-  useEffect(() => {
+  const scaleAnim = React.useRef(new Animated.Value(0.9)).current;
+  const opacityAnim = React.useRef(new Animated.Value(0)).current;
+
+  React.useEffect(() => {
     if (visible) {
-      // Анимация появления - быстрая и плавная
-      Animated.parallel([
+      // Сначала opacity, потом scale для красивого появления
+      Animated.sequence([
+        Animated.timing(opacityAnim, {
+          toValue: 1,
+          duration: 100,
+          useNativeDriver: true,
+        }),
         Animated.spring(scaleAnim, {
           toValue: 1,
           useNativeDriver: true,
           tension: 120,
-          friction: 8,
-        }),
-        Animated.timing(opacityAnim, {
-          toValue: 1,
-          duration: 150,
-          useNativeDriver: true,
+          friction: 7,
         }),
       ]).start();
     } else {
-      // Анимация исчезновения
       Animated.parallel([
         Animated.spring(scaleAnim, {
-          toValue: 0,
+          toValue: 0.8,
           useNativeDriver: true,
-          tension: 120,
+          tension: 100,
           friction: 8,
         }),
         Animated.timing(opacityAnim, {
           toValue: 0,
-          duration: 100,
+          duration: 80,
           useNativeDriver: true,
         }),
       ]).start();
     }
   }, [visible, scaleAnim, opacityAnim]);
 
-  // Если не видима или нет anchor - не рендерим
-  if (!visible || !anchor) {
-    return null;
-  }
-
-  // Позиционирование панели по anchor
-  const calculatePosition = () => {
-    const barWidth = AVAILABLE_REACTIONS.length * 44 + 16; // Точная ширина
-    const barHeight = 56;
-    
-    // Центрируем панель над сообщением
-    let x = anchor.x + anchor.w / 2 - barWidth / 2;
-    let y = anchor.y - barHeight - 8; // Над сообщением с отступом
-
-    // Проверяем края экрана
-    if (x < 12) x = 12;
-    if (x + barWidth > screenWidth - 12) x = screenWidth - barWidth - 12;
-    
-    // Если не помещается сверху, показываем снизу
-    if (y < insets.top + 8) {
-      y = anchor.y + anchor.h + 8;
-    }
-
-    // Проверяем нижний край
-    if (y + barHeight > screenHeight - insets.bottom - 12) {
-      y = screenHeight - insets.bottom - barHeight - 12;
-    }
-
-    return { x, y };
-  };
-
-  const { x, y } = calculatePosition();
-
   const handleReactionPress = (emoji: EmojiType) => {
-    onReactionSelect(emoji);
+    if (selectedMessageId) {
+      addReaction(selectedMessageId, emoji);
+      console.log('Реакция добавлена:', emoji, 'для сообщения:', selectedMessageId);
+    }
     onClose();
   };
 
+  const calculatePosition = () => {
+    if (!anchor) return { x: 0, y: 0 };
+    
+    const screenWidth = Dimensions.get('window').width;
+    const fallbackWidth = AVAILABLE_REACTIONS.length * 44 + 16;
+    const barWidth = measuredWidth || fallbackWidth;
+    const barHeight = 56;
+    
+    let x = anchor.x + anchor.w / 2 - barWidth / 2;
+    const margin = 12;
+    let yTop = anchor.y - barHeight - 60;
+    let yBottom = anchor.y + anchor.h + margin;
+    let y = yTop;
+    
+    // Зажимаем в пределах экрана
+    if (x < 12) x = 12;
+    if (x + barWidth > screenWidth - 12) x = screenWidth - barWidth - 12;
+    
+    // Флип вниз при нехватке места сверху
+    if (yTop < insets.top + 24) {
+      y = yBottom;
+    }
+    
+    return { x, y };
+  };
+
+  if (!visible || !anchor) return null;
+
+  const position = calculatePosition();
+
+  const message = selectedMessageId ? getMessageById?.(selectedMessageId) : undefined;
+  const actions = getActions ? getActions(message) : null;
+
   return (
     <Animated.View
+      pointerEvents="box-none"
       style={[
         styles.container,
         {
-          left: x,
-          top: y,
           transform: [{ scale: scaleAnim }],
           opacity: opacityAnim,
-          backgroundColor: currentThemeData?.inputBg 
-            ? `${currentThemeData.inputBg}CC`
-            : 'rgba(35, 35, 60, 0.95)',
-          borderColor: currentThemeData?.border || 'rgba(255, 255, 255, 0.12)',
+          left: position.x,
+          top: position.y,
         },
       ]}
-      pointerEvents="auto"
     >
-      {/* Первая строка - реакции */}
-      <View style={styles.reactionsContainer}>
-        {AVAILABLE_REACTIONS.map((emoji) => (
+      <View
+        pointerEvents="auto"
+        style={[
+          styles.reactionBar,
+          {
+            backgroundColor: THEMES[currentTheme].inputBg + 'CC',
+            shadowColor: THEMES[currentTheme].accent,
+            shadowOffset: { width: 0, height: 4 },
+            shadowRadius: 8,
+            elevation: 8,
+          },
+        ]}
+        onLayout={(e) => {
+          const w = e.nativeEvent.layout.width;
+          if (w && w > 0) setMeasuredWidth(w);
+        }}
+      >
+        {AVAILABLE_REACTIONS.map(({ key, icon }) => (
           <TouchableOpacity
-            key={emoji}
+            key={key}
             style={styles.reactionButton}
-            onPress={() => handleReactionPress(emoji)}
+            onPress={() => handleReactionPress(key)}
             activeOpacity={0.7}
           >
-            <Text style={styles.reactionEmoji}>{emoji}</Text>
+            <Ionicons name={icon} size={24} color={THEMES[currentTheme].text} />
           </TouchableOpacity>
         ))}
       </View>
 
-      {/* Вторая строка - ActionsBar (пока скрыта) */}
-      {message && getActions && (
-        <ActionsBar
-          message={message}
-          getActions={getActions}
-          currentThemeData={currentThemeData}
-          visible={false} // Пока скрыта
-        />
+      {Array.isArray(actions) && actions.length > 0 && (
+        <ActionsBar actions={actions} themedStyles={THEMES[currentTheme]} />
       )}
     </Animated.View>
   );
@@ -157,33 +167,29 @@ const ReactionBar: React.FC<ReactionBarPropsWithTheme> = ({
 const styles = StyleSheet.create({
   container: {
     position: 'absolute',
-    borderRadius: 12,
-    borderWidth: 1,
-    padding: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 4,
     zIndex: 1000,
   },
-  reactionsContainer: {
+  reactionBar: {
     flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-around',
-    minHeight: 48,
+    borderRadius: 28,
+    paddingHorizontal: 8,
+    paddingVertical: 8,
   },
   reactionButton: {
     width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    height: 40,
     justifyContent: 'center',
     alignItems: 'center',
-    marginHorizontal: 2,
+    borderRadius: 20,
   },
   reactionEmoji: {
-    fontSize: 20,
+    fontSize: 24,
+  },
+  actionsBarPlaceholder: {
+    height: 48,
+    marginTop: 8,
+    borderRadius: 24,
+    backgroundColor: 'transparent',
   },
 });
 

@@ -12,7 +12,7 @@ export const useSelectedMessageAnimation = (isSelected: boolean) => {
         Animated.timing(scaleAnim, {
           toValue: 1.03,
           duration: 120,
-          useNativeDriver: true,
+          useNativeDriver: false,
         }),
         Animated.timing(shadowAnim, {
           toValue: 1,
@@ -26,7 +26,7 @@ export const useSelectedMessageAnimation = (isSelected: boolean) => {
         Animated.timing(scaleAnim, {
           toValue: 1,
           duration: 120,
-          useNativeDriver: true,
+          useNativeDriver: false,
         }),
         Animated.timing(shadowAnim, {
           toValue: 0,
@@ -48,3 +48,7 @@ export const useSelectedMessageAnimation = (isSelected: boolean) => {
     animateSelection,
   };
 };
+
+// Default export для Expo Router
+const UseSelectedMessageAnimationComponent = () => null;
+export default UseSelectedMessageAnimationComponent;

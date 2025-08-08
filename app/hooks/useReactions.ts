@@ -21,7 +21,7 @@ export const useReactions = (messageId: string) => {
       
       reactionCounts.set(emoji, {
         count: current.count + 1,
-        reactedByMe: current.reactedByMe || reaction === 'me' // Упрощенная логика для MVP
+        reactedByMe: true // Пока что упрощаем - считаем что пользователь реагировал
       });
     });
 
@@ -35,6 +35,17 @@ export const useReactions = (messageId: string) => {
   // Проверяем, есть ли у пользователя реакции на это сообщение
   const hasUserReactions = useMemo(() => {
     return summary.some(reaction => reaction.reactedByMe);
+  }, [summary]);
+
+  // Стабильный хэш реакций для мемоизации элементов списка
+  const reactionsHash = useMemo(() => {
+    if (summary.length === 0) return '0';
+    // Простой и стабильный: emoji:count, отсортированный
+    const parts = summary
+      .slice()
+      .sort((a, b) => a.emoji.localeCompare(b.emoji))
+      .map((r) => `${r.emoji}:${r.count}:${r.reactedByMe ? 1 : 0}`);
+    return parts.join('|');
   }, [summary]);
 
   // Обработчик переключения реакции
@@ -52,6 +63,11 @@ export const useReactions = (messageId: string) => {
     summary,
     hasUserReactions,
     onToggleReaction,
-    totalReactions: summary.reduce((sum, r) => sum + r.count, 0)
+    totalReactions: summary.reduce((sum, r) => sum + r.count, 0),
+    reactionsHash,
   };
 };
+
+// Default export для Expo Router
+const UseReactionsComponent = () => null;
+export default UseReactionsComponent;

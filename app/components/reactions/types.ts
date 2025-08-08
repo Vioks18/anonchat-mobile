@@ -32,3 +32,7 @@ export interface MessageReactionsProps {
   themedStyles: any;
   isMyMessage?: boolean;
 }
+
+// Default export для Expo Router
+const TypesComponent = () => null;
+export default TypesComponent;

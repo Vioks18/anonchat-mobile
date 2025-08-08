@@ -93,7 +93,7 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
         }, 500);
       }, 1000);
       
-if (__DEV__) // console.log('useMessageStore: Сообщение добавлено', text);
+      // console.log('useMessageStore: Сообщение добавлено', text);
     } catch (error) {
       console.error('useMessageStore: Ошибка добавления сообщения', error);
     }
@@ -102,7 +102,7 @@ if (__DEV__) // console.log('useMessageStore: Сообщение добавле�
   addBotMessage: (text: string) => {
     try {
       if (!validateMessage(text)) {
-if (__DEV__) console.warn('addBotMessage: Невалидный текст сообщения');
+        console.warn('addBotMessage: Невалидный текст сообщения');
         return;
       }
 
@@ -119,7 +119,7 @@ if (__DEV__) console.warn('addBotMessage: Невалидный текст соо
         messages: [...state.messages, newMessage]
       }));
       
-if (__DEV__) // console.log('addBotMessage: Сообщение бота добавлено', newMessage.id);
+      // console.log('addBotMessage: Сообщение бота добавлено', newMessage.id);
     } catch (error) {
       console.error('addBotMessage: Ошибка добавления сообщения бота', error);
     }
@@ -128,7 +128,7 @@ if (__DEV__) // console.log('addBotMessage: Сообщение бота доба
   updateMessage: (id: string, partial: Partial<Message>) => {
     try {
       if (!id || typeof id !== 'string') {
-if (__DEV__) console.warn('updateMessage: Невалидный ID сообщения');
+        console.warn('updateMessage: Невалидный ID сообщения');
         return;
       }
 
@@ -138,7 +138,7 @@ if (__DEV__) console.warn('updateMessage: Невалидный ID сообщен
         )
       }));
       
-if (__DEV__) // console.log('updateMessage: Сообщение обновлено', id);
+      // console.log('updateMessage: Сообщение обновлено', id);
     } catch (error) {
       console.error('updateMessage: Ошибка обновления сообщения', error);
     }
@@ -147,7 +147,7 @@ if (__DEV__) // console.log('updateMessage: Сообщение обновлен�
   removeMessage: (id: string) => {
     try {
       if (!id || typeof id !== 'string') {
-if (__DEV__) console.warn('removeMessage: Невалидный ID сообщения');
+        console.warn('removeMessage: Невалидный ID сообщения');
         return;
       }
 
@@ -155,7 +155,7 @@ if (__DEV__) console.warn('removeMessage: Невалидный ID сообщен
         messages: state.messages.filter(msg => msg.id !== id)
       }));
       
-if (__DEV__) // console.log('removeMessage: Сообщение удалено', id);
+      // console.log('removeMessage: Сообщение удалено', id);
     } catch (error) {
       console.error('removeMessage: Ошибка удаления сообщения', error);
     }
@@ -164,12 +164,12 @@ if (__DEV__) // console.log('removeMessage: Сообщение удалено', 
   addReaction: (messageId: string, reaction: string) => {
     try {
       if (!messageId || typeof messageId !== 'string') {
-if (__DEV__) console.warn('addReaction: Невалидный ID сообщения');
+        console.warn('addReaction: Невалидный ID сообщения');
         return;
       }
 
       if (!reaction || typeof reaction !== 'string') {
-if (__DEV__) console.warn('addReaction: Невалидная реакция');
+        console.warn('addReaction: Невалидная реакция');
         return;
       }
 
@@ -204,12 +204,12 @@ if (__DEV__) console.warn('addReaction: Невалидная реакция');
   removeReaction: (messageId: string, reaction: string) => {
     try {
       if (!messageId || typeof messageId !== 'string') {
-if (__DEV__) console.warn('removeReaction: Невалидный ID сообщения');
+        console.warn('removeReaction: Невалидный ID сообщения');
         return;
       }
 
       if (!reaction || typeof reaction !== 'string') {
-if (__DEV__) console.warn('removeReaction: Невалидная реакция');
+        console.warn('removeReaction: Невалидная реакция');
         return;
       }
 
@@ -224,7 +224,7 @@ if (__DEV__) console.warn('removeReaction: Невалидная реакция')
         })
       }));
       
-if (__DEV__) // console.log('removeReaction: Реакция удалена', messageId, reaction);
+      // console.log('removeReaction: Реакция удалена', messageId, reaction);
     } catch (error) {
       console.error('removeReaction: Ошибка удаления реакции', error);
     }
@@ -233,7 +233,7 @@ if (__DEV__) // console.log('removeReaction: Реакция удалена', mes
   toggleMessageSelection: (messageId: string) => {
     try {
       if (!messageId || typeof messageId !== 'string') {
-if (__DEV__) console.warn('toggleMessageSelection: Невалидный ID сообщения');
+        console.warn('toggleMessageSelection: Невалидный ID сообщения');
         return;
       }
 
@@ -289,7 +289,7 @@ if (__DEV__) console.warn('toggleMessageSelection: Невалидный ID со�
   reset: () => {
     try {
       set({ messages: initialMessages, selectedMessages: [] });
-if (__DEV__) console.log('reset: Store сброшен');
+      console.log('reset: Store сброшен');
     } catch (error) {
       console.error('reset: Ошибка сброса store', error);
     }
@@ -299,7 +299,7 @@ if (__DEV__) console.log('reset: Store сброшен');
   getMessageById: (id: string) => {
     try {
       if (!id || typeof id !== 'string') {
-if (__DEV__) console.warn('getMessageById: Невалидный ID');
+        console.warn('getMessageById: Невалидный ID');
         return undefined;
       }
 
@@ -314,7 +314,7 @@ if (__DEV__) console.warn('getMessageById: Невалидный ID');
   getMessagesBySender: (sender: "me" | "other") => {
     try {
       if (!sender || (sender !== "me" && sender !== "other")) {
-if (__DEV__) console.warn('getMessagesBySender: Невалидный отправитель');
+        console.warn('getMessagesBySender: Невалидный отправитель');
         return [];
       }
 
@@ -339,7 +339,7 @@ if (__DEV__) console.warn('getMessagesBySender: Невалидный отпра�
   getMessagesByStatus: (status: Message["status"]) => {
     try {
       if (status && !["sending", "sent", "delivered", "read"].includes(status)) {
-if (__DEV__) console.warn('getMessagesByStatus: Невалидный статус');
+        console.warn('getMessagesByStatus: Невалидный статус');
         return [];
       }
 
