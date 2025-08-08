@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import ChatCore from '../components/ChatCore';
+import ChatCoreWithReactions from '../components/ChatCoreWithReactions';
 import { useBotProvider } from '../hooks/useBotProvider';
 import { useDevBotCommands } from '../hooks/useDevBotCommands';
 
@@ -19,11 +19,11 @@ const ChatScreenInner: React.FC = () => {
       }
     }
     
-    // Обычное сообщение - ChatCore сам обработает отправку
+    // Обычное сообщение - ChatCoreWithReactions сам обработает отправку
   };
 
   return (
-    <ChatCore 
+    <ChatCoreWithReactions 
       isBotEnabled={isBotEnabled}
       onToggleBot={toggleBot}
       onSendMessage={handleSendMessage}

@@ -24,5 +24,6 @@ export const triggerHaptic = async (type: 'light' | 'medium' | 'heavy' | 'succes
   }
 };
 
-// Default export для Expo Router
-export default triggerHaptic; 
+// Default export для Expo Router - React компонент
+const HapticsComponent = () => null;
+export default HapticsComponent; 

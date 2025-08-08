@@ -39,7 +39,7 @@ function Write-Log {
 # Git status check function
 function Test-GitStatus {
     try {
-        $status = git status --porcelain
+        git status --porcelain | Out-Null
         if ($LASTEXITCODE -eq 0) {
             return $true
         } else {
@@ -56,7 +56,7 @@ function Test-GitStatus {
 function Test-HasChanges {
     try {
         $changes = git status --porcelain
-        return $changes -ne $null -and $changes.Length -gt 0
+        return $null -ne $changes -and $changes.Length -gt 0
     } catch {
         Write-Log "Error checking changes: $($_.Exception.Message)" "ERROR"
         return $false

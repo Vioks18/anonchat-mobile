@@ -25,6 +25,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
+  Animated,
   FlatList,
   Keyboard,
   StyleSheet,
@@ -37,6 +38,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useMessageStore } from '../hooks/useMessageStore';
 import { useUIWatchDog } from '../hooks/useUIWatchDog';
 import { ErrorSeverity, useErrorMonitor } from '../utils/errorBoundary';
+import ChatListWithReactions from './ChatListWithReactions';
 
 // Темы
 const THEMES = {
@@ -138,7 +140,15 @@ const ChatCoreFallback: React.FC<{ error?: string }> = ({ error }) => (
   </SafeAreaView>
 );
 
-// Улучшенный ChatCore с защитой
+// Функция для получения цвета тени в зависимости от темы
+const getShadowColor = (theme: any, isMe: boolean) => {
+  if (isMe) {
+    return theme.bubbleMe;
+  } else {
+    return theme.bubbleOther;
+  }
+};
+
 const ChatCoreInner: React.FC<ChatCoreProps> = ({ onSendMessage, onError, isBotEnabled = false, onToggleBot }) => {
   // Используем систему мониторинга ошибок
   const { addError, getStats, isStable } = useErrorMonitor();
@@ -151,23 +161,31 @@ const ChatCoreInner: React.FC<ChatCoreProps> = ({ onSendMessage, onError, isBotE
   const messages = useMessageStore((s) => s?.messages || []);
   const addMessage = useMessageStore((s) => s?.addMessage || (() => {}));
   
-  // Отфильтрованные сообщения для правильного порядка (при inverted={true} нужен обратный порядок)
-  const filteredMessages = React.useMemo(() => {
-    try {
-      if (!Array.isArray(messages)) {
-        addError(new Error('messages не является массивом'), 'ChatCore', ErrorSeverity.MEDIUM);
-        return [];
-      }
-      return [...messages].reverse();
-    } catch (error) {
-      addError(error instanceof Error ? error : new Error(String(error)), 'ChatCore', ErrorSeverity.HIGH);
-      return [];
-    }
-  }, [messages, addError]);
-  
   // Состояния для тем с защитой
   const [currentTheme, setCurrentTheme] = useState("dark");
   const [showThemeSelector, setShowThemeSelector] = useState(false);
+  
+  // Состояния для меню
+  const [showMenu, setShowMenu] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  
+  const [inputText, setInputText] = useState("");
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const [inputFocused, setInputFocused] = useState(false);
+  const flatListRef = useRef<FlatList>(null); // Пустой ref для совместимости
+  
+  // Простая анимация клавиатуры без сложных вычислений
+  const keyboardAnimation = useRef(new Animated.Value(0)).current;
+  
+  // Синхронизируем анимацию с состоянием - упрощенная версия
+  useEffect(() => {
+    Animated.timing(keyboardAnimation, {
+      toValue: keyboardHeight,
+      duration: 250,
+      useNativeDriver: false,
+    }).start();
+  }, [keyboardHeight, keyboardAnimation]);
 
   // Применение текущей темы с защитой
   const currentThemeData = React.useMemo(() => {
@@ -179,15 +197,31 @@ const ChatCoreInner: React.FC<ChatCoreProps> = ({ onSendMessage, onError, isBotE
     }
   }, [currentTheme, addError]);
   
-  // Состояния для меню
-  const [showMenu, setShowMenu] = useState(false);
-  const [isSearching, setIsSearching] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  
-  const [inputText, setInputText] = useState("");
-  const [keyboardHeight, setKeyboardHeight] = useState(0);
-  const [inputFocused, setInputFocused] = useState(false);
-  const flatListRef = useRef<FlatList>(null);
+  // Отфильтрованные сообщения с поиском и правильным порядком
+  const filteredMessages = React.useMemo(() => {
+    try {
+      if (!Array.isArray(messages)) {
+        addError(new Error('messages не является массивом'), 'ChatCore', ErrorSeverity.MEDIUM);
+        return [];
+      }
+
+      let filtered = [...messages];
+
+      // Применяем поиск если есть запрос
+      if (searchQuery.trim().length > 0) {
+        const query = searchQuery.toLowerCase().trim();
+        filtered = filtered.filter(message => 
+          message.text.toLowerCase().includes(query)
+        );
+      }
+
+      // Возвращаем в обратном порядке для inverted FlatList
+      return filtered.reverse();
+    } catch (error) {
+      addError(error instanceof Error ? error : new Error(String(error)), 'ChatCore', ErrorSeverity.HIGH);
+      return [];
+    }
+  }, [messages, searchQuery, addError]);
 
   // WatchDog для мониторинга UI с защитой
   const watchDogResult = useUIWatchDog({
@@ -197,7 +231,7 @@ const ChatCoreInner: React.FC<ChatCoreProps> = ({ onSendMessage, onError, isBotE
     inputFocused,
     onScrollToEnd: () => {
       try {
-        flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+        // Прокрутка теперь обрабатывается в ChatListWithReactions
       } catch (error) {
         addError(error instanceof Error ? error : new Error(String(error)), 'ChatCore', ErrorSeverity.LOW);
       }
@@ -253,7 +287,7 @@ const ChatCoreInner: React.FC<ChatCoreProps> = ({ onSendMessage, onError, isBotE
         addError(error instanceof Error ? error : new Error(String(error)), 'ChatCore', ErrorSeverity.LOW);
       }
     };
-  }, [safeExecute, addError]);
+  }, [safeExecute, addError, setKeyboardHeight]);
 
 
 
@@ -280,46 +314,11 @@ const ChatCoreInner: React.FC<ChatCoreProps> = ({ onSendMessage, onError, isBotE
       // Безопасный скролл вниз (при inverted={true} это scrollToOffset)
       setTimeout(() => {
         safeExecute(() => {
-          flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+          // flatListRef.current?.scrollToOffset({ offset: 0, animated: true }); // This line is removed
         }, 'scrollToEnd', ErrorSeverity.LOW);
       }, 100);
     }, 'sendMessage', ErrorSeverity.MEDIUM);
   }, [inputText, onSendMessage, safeExecute, addMessage]);
-
-  // Безопасный рендер сообщения с защитой
-  const renderMessage = useCallback(({ item }: { item: any }) => {
-    try {
-      // Валидация сообщения
-      if (!item || typeof item !== 'object') {
-        addError(new Error('Невалидное сообщение'), 'ChatCore', ErrorSeverity.LOW);
-        return null;
-      }
-
-      const isMe = item.sender === "me";
-      
-      return (
-        <View style={[styles.messageContainer, isMe ? styles.messageMe : styles.messageOther]}>
-          <View style={[
-            styles.bubble, 
-            isMe 
-              ? { ...styles.bubbleMe, backgroundColor: currentThemeData.bubbleMe }
-              : { ...styles.bubbleOther, backgroundColor: currentThemeData.bubbleOther }
-          ]}>
-            <Text style={[styles.messageText, { color: currentThemeData.text }]}>
-              {item.text || 'Пустое сообщение'}
-            </Text>
-          </View>
-        </View>
-      );
-    } catch (error) {
-      addError(error instanceof Error ? error : new Error(String(error)), 'ChatCore', ErrorSeverity.MEDIUM);
-      return (
-        <View style={styles.errorMessage}>
-          <Text style={styles.errorText}>Ошибка отображения сообщения</Text>
-        </View>
-      );
-    }
-  }, [currentThemeData, addError]);
 
   // Критическая ошибка - показываем fallback
   if (hasCriticalError) {
@@ -472,29 +471,28 @@ const ChatCoreInner: React.FC<ChatCoreProps> = ({ onSendMessage, onError, isBotE
         )}
 
                  {/* Список сообщений - критически важный компонент */}
-         <FlatList
-           ref={flatListRef}
-           data={filteredMessages}
-           renderItem={renderMessage}
-           keyExtractor={(item) => item.id || Math.random().toString()}
-           style={styles.messagesList}
-           showsVerticalScrollIndicator={false}
-           keyboardShouldPersistTaps="handled"
-           removeClippedSubviews={true}
-           maxToRenderPerBatch={10}
-           windowSize={10}
-           initialNumToRender={10}
-           inverted={true}
-           onLayout={() => {
-             // Безопасная обработка layout
-           }}
-         />
+         <ChatListWithReactions
+          messages={filteredMessages}
+          themedStyles={{ text: currentThemeData.text }}
+          styles={styles}
+          currentThemeData={currentThemeData}
+          onScrollToEnd={() => {
+            try {
+              // flatListRef.current?.scrollToOffset({ offset: 0, animated: true }); // This line is removed
+            } catch (error) {
+              addError(error instanceof Error ? error : new Error(String(error)), 'ChatCore', ErrorSeverity.LOW);
+            }
+          }}
+          onScrollBeginDrag={() => {
+            // Обработка начала скролла
+          }}
+        />
 
         {/* Строка ввода - критически важный компонент */}
-        <View style={[
+        <Animated.View style={[
           styles.inputContainer, 
           { 
-            marginBottom: keyboardHeight,
+            marginBottom: keyboardHeight, // Простое значение без интерполяции
             backgroundColor: currentThemeData.inputBg,
             borderTopColor: currentThemeData.border
           }
@@ -535,7 +533,10 @@ const ChatCoreInner: React.FC<ChatCoreProps> = ({ onSendMessage, onError, isBotE
           >
             <Ionicons name="send-outline" size={22} color="#fff" />
           </TouchableOpacity>
-        </View>
+        </Animated.View>
+        
+        {/* ReactionPicker - inline popover */}
+        {/* This component is now rendered inline within renderMessage */}
       </View>
       
       {/* DevHUD для отображения статуса WatchDog (временно отключен) */}
@@ -673,21 +674,23 @@ const styles = StyleSheet.create({
   bubbleMe: {
     backgroundColor: '#6c5ce7',
     shadowColor: '#6c5ce7',
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 4,
+    shadowOpacity: 0.2, // Уменьшил с 0.25 до 0.2
+    shadowRadius: 6, // Уменьшил с 8 до 6
+    shadowOffset: { width: 0, height: 2 }, // Добавил смещение
+    elevation: 3, // Уменьшил с 4 до 3
   },
   bubbleOther: {
     backgroundColor: '#2a2a4a',
     shadowColor: '#2a2a4a',
-    shadowOpacity: 0.12,
+    shadowOpacity: 0.1, // Уменьшил с 0.12 до 0.1
     shadowRadius: 4,
+    shadowOffset: { width: 0, height: 1 }, // Добавил смещение
     elevation: 2,
   },
   messageText: {
     fontSize: 16,
     color: '#fff',
-    lineHeight: 20,
+    lineHeight: 22, // Увеличил с 20 до 22 для лучшего отображения
   },
   inputContainer: {
     flexDirection: "row",
@@ -849,4 +852,19 @@ const styles = StyleSheet.create({
         color: "#fff",
         fontFamily: "Poppins-Regular",
       },
+  highlightedMessage: {
+    borderWidth: 2,
+    borderColor: 'rgba(59, 130, 246, 0.4)', // Тонкая синяя граница
+    shadowColor: 'rgba(59, 130, 246, 0.3)',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.5,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  selectedMessage: {
+    // Полностью убираю стили выделения
+  },
+  selectedBubble: {
+    // Полностью убираю стили выделения
+  },
 }); 

@@ -4,11 +4,18 @@ import { Message } from '../types/message';
 
 interface MessageStore {
   messages: Message[];
+  selectedMessages: string[]; // Новое состояние для мульти-выбора
   addMessage: (text: string) => void;
   addBotMessage: (text: string) => void;
   updateMessage: (id: string, partial: Partial<Message>) => void;
   removeMessage: (id: string) => void;
   addReaction: (messageId: string, reaction: string) => void;
+  removeReaction: (messageId: string, reaction: string) => void;
+  // Методы для мульти-выбора
+  toggleMessageSelection: (messageId: string) => void;
+  clearMessageSelection: () => void;
+  selectAllMessages: () => void;
+  removeSelectedMessages: () => void;
   reset: () => void;
   // Селекторы для оптимизации
   getMessageById: (id: string) => Message | undefined;
@@ -44,6 +51,7 @@ const generateId = (): string => {
 
 export const useMessageStore = create<MessageStore>((set, get) => ({
   messages: initialMessages,
+  selectedMessages: [],
   
   addMessage: (text: string) => {
     try {
@@ -169,25 +177,119 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
         messages: state.messages.map(msg => {
           if (msg.id === messageId) {
             const reactions = msg.reactions || [];
-            const newReactions = reactions.includes(reaction) 
-              ? reactions.filter(r => r !== reaction)
-              : [...reactions, reaction];
+            
+            // Проверяем, есть ли уже такая реакция
+            const hasReaction = reactions.includes(reaction);
+            
+            if (hasReaction) {
+              // Если реакция уже есть, убираем её (toggle)
+              const newReactions = reactions.filter(r => r !== reaction);
+              return { ...msg, reactions: newReactions };
+            } else {
+              // Если реакции нет, убираем ВСЕ старые реакции и добавляем новую
+              // Один пользователь = одна реакция на сообщение
+              return { ...msg, reactions: [reaction] };
+            }
+          }
+          return msg;
+        })
+      }));
+      
+      console.log('addReaction: Реакция переключена', messageId, reaction);
+    } catch (error) {
+      console.error('addReaction: Ошибка добавления реакции', error);
+    }
+  },
+
+  removeReaction: (messageId: string, reaction: string) => {
+    try {
+      if (!messageId || typeof messageId !== 'string') {
+        console.warn('removeReaction: Невалидный ID сообщения');
+        return;
+      }
+
+      if (!reaction || typeof reaction !== 'string') {
+        console.warn('removeReaction: Невалидная реакция');
+        return;
+      }
+
+      set((state) => ({
+        messages: state.messages.map(msg => {
+          if (msg.id === messageId) {
+            const reactions = msg.reactions || [];
+            const newReactions = reactions.filter(r => r !== reaction);
             return { ...msg, reactions: newReactions };
           }
           return msg;
         })
       }));
       
-      // console.log('addReaction: Реакция добавлена', messageId, reaction);
+      // console.log('removeReaction: Реакция удалена', messageId, reaction);
     } catch (error) {
-      console.error('addReaction: Ошибка добавления реакции', error);
+      console.error('removeReaction: Ошибка удаления реакции', error);
     }
   },
   
+  toggleMessageSelection: (messageId: string) => {
+    try {
+      if (!messageId || typeof messageId !== 'string') {
+        console.warn('toggleMessageSelection: Невалидный ID сообщения');
+        return;
+      }
+
+      set((state) => {
+        const isSelected = state.selectedMessages.includes(messageId);
+        const newSelectedMessages = isSelected
+          ? state.selectedMessages.filter(id => id !== messageId)
+          : [...state.selectedMessages, messageId];
+        
+        return { selectedMessages: newSelectedMessages };
+      });
+      
+      console.log('toggleMessageSelection: Выбор переключен', messageId);
+    } catch (error) {
+      console.error('toggleMessageSelection: Ошибка переключения выбора', error);
+    }
+  },
+
+  clearMessageSelection: () => {
+    try {
+      set({ selectedMessages: [] });
+      console.log('clearMessageSelection: Выбор очищен');
+    } catch (error) {
+      console.error('clearMessageSelection: Ошибка очистки выбора', error);
+    }
+  },
+
+  selectAllMessages: () => {
+    try {
+      const state = get();
+      const allMessageIds = state.messages.map(msg => msg.id);
+      set({ selectedMessages: allMessageIds });
+      console.log('selectAllMessages: Выбраны все сообщения');
+    } catch (error) {
+      console.error('selectAllMessages: Ошибка выбора всех сообщений', error);
+    }
+  },
+
+  removeSelectedMessages: () => {
+    try {
+      const state = get();
+      const newMessages = state.messages.filter(msg => !state.selectedMessages.includes(msg.id));
+      set({ 
+        messages: newMessages,
+        selectedMessages: [] // Очищаем выбор после удаления
+      });
+      console.log('removeSelectedMessages: Удалены выбранные сообщения');
+    } catch (error) {
+      console.error('removeSelectedMessages: Ошибка удаления выбранных сообщений', error);
+    }
+  },
+
   reset: () => {
     try {
-      set({ messages: initialMessages });
-      // console.log('reset: Store сброшен');
+      set({ messages: initialMessages, selectedMessages: [] });
+      console.log('reset: Store сброшен');
     } catch (error) {
       console.error('reset: Ошибка сброса store', error);
     }
@@ -262,7 +364,6 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
   getLatestMessage: () => {
     try {
       const state = get();
-      if (state.messages.length === 0) return undefined;
       return state.messages[state.messages.length - 1];
     } catch (error) {
       console.error('getLatestMessage: Ошибка получения последнего сообщения', error);
