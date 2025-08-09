@@ -1,5 +1,8 @@
 # QA Report
 
+**Mode:** soft
+**New issues:** 4
+
 ## ✅ Passed
 - reactionbar.anchor_guard (P0) — app/components/reactions/ReactionBar.tsx: Found
 - store.status_read (P0) — app/hooks/useMessageStore.ts: read in statuses
@@ -25,10 +28,10 @@
 - secrets.regex (P0) — **/*.{ts,tsx,js,jsx}: no secrets found
 
 ## ⚠️ Warnings
-- reactionstate.keyboard_close (P1) — app/hooks/useReactionState.ts: keyboard listeners missing
-- perf.stable_handlers (P1) — app/hooks/useReactions.ts: handlers not memoized
-- chatlist.doubletap_window (P2) — app/components/ChatListWithReactions.tsx: double-tap window not in 220–300ms
-- bubble.paddingRight.meta (P1) — app/components/MessageWithReactions.tsx: paddingRight < 28
+- reactionstate.keyboard_close (P1) — app/hooks/useReactionState.ts: keyboard listeners missing **NEW**
+- perf.stable_handlers (P1) — app/hooks/useReactions.ts: handlers not memoized **NEW**
+- chatlist.doubletap_window (P2) — app/components/ChatListWithReactions.tsx: double-tap window not in 220–300ms **NEW**
+- bubble.paddingRight.meta (P1) — app/components/MessageWithReactions.tsx: paddingRight < 28 **NEW**
 
 ## ❌ P0 Issues
 
