@@ -110,7 +110,7 @@ const MessageWithReactions: React.FC<MessageWithReactionsProps> = ({
       paddingHorizontal: (message.text?.length ?? 0) <= 3 ? 6 : 8, // Более компактные отступы
       paddingRight: isMyMessage ? 
         ((message.text?.length ?? 0) > 20 ? 80 : 60) : // Больше места для очень длинных
-        ((message.text?.length ?? 0) <= 3 ? 6 : 8), // Больше места для метаданных
+        ((message.text?.length ?? 0) <= 3 ? 28 : 8), // Минимум 28px для метаданных
       alignSelf: isMyMessage ? 'flex-end' as const : 'flex-start' as const,
     },
   ];

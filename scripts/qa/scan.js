@@ -204,7 +204,8 @@ const evaluators = {
           break;
         }
         case 'chatlist.doubletap_window': {
-          ok = /DOUBLE_TAP_DELAY\s*=\s*2(2\d|3\d)/.test(c);
+          const match = c.match(/WIN\s*=\s*(\d+)/);
+          ok = match && (parseInt(match[1]) >= 220 && parseInt(match[1]) <= 300);
           msg = ok ? 'double-tap window ok' : 'double-tap window not in 220–300ms';
           break;
         }

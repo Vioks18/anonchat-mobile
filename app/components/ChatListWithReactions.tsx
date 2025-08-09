@@ -56,7 +56,7 @@ const ChatListWithReactions: React.FC<ChatListWithReactionsProps> = ({
 
   const handlePress = useCallback((id: string, e?: any) => {
     const now = Date.now();
-    const WIN = 400; // Увеличиваем окно для двойного тапа до 400ms
+    const WIN = 300; // Окно двойного тапа 220-300ms согласно QA правилам
     
     if (__DEV__) {
       console.log('🔥 handlePress:', { id, lastTap, timeDiff: lastTap ? now - lastTap.t : null });
@@ -82,7 +82,7 @@ const ChatListWithReactions: React.FC<ChatListWithReactionsProps> = ({
       setLocalSelectedMessageId(id);
       setLastTouch?.(e?.nativeEvent?.pageX, e?.nativeEvent?.pageY);
       if (ref) openAtMessage(id, ref);
-      setLastTap(null);
+      setLastTap(null); // Сбрасываем для следующего двойного тапа
       return;
     }
     

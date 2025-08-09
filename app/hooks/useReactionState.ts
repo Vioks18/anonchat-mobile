@@ -25,9 +25,16 @@ export const useReactionState = () => {
   }, []);
 
   const openAtMessage = useCallback((messageId: string, viewRef: any) => {
-    if (!viewRef) return;
+    if (!viewRef) {
+      if (__DEV__) console.log('🔥 openAtMessage: no viewRef');
+      return;
+    }
+
+    if (__DEV__) console.log('🔥 openAtMessage: calling measureInWindow');
 
     viewRef.measureInWindow((x: number, y: number, w: number, h: number) => {
+      if (__DEV__) console.log('🔥 measureInWindow callback:', { x, y, w, h });
+      
       const baseAnchor: ReactionAnchor = { x, y, w, h };
       
       if (lastTouchRef.current) {
@@ -44,6 +51,7 @@ export const useReactionState = () => {
       setVisible(true);
       
       if (__DEV__) {
+        console.log('🔥 Reaction panel opened:', { messageId, visible: true });
         const anchorWithTouch = lastTouchRef.current 
           ? { ...baseAnchor, touchX: lastTouchRef.current.x, touchY: lastTouchRef.current.y }
           : baseAnchor;
