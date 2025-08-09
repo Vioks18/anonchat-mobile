@@ -62,5 +62,8 @@ export function useSelectedMessageAnimation({
       transform: [{ scale: scaleAnim }],
       opacity: opacityAnim,
     },
+    shadowStyle: {
+      shadowOpacity: shadowAnim,
+    },
   };
 }

@@ -4,6 +4,7 @@
 - reactionbar.anchor_guard (P0) — app/components/reactions/ReactionBar.tsx: Found
 - store.status_read (P0) — app/hooks/useMessageStore.ts: read in statuses
 - chatlist.scroll_close (P1) — app/components/ChatListWithReactions.tsx: Found
+- perf.memo_bubble (P1) — app/components/MessageWithReactions.tsx: memo present
 - perf.memo_bubble (P1) — app/components/ChatMessage.tsx: memo present
 - perf.stable_handlers (P1) — app/components/ChatListWithReactions.tsx: callbacks memoized
 - reactionbar.clamp_flip_safe (P2) — app/components/reactions/ReactionBar.tsx: safe area + clamp logic present
@@ -11,7 +12,6 @@
 
 ## ⚠️ Warnings
 - reactionstate.keyboard_close (P1) — app/hooks/useReactionState.ts: keyboard listeners missing
-- perf.memo_bubble (P1) — app/components/MessageWithReactions.tsx: not memoized
 - perf.stable_handlers (P1) — app/hooks/useReactions.ts: handlers not memoized
 - chatlist.doubletap_window (P2) — app/components/ChatListWithReactions.tsx: double-tap window not in 220–300ms
 
@@ -20,4 +20,4 @@
 - perf.dev_logs (P0) — app/hooks/useMessageStore.ts: dev logs not guarded
 - perf.dev_logs (P0) — app/hooks/useBotProvider.ts: dev logs not guarded
 
-Summary: Passed=7, Warnings=4, P0=3
+Summary: Passed=8, Warnings=3, P0=3

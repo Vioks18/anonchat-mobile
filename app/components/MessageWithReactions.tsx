@@ -71,7 +71,7 @@ const MessageWithReactions: React.FC<MessageWithReactionsProps> = ({
   const { removeReaction } = useMessageStore();
   
   // Анимация выбранного сообщения
-  const { animatedStyle, shadowAnim } = useSelectedMessageAnimation({ isSelected });
+  const { animatedStyle, shadowStyle } = useSelectedMessageAnimation({ isSelected });
 
   // Умная обработка тапов
   const onPressWrap = (e: any) => {
@@ -147,15 +147,15 @@ const MessageWithReactions: React.FC<MessageWithReactionsProps> = ({
             delayLongPress={500}
             hitSlop={{ top: 6, bottom: 6, left: 4, right: 4 }}
             android_disableSound
-            style={[
-              styles.bubble,
-              bubbleStyle,
-              isMyMessage ? styles.bubbleMe : styles.bubbleOther,
-              isSelected && {
-                ...styles.selectedBubble,
-                shadowOpacity: shadowAnim,
-              }
-            ]}
+                         style={[
+               styles.bubble,
+               bubbleStyle,
+               isMyMessage ? styles.bubbleMe : styles.bubbleOther,
+               isSelected && {
+                 ...styles.selectedBubble,
+                 ...shadowStyle,
+               }
+             ]}
           >
                       <Text style={textStyle}>{message.text}</Text>
             
