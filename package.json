@@ -29,6 +29,8 @@
     "qa:fix": "node scripts/qa/scan.js --autofix",
     "qa:baseline:update": "node scripts/qa/scan.js && cp QA-REPORT.md qa-baseline.json",
     "qa:oneclick": "powershell -ExecutionPolicy Bypass -File scripts/qa/quick-fix.ps1",
+    "qa:gestures": "node scripts/sim/run.js --tapdiag && node scripts/qa/scan.js",
+    "qa:strict:gestures": "node scripts/sim/run.js --tapdiag && node -e \"process.env.QA_MODE='strict';require('./scripts/qa/scan.js')\"",
     "sim": "node scripts/sim/run.js",
     "qa:sim": "npm run qa && npm run sim",
     "guard:install": "node scripts/guard/install-precommit.js",

@@ -1,4 +1,5 @@
 import { useCallback, useRef, useState } from 'react';
+import { GestureProbe } from '../utils/gestureProbe';
 import { useKeyboardHeight } from './useKeyboardHeight';
 
 export type ReactionAnchor = {
@@ -41,10 +42,26 @@ export const useReactionState = () => {
       
       setSelectedMessageId(messageId);
       setVisible(true);
+      
+      if (__DEV__) {
+        const anchorWithTouch = lastTouchRef.current 
+          ? { ...baseAnchor, touchX: lastTouchRef.current.x, touchY: lastTouchRef.current.y }
+          : baseAnchor;
+        GestureProbe.log({
+          type: 'openReaction',
+          t: Date.now(),
+          msgId: messageId,
+          x: anchorWithTouch.touchX,
+          y: anchorWithTouch.touchY
+        });
+      }
     });
   }, []);
 
   const close = useCallback(() => {
+    if (__DEV__) {
+      GestureProbe.log({ type: 'closeReaction', t: Date.now() });
+    }
     setVisible(false);
     setAnchor(null);
     lastTouchRef.current = null;

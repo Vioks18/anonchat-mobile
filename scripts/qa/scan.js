@@ -247,6 +247,49 @@ const evaluators = {
           msg = ok ? 'no secrets found' : `secrets found: ${secrets?.slice(0, 3).join(', ')}`;
           break;
         }
+        case 'gestures.doubletap.behavior': {
+          const tapdiagPath = path.join(ROOT, 'tapdiag-report.json');
+          if (!fs.existsSync(tapdiagPath)) {
+            ok = false;
+            msg = 'tapdiag-report.json not found - run npm run qa:gestures first';
+            if (DEBUG) console.log('No tapdiag-report.json found, suggesting to run gesture diagnostics');
+          } else {
+            try {
+              const tapdiag = JSON.parse(readFileSafe('tapdiag-report.json'));
+              
+              // Проверяем пороги
+              const lateSecondTapOk = tapdiag.lateSecondTap === 0;
+              const duringScrollOk = tapdiag.duringScroll === 0;
+              const openLatencyOk = tapdiag.openLatencyP95 < 300;
+              const openTooFarOk = tapdiag.openTooFar === 0;
+              
+              ok = lateSecondTapOk && duringScrollOk && openLatencyOk && openTooFarOk;
+              
+              const issues = [];
+              if (!lateSecondTapOk) issues.push(`lateSecondTap: ${tapdiag.lateSecondTap} > 0`);
+              if (!duringScrollOk) issues.push(`duringScroll: ${tapdiag.duringScroll} > 0`);
+              if (!openLatencyOk) issues.push(`openLatencyP95: ${tapdiag.openLatencyP95} > 300ms`);
+              if (!openTooFarOk) issues.push(`openTooFar: ${tapdiag.openTooFar} > 0`);
+              
+              msg = ok 
+                ? 'all gesture metrics within limits' 
+                : `gesture issues: ${issues.join(', ')}`;
+              
+              if (DEBUG) {
+                console.log('Tap diagnostics results:', {
+                  lateSecondTap: tapdiag.lateSecondTap,
+                  duringScroll: tapdiag.duringScroll,
+                  openLatencyP95: tapdiag.openLatencyP95,
+                  openTooFar: tapdiag.openTooFar
+                });
+              }
+            } catch (error) {
+              ok = false;
+              msg = `error reading tapdiag-report.json: ${error.message}`;
+            }
+          }
+          break;
+        }
         default:
           break;
       }

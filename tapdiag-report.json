@@ -1,0 +1,10 @@
+{
+  "doubleTapWindowMs": 260,
+  "lateSecondTap": 2,
+  "duringScroll": 1,
+  "openLatencyP95": 300,
+  "openTooFar": 1,
+  "totalDoubleTaps": 3,
+  "totalOpenReactions": 3,
+  "totalScrollEvents": 1
+}

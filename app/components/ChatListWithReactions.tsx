@@ -3,6 +3,7 @@ import { FlatList, View } from 'react-native';
 import { Portal } from 'react-native-portalize';
 import useReactionState from '../hooks/useReactionState';
 import { Message } from '../types/message';
+import { GestureProbe } from '../utils/gestureProbe';
 import MessageWithReactions from './MessageWithReactions';
 import { ReactionBar } from './reactions';
 
@@ -43,6 +44,9 @@ const ChatListWithReactions: React.FC<ChatListWithReactionsProps> = ({
 
   const handleLongPress = useCallback((id: string, e?: any) => {
     if (scrollingRef.current) return;
+    if (__DEV__) {
+      GestureProbe.log({ type: 'longPress', t: Date.now(), msgId: id });
+    }
     setLocalSelectedMessageId(id);
     setShowHeaderActions(true);
     onMessageSelected?.(id); // Показываем кнопки в header при long-press
@@ -72,6 +76,13 @@ const ChatListWithReactions: React.FC<ChatListWithReactionsProps> = ({
     if (lastTap && lastTap.messageId === id && (now - lastTap.t) < WIN) {
       if (__DEV__) {
         if (__DEV__) console.log('🔥 ДВОЙНОЙ ТАП!');
+        GestureProbe.log({ 
+          type: 'doubleTap', 
+          t: Date.now(), 
+          msgId: id, 
+          x: e?.nativeEvent?.pageX, 
+          y: e?.nativeEvent?.pageY 
+        });
       }
       // ДАБЛ-ТАП = открываем реакции
       const ref = messageRefs.current.get(id);
@@ -121,12 +132,18 @@ const ChatListWithReactions: React.FC<ChatListWithReactionsProps> = ({
   }, [localSelectedMessageId, handleLongPress, handlePress, registerMessageRef]);
 
   const handleScrollBeginDrag = useCallback(() => {
+    if (__DEV__) {
+      GestureProbe.log({ type: 'scrollBegin', t: Date.now() });
+    }
     scrollingRef.current = true;
     handleClose();
     onScrollBeginDrag?.();
   }, [handleClose, onScrollBeginDrag]);
 
   const handleScrollEndDrag = useCallback(() => {
+    if (__DEV__) {
+      GestureProbe.log({ type: 'scrollEnd', t: Date.now() });
+    }
     setTimeout(() => {
       scrollingRef.current = false;
     }, 100);

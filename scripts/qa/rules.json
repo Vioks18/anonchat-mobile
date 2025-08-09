@@ -92,6 +92,15 @@
       "allowlist": []
     },
     {
+      "id": "gestures.doubletap.behavior",
+      "severity": "P0",
+      "type": "custom",
+      "files": ["tapdiag-report.json"],
+      "description": "Double-tap должен открывать панель ≤300 мс и близко к точке касания; без конфликтов со скроллом.",
+      "experimental": false,
+      "allowlist": []
+    },
+    {
       "id": "deps.unused",
       "severity": "P2",
       "type": "custom",

@@ -1,7 +1,7 @@
 # QA Report
 
 **Mode:** soft
-**New issues:** 4
+**New issues:** 5
 
 ## ✅ Passed
 - reactionbar.anchor_guard (P0) — app/components/reactions/ReactionBar.tsx: Found
@@ -34,5 +34,6 @@
 - bubble.paddingRight.meta (P1) — app/components/MessageWithReactions.tsx: paddingRight < 28 **NEW**
 
 ## ❌ P0 Issues
+- gestures.doubletap.behavior (P0) — tapdiag-report.json: gesture issues: lateSecondTap: 2 > 0, duringScroll: 1 > 0, openLatencyP95: 300 > 300ms, openTooFar: 1 > 0 **NEW**
 
-Summary: Passed=22, Warnings=4, P0=0
+Summary: Passed=22, Warnings=4, P0=1
