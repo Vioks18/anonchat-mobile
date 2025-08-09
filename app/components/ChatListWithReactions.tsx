@@ -1,26 +1,28 @@
-import * as Clipboard from 'expo-clipboard';
 import React, { useCallback, useRef, useState } from 'react';
-import { FlatList, Text, View } from 'react-native';
-import { useMessageStore } from '../hooks/useMessageStore';
-import { useReactionState } from '../hooks/useReactionState';
+import { FlatList, View } from 'react-native';
+import { Portal } from 'react-native-portalize';
+import useReactionState from '../hooks/useReactionState';
 import { Message } from '../types/message';
 import MessageWithReactions from './MessageWithReactions';
-import ReactionBar from './reactions/ReactionBar';
+import { ReactionBar } from './reactions';
 
 interface ChatListWithReactionsProps {
   messages: Message[];
   onScrollBeginDrag?: () => void;
+  onMessageSelected?: (messageId: string | null) => void;
 }
 
 const ChatListWithReactions: React.FC<ChatListWithReactionsProps> = ({
   messages,
-  onScrollBeginDrag
+  onScrollBeginDrag,
+  onMessageSelected,
 }) => {
-  const removeMessage = useMessageStore((s: any) => s.removeMessage);
-  const { selectedMessageId, anchor, visible, openAtMessage, close } = useReactionState();
+  const { selectedMessageId, anchor, visible, openAtMessage, close, setLastTouch, keyboardHeight } = useReactionState();
   const messageRefs = useRef(new Map<string, any>());
-  const [lastTap, setLastTap] = useState<{ messageId: string; timestamp: number } | null>(null);
   const scrollingRef = useRef<boolean>(false);
+  const [lastTap, setLastTap] = useState<{ messageId: string; t: number } | null>(null);
+  const [showHeaderActions, setShowHeaderActions] = useState(false);
+  const [localSelectedMessageId, setLocalSelectedMessageId] = useState<string | null>(null);
 
   const registerMessageRef = useCallback((id: string, ref: any) => {
     if (ref && id) {
@@ -28,102 +30,97 @@ const ChatListWithReactions: React.FC<ChatListWithReactionsProps> = ({
     }
   }, []);
 
-  const handleMessageLongPress = useCallback((messageId: string) => {
-    if (scrollingRef.current) return;
-    const ref = messageRefs.current.get(messageId);
-    if (ref) {
-      openAtMessage(messageId, ref);
+  const handleClose = useCallback(() => {
+    if (__DEV__) {
+      console.log('🔥 ChatList: handleClose - закрываем оба меню одновременно');
     }
-  }, [openAtMessage]);
+    // Закрываем оба меню одновременно
+    setTimeout(() => {
+      setShowHeaderActions(false);
+      setLocalSelectedMessageId(null);
+      onMessageSelected?.(null);
+      close();
+    }, 0);
+  }, [close, onMessageSelected]);
 
-  const handleMessagePress = useCallback((messageId: string) => {
+  const handleLongPress = useCallback((id: string, e?: any) => {
+    if (scrollingRef.current) return;
+    setLocalSelectedMessageId(id);
+    setShowHeaderActions(true);
+    onMessageSelected?.(id); // Показываем кнопки в header при long-press
+    close(); // на long-press реакции НЕ открываем
+    setLastTap(null); // Сбрасываем двойной тап при long-press
+  }, [close, onMessageSelected]);
+
+  const handlePress = useCallback((id: string, e?: any) => {
     const now = Date.now();
-    const DOUBLE_TAP_DELAY = 260; // 220–280 мс
-
-    if (scrollingRef.current) return;
-
-    if (selectedMessageId) { 
-      close(); 
-      return; 
-    }
-
-    if (lastTap && lastTap.messageId === messageId && now - lastTap.timestamp < DOUBLE_TAP_DELAY) {
-      const ref = messageRefs.current.get(messageId);
-      if (ref) openAtMessage(messageId, ref); // ✅ тот же путь, что у long-press
+    const WIN = 260;
+    
+    // Проверяем флаг closeAll - если есть, закрываем все меню сразу
+    if (e?.closeAll) {
+      handleClose();
       setLastTap(null);
       return;
     }
-
-    setLastTap({ messageId, timestamp: now });
-  }, [selectedMessageId, lastTap, close, openAtMessage]);
+    
+    // Если сообщение уже выделено удержанием - просто убираем выделение
+    if (localSelectedMessageId === id && showHeaderActions) {
+      setLocalSelectedMessageId(null);
+      setShowHeaderActions(false);
+      onMessageSelected?.(null);
+      setLastTap(null);
+      return;
+    }
+    
+    if (lastTap && lastTap.messageId === id && (now - lastTap.t) < WIN) {
+      // double-tap → ОТКРЫТЬ РЕАКЦИИ + ПОКАЗАТЬ КНОПКИ В HEADER
+      setShowHeaderActions(true);
+      setLocalSelectedMessageId(id);
+      onMessageSelected?.(id); // Показываем кнопки в header при double-tap
+      setLastTouch?.(e?.nativeEvent?.pageX, e?.nativeEvent?.pageY);
+      const ref = messageRefs.current.get(id);
+      if (ref) openAtMessage(id, ref);
+      setLastTap(null);
+      return;
+    }
+    
+    // Обычный тап → закрываем реакции если они открыты
+    if (visible) {
+      close();
+      setLocalSelectedMessageId(null);
+      onMessageSelected?.(null);
+    }
+    
+    setLastTap({ messageId: id, t: now });
+  }, [lastTap, openAtMessage, setLastTouch, onMessageSelected, visible, close, localSelectedMessageId, showHeaderActions, handleClose]);
 
   const renderMessage = useCallback(({ item }: { item: Message }) => {
     const isMyMessage = item.sender === 'me';
-    const isSelected = selectedMessageId === item.id;
+    const isSelected = localSelectedMessageId === item.id;
 
     return (
       <MessageWithReactions
         message={item}
         isMyMessage={isMyMessage}
         isSelected={isSelected}
-        onLongPress={() => handleMessageLongPress(item.id)}
-        onPress={() => handleMessagePress(item.id)}
+        onLongPress={handleLongPress}
+        onPress={handlePress}
         registerRef={registerMessageRef}
       />
     );
-  }, [selectedMessageId, handleMessageLongPress, handleMessagePress, registerMessageRef]);
+  }, [localSelectedMessageId, handleLongPress, handlePress, registerMessageRef]);
 
   const handleScrollBeginDrag = useCallback(() => {
     scrollingRef.current = true;
-    close();
+    handleClose();
     onScrollBeginDrag?.();
-  }, [close, onScrollBeginDrag]);
+  }, [handleClose, onScrollBeginDrag]);
 
   const handleScrollEndDrag = useCallback(() => {
     setTimeout(() => {
       scrollingRef.current = false;
     }, 100);
   }, []);
-
-  const getActions = useCallback((message: Message | undefined) => {
-    if (!message) return [];
-
-    return [
-      {
-        key: 'reply' as const,
-        icon: (<Text style={{ fontSize: 16 }}>↩️</Text>),
-        onPress: () => {
-          if (__DEV__) console.warn('Reply action: no-op (handler not wired)', message.id);
-          close();
-        },
-        visible: true,
-      },
-      {
-        key: 'copy' as const,
-        icon: (<Text style={{ fontSize: 16 }}>📋</Text>),
-        onPress: async () => {
-          try {
-            await Clipboard.setStringAsync(message.text || '');
-          } finally {
-            close();
-          }
-        },
-        visible: true,
-      },
-      {
-        key: 'delete' as const,
-        icon: (<Text style={{ fontSize: 16 }}>🗑️</Text>),
-        onPress: () => {
-          try {
-            removeMessage?.(message.id);
-          } finally {
-            close();
-          }
-        },
-        visible: true,
-      },
-    ];
-  }, [close, removeMessage]);
 
   return (
     <View style={{ flex: 1 }}>
@@ -139,13 +136,15 @@ const ChatListWithReactions: React.FC<ChatListWithReactionsProps> = ({
         onScrollEndDrag={handleScrollEndDrag}
       />
       
-      <ReactionBar
-        visible={visible}
-        anchor={anchor}
-        onClose={close}
-        selectedMessageId={selectedMessageId}
-        getActions={getActions}
-      />
+      <Portal>
+                 <ReactionBar
+           visible={visible}
+           anchor={anchor}
+           onClose={handleClose}
+           selectedMessageId={localSelectedMessageId}
+           keyboardHeight={keyboardHeight}
+         />
+      </Portal>
     </View>
   );
 };

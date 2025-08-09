@@ -36,8 +36,6 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useMessageStore } from '../hooks/useMessageStore';
-
-import * as Clipboard from 'expo-clipboard';
 import { useUIWatchDog } from '../hooks/useUIWatchDog';
 import { ErrorSeverity, useErrorMonitor } from '../utils/errorBoundary';
 import ChatListWithReactions from './ChatListWithReactions';
@@ -162,49 +160,6 @@ const ChatCoreInner: React.FC<ChatCoreProps> = ({ onSendMessage, onError, isBotE
   // Подключаем Zustand store для сообщений с защитой
   const messages = useMessageStore((s) => s?.messages || []);
   const addMessage = useMessageStore((s) => s?.addMessage || (() => {}));
-  const removeMessage = useMessageStore((s) => s?.removeMessage || (() => {}));
-  const setReplyDraft = useMessageStore((s) => s?.setReplyDraft || (() => {}));
-  const getMessageById = useMessageStore((s) => s?.getMessageById || (() => undefined));
-  
-  // Получаем выбранное сообщение для действий
-  const [selectedMessageId, setSelectedMessageId] = useState<string | null>(null);
-  
-  // Функции для действий с сообщениями
-  const handleReply = useCallback(() => {
-    if (selectedMessageId) {
-      const message = getMessageById(selectedMessageId);
-      if (message) {
-        setReplyDraft(message);
-        setSelectedMessageId(null);
-      }
-    }
-  }, [selectedMessageId, getMessageById, setReplyDraft]);
-  
-  const handleCopy = useCallback(async () => {
-    if (selectedMessageId) {
-      const message = getMessageById(selectedMessageId);
-      if (message) {
-        try {
-          await Clipboard.setStringAsync(message.text);
-          setSelectedMessageId(null);
-        } catch (error) {
-          if (__DEV__) console.warn('Ошибка копирования:', error);
-        }
-      }
-    }
-  }, [selectedMessageId, getMessageById]);
-  
-  const handleForward = useCallback(() => {
-    if (__DEV__) console.warn('Forward: TODO - пока не реализовано');
-    setSelectedMessageId(null);
-  }, []);
-  
-  const handleDelete = useCallback(() => {
-    if (selectedMessageId) {
-      removeMessage(selectedMessageId);
-      setSelectedMessageId(null);
-    }
-  }, [selectedMessageId, removeMessage]);
   
   // Состояния для тем с защитой
   const [currentTheme, setCurrentTheme] = useState("dark");
@@ -389,46 +344,13 @@ const ChatCoreInner: React.FC<ChatCoreProps> = ({ onSendMessage, onError, isBotE
           {!isSearching ? (
             <>
               <Text style={styles.headerText}>Axora</Text>
-              {selectedMessageId ? (
-                <View style={styles.headerActions}>
-                  <TouchableOpacity 
-                    style={styles.actionButton}
-                    onPress={handleReply}
-                    activeOpacity={0.7}
-                  >
-                    <Ionicons name="arrow-undo" size={18} color="#fff" />
-                  </TouchableOpacity>
-                  <TouchableOpacity 
-                    style={styles.actionButton}
-                    onPress={handleCopy}
-                    activeOpacity={0.7}
-                  >
-                    <Ionicons name="copy" size={18} color="#fff" />
-                  </TouchableOpacity>
-                  <TouchableOpacity 
-                    style={styles.actionButton}
-                    onPress={handleForward}
-                    activeOpacity={0.7}
-                  >
-                    <Ionicons name="arrow-forward" size={18} color="#fff" />
-                  </TouchableOpacity>
-                  <TouchableOpacity 
-                    style={styles.actionButton}
-                    onPress={handleDelete}
-                    activeOpacity={0.7}
-                  >
-                    <Ionicons name="trash" size={18} color="#fff" />
-                  </TouchableOpacity>
-                </View>
-              ) : (
-                <TouchableOpacity 
-                  style={styles.menuButton}
-                  onPress={() => setShowMenu(!showMenu)}
-                  activeOpacity={0.7}
-                >
-                  <Ionicons name="ellipsis-vertical" size={20} color="#fff" />
-                </TouchableOpacity>
-              )}
+              <TouchableOpacity 
+                style={styles.menuButton}
+                onPress={() => setShowMenu(!showMenu)}
+                activeOpacity={0.7}
+              >
+                <Ionicons name="ellipsis-vertical" size={20} color="#fff" />
+              </TouchableOpacity>
             </>
           ) : (
             <View style={styles.searchContainer}>
@@ -554,7 +476,6 @@ const ChatCoreInner: React.FC<ChatCoreProps> = ({ onSendMessage, onError, isBotE
           onScrollBeginDrag={() => {
             // Обработка начала скролла
           }}
-          onMessageSelected={setSelectedMessageId}
         />
 
         {/* Строка ввода - критически важный компонент */}
@@ -648,20 +569,6 @@ const styles = StyleSheet.create({
     letterSpacing: 2,
     fontFamily: "SpaceMono",
   },
-  headerActions: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  actionButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "rgba(255,255,255,0.1)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-
   menuButton: {
     width: 40,
     height: 40,

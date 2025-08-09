@@ -23,6 +23,7 @@ interface MessageStore {
   // Селекторы для оптимизации
   getMessageById: (id: string) => Message | undefined;
   getMessagesBySender: (sender: "me" | "other") => Message[];
+  getMessagesWithReactions: () => Message[];
   getMessagesByStatus: (status: Message["status"]) => Message[];
   getMessageCount: () => number;
   getLatestMessage: () => Message | undefined;
@@ -64,6 +65,7 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
         sender: "me",
         timestamp: Date.now(),
         status: "sending",
+        reactions: [],
       };
       
       set((state) => ({
@@ -114,6 +116,7 @@ if (__DEV__) console.warn('addBotMessage: Невалидный текст соо
         sender: "other",
         timestamp: Date.now(),
         status: "sent",
+        reactions: [],
       };
       
       set((state) => ({
@@ -164,37 +167,39 @@ if (__DEV__) console.warn('removeMessage: Невалидный ID сообщен
   
   addReaction: (messageId: string, reaction: string) => {
     try {
-      if (!messageId || typeof messageId !== 'string' || !reaction || typeof reaction !== 'string') {
-        if (__DEV__) console.warn('addReaction: Невалидные параметры реакции');
+      if (!messageId || typeof messageId !== 'string') {
+if (__DEV__) console.warn('addReaction: Невалидный ID сообщения');
         return;
       }
 
-      if (__DEV__) {
-        console.log('🔥 addReaction: Добавляем реакцию', { messageId, reaction });
+      if (!reaction || typeof reaction !== 'string') {
+if (__DEV__) console.warn('addReaction: Невалидная реакция');
+        return;
       }
 
-      set((state) => {
-        const newMessages = state.messages.map(msg => {
+      set((state) => ({
+        messages: state.messages.map(msg => {
           if (msg.id === messageId) {
-            // Если уже есть такая реакция - убираем её (toggle)
-            if (msg.reactions && msg.reactions.includes(reaction)) {
-              return { ...msg, reactions: msg.reactions.filter(r => r !== reaction) };
+            const reactions = msg.reactions || [];
+            
+            // Проверяем, есть ли уже такая реакция
+            const hasReaction = reactions.includes(reaction);
+            
+            if (hasReaction) {
+              // Если реакция уже есть, убираем её (toggle)
+              const newReactions = reactions.filter(r => r !== reaction);
+              return { ...msg, reactions: newReactions };
+            } else {
+              // Если реакции нет, убираем ВСЕ старые реакции и добавляем новую
+              // Один пользователь = одна реакция на сообщение
+              return { ...msg, reactions: [reaction] };
             }
-            // Иначе заменяем все реакции на новую (только одна реакция)
-            return { ...msg, reactions: [reaction] };
           }
           return msg;
-        });
-        
-        if (__DEV__) {
-          const updatedMsg = newMessages.find(m => m.id === messageId);
-          console.log('🔥 addReaction: Обновленное сообщение', updatedMsg);
-        }
-        
-        return { messages: newMessages };
-      });
+        })
+      }));
       
-      if (__DEV__) { console.log('addReaction: Реакция добавлена', messageId, reaction); }
+      if (__DEV__) console.log('addReaction: Реакция переключена', messageId, reaction);
     } catch (error) {
       console.error('addReaction: Ошибка добавления реакции', error);
     }
@@ -202,29 +207,28 @@ if (__DEV__) console.warn('removeMessage: Невалидный ID сообщен
 
   removeReaction: (messageId: string, reaction: string) => {
     try {
-      if (!messageId || typeof messageId !== 'string' || !reaction || typeof reaction !== 'string') {
-        if (__DEV__) console.warn('removeReaction: Невалидные параметры реакции');
+      if (!messageId || typeof messageId !== 'string') {
+if (__DEV__) console.warn('removeReaction: Невалидный ID сообщения');
         return;
       }
 
-      if (__DEV__) {
-        console.log('🔥 removeReaction: Удаляем реакцию', { messageId, reaction });
+      if (!reaction || typeof reaction !== 'string') {
+if (__DEV__) console.warn('removeReaction: Невалидная реакция');
+        return;
       }
 
-      set((state) => {
-        const newMessages = state.messages.map(msg => 
-          msg.id === messageId ? { ...msg, reactions: (msg.reactions || []).filter((r: string) => r !== reaction) } : msg
-        );
-        
-        if (__DEV__) {
-          const updatedMsg = newMessages.find(m => m.id === messageId);
-          console.log('🔥 removeReaction: Обновленное сообщение', updatedMsg);
-        }
-        
-        return { messages: newMessages };
-      });
+      set((state) => ({
+        messages: state.messages.map(msg => {
+          if (msg.id === messageId) {
+            const reactions = msg.reactions || [];
+            const newReactions = reactions.filter(r => r !== reaction);
+            return { ...msg, reactions: newReactions };
+          }
+          return msg;
+        })
+      }));
       
-      if (__DEV__) { console.log('removeReaction: Реакция удалена', messageId, reaction); }
+      if (__DEV__) { /* console.log('removeReaction: Реакция удалена', messageId, reaction); */ }
     } catch (error) {
       console.error('removeReaction: Ошибка удаления реакции', error);
     }
@@ -243,6 +247,7 @@ if (__DEV__) console.warn('removeMessage: Невалидный ID сообщен
         sender: 'me',
         timestamp: Date.now(),
         status: 'sending',
+        reactions: [],
         replyTo: parent,
       };
       set((state) => ({ messages: [...state.messages, newMessage] }));
@@ -371,6 +376,16 @@ if (__DEV__) console.warn('getMessagesBySender: Невалидный отпра�
     }
   },
 
+  getMessagesWithReactions: () => {
+    try {
+      const state = get();
+      return state.messages.filter(msg => msg.reactions && msg.reactions.length > 0);
+    } catch (error) {
+      console.error('getMessagesWithReactions: Ошибка получения сообщений с реакциями', error);
+      return [];
+    }
+  },
+
   getMessagesByStatus: (status: Message["status"]) => {
     try {
       if (status && !["sending", "sent", "delivered", "read"].includes(status)) {
@@ -416,6 +431,7 @@ export const useMessageSelectors = () => {
     const memoizedSelectors = React.useMemo(() => ({
       getMessageById: (id: string) => store.getMessageById(id),
       getMessagesBySender: (sender: "me" | "other") => store.getMessagesBySender(sender),
+      getMessagesWithReactions: () => store.getMessagesWithReactions(),
       getMessagesByStatus: (status: Message["status"]) => store.getMessagesByStatus(status),
       getMessageCount: () => store.getMessageCount(),
       getLatestMessage: () => store.getLatestMessage(),
@@ -427,6 +443,7 @@ export const useMessageSelectors = () => {
     return {
       getMessageById: () => undefined,
       getMessagesBySender: () => [],
+      getMessagesWithReactions: () => [],
       getMessagesByStatus: () => [],
       getMessageCount: () => 0,
       getLatestMessage: () => undefined,

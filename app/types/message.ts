@@ -4,7 +4,7 @@ export interface Message {
   sender: "me" | "other";
   timestamp: number;
   status: "sending" | "sent" | "delivered" | "read";
-  reactions: string[];
+  reactions?: string[];
   replyTo?: Message;
 }
 
