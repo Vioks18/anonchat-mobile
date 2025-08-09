@@ -75,6 +75,9 @@ const MessageWithReactions: React.FC<MessageWithReactionsProps> = ({
 
   // Умная обработка тапов
   const onPressWrap = (e: any) => {
+    if (__DEV__) {
+      console.log('🔥 MessageWithReactions onPress:', { messageId: message.id, isSelected });
+    }
     // Передаем closeAll только если сообщение выбрано (меню открыто)
     onPress?.(message.id, { ...e, closeAll: isSelected });
   };

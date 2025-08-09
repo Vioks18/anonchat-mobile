@@ -1,10 +1,9 @@
 # QA Report
 
 **Mode:** strict
-**New issues:** 3
+**New issues:** 5
 
 ## ✅ Passed
-- reactionbar.anchor_guard (P0) — app/components/reactions/ReactionBar.tsx: Found
 - store.status_read (P0) — app/hooks/useMessageStore.ts: read in statuses
 - perf.dev_logs (P0) — app/hooks/useUIWatchDog.ts: logs guarded
 - perf.dev_logs (P0) — app/hooks/useMessageStore.ts: logs guarded
@@ -20,7 +19,6 @@
 - bubble.noWidth100 (P1) — app/components/MessageWithReactions.tsx: OK
 - doubleTap.window (P1) — app/components/ChatListWithReactions.tsx: window 220-300ms
 - scroll.gate (P1) — app/components/ChatListWithReactions.tsx: Found
-- reactionbar.guard (P0) — app/components/reactions/ReactionBar.tsx: Found
 - reactionbar.pointerEvents (P1) — app/components/reactions/ReactionBar.tsx: Found
 - anchor.touchXY (P1) — app/hooks/useReactionState.ts: touchXY support present
 - status.read (P0) — app/hooks/useMessageStore.ts: OK
@@ -32,6 +30,8 @@
 - bubble.paddingRight.meta (P1) — app/components/MessageWithReactions.tsx: paddingRight < 28 **NEW**
 
 ## ❌ P0 Issues
+- reactionbar.anchor_guard (P0) — app/components/reactions/ReactionBar.tsx: Missing: if (!visible || !anchor) return null; **NEW**
 - gestures.doubletap.behavior (P0) — tapdiag-report.json: gesture issues: lateSecondTap: 2 > 0, duringScroll: 1 > 0, openLatencyP95: 300 > 300ms, openTooFar: 1 > 0 **NEW**
+- reactionbar.guard (P0) — app/components/reactions/ReactionBar.tsx: Missing: if (!visible || !anchor) return null; **NEW**
 
-Summary: Passed=22, Warnings=2, P0=1
+Summary: Passed=20, Warnings=2, P0=3

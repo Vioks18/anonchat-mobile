@@ -60,7 +60,16 @@ const ReactionBar: React.FC<ReactionBarProps> = ({
     }
   };
 
-  if (!visible || !anchor) return null;
+  if (!visible || !anchor) {
+    if (__DEV__) {
+      console.log('🔥 ReactionBar: not visible', { visible, anchor: !!anchor });
+    }
+    return null;
+  }
+
+  if (__DEV__) {
+    console.log('🔥 ReactionBar: rendering', { position, anchor });
+  }
 
   // Адаптивные цвета для панели реакций
   const overlayColors = pickOverlayForBg(THEMES.dark.inputBg, 'dark');
