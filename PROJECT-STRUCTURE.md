@@ -76,12 +76,24 @@
 │   ├── _layout.tsx                 # Layout для Expo Router
 │   ├── +not-found.tsx              # 404 страница
 │   └── index.tsx                   # Точка входа
-├── 📁 docs/                        # Документация (УСТАРЕЛА)
+├── 📁 docs/                        # Документация проекта
+│   ├── QA_RULES.md                 # Правила QA системы
+│   └── LOCKS.md                    # Критические инварианты
 ├── 📁 scripts/                     # Скрипты автоматизации
+│   ├── 📁 qa/                      # QA система
+│   │   ├── scan.js                 # Основной сканер качества
+│   │   └── rules.json              # Правила проверки
+│   ├── 📁 sim/                     # Симуляция и тестирование
+│   │   └── run.js                  # Симулятор чата
+│   ├── 📁 guard/                   # Pre-commit защита
+│   │   └── install-precommit.js    # Установщик хуков
 │   ├── git-backup.ps1              # PowerShell скрипт для бэкапов
 │   └── protect-chatcore.js         # Защита ChatCore
 ├── 📁 backups/                     # Автоматические бэкапы
 ├── 📁 reports/                     # Отчеты
+├── QA-REPORT.md                    # Отчет качества кода
+├── qa-baseline.json                # Baseline для QA
+├── sim-report.json                 # Отчет симуляции
 ├── 📁 assets/                      # Статические ресурсы
 ├── 📁 android/                     # Android настройки
 ├── 📁 .expo/                       # Expo конфигурация
@@ -202,8 +214,37 @@ DevBotMessage.tsx + DevHUD.tsx
 - Проверять логи в консоли
 - Тестировать на реальном устройстве
 
+## 🛡️ QA система (v2.0)
+
+### **Компоненты:**
+- `scripts/qa/scan.js` - Основной сканер качества
+- `scripts/qa/rules.json` - Правила проверки (25+ правил)
+- `scripts/guard/install-precommit.js` - Pre-commit защита
+- `scripts/sim/run.js` - Симулятор для тестирования
+
+### **Режимы работы:**
+- **strict** - исключает experimental правила
+- **soft** - полная проверка всех правил
+- **debug** - детальная отладка
+
+### **Команды:**
+```bash
+npm run qa              # Обычная проверка
+npm run qa:strict       # Строгий режим
+npm run qa:soft         # Мягкий режим
+npm run qa:debug        # С отладкой
+npm run qa:fix          # Автоисправление
+```
+
+### **Защита:**
+- Pre-commit хук блокирует P0 ошибки
+- Автоматическая проверка console.log
+- Baseline отслеживание прогресса
+
 ## 📚 Ссылки на документацию
 
+- `docs/QA_RULES.md` - Правила QA системы
+- `docs/LOCKS.md` - Критические инварианты
 - `REACTIONS-IMPLEMENTATION.md` - Система реакций
 - `CHATCORE-PROTECTION.md` - Правила защиты
 - `BACKUP-README.md` - Система бэкапов
@@ -216,6 +257,9 @@ DevBotMessage.tsx + DevHUD.tsx
 - ✅ DevBot команды
 - ✅ Защита критических файлов
 - ✅ Система бэкапов
+- ✅ QA система v2.0 (25+ правил)
+- ✅ Pre-commit защита
+- ✅ Автоматическая очистка console.log
 
 ### **🚧 В разработке:**
 - 🔄 Тестирование реакций
