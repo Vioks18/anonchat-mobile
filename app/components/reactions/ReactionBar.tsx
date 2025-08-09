@@ -29,23 +29,22 @@ const ReactionBar: React.FC<ReactionBarProps> = ({
   const position = React.useMemo(() => {
     if (!anchor) return { x: 0, y: 0 };
     
-    const screenW = Dimensions.get('window').width;
-    const screenH = Dimensions.get('window').height;
-    const safeTop = insets.top + 12;
-    const safeBottom = screenH - (insets.bottom + keyboardHeight) - 12;
+    const W = Dimensions.get('window').width;
+    const H = Dimensions.get('window').height;
     const barW = measuredWidth || (AVAILABLE_REACTIONS.length * 44 + 16);
     const barH = 56;
     
-    // Позиционирование от touchX/touchY (если есть), иначе от центра anchor
-    const baseX = (anchor.touchX ?? (anchor.x + anchor.w / 2));
-    let x = baseX - barW / 2;
-    x = Math.max(12, Math.min(x, screenW - barW - 12)); // clamp по экрану
+    // Позиционирование от точки тапа (если есть)
+    const baseX = anchor.touchX ?? (anchor.x + anchor.w / 2);
+    let left = Math.max(12, Math.min(baseX - barW / 2, W - barW - 12));
     
+    const safeTop = insets.top + 12;
+    const safeBottom = H - insets.bottom - 12;
     const yTop = (anchor.touchY ?? anchor.y) - barH - 12;
     const yBottom = (anchor.touchY ?? (anchor.y + anchor.h)) + 12;
-    let y = (yTop < safeTop) ? Math.min(yBottom, safeBottom - barH) : Math.max(yTop, safeTop);
+    let top = (yTop < safeTop) ? Math.min(yBottom, safeBottom - barH) : Math.max(yTop, safeTop);
     
-    return { x, y };
+    return { x: left, y: top };
   }, [anchor, measuredWidth, insets.top, insets.bottom, keyboardHeight]);
 
   const handleReaction = (reaction: string) => {
@@ -54,11 +53,7 @@ const ReactionBar: React.FC<ReactionBarProps> = ({
     }
     if (selectedMessageId) {
       addReaction(selectedMessageId, reaction);
-      if (__DEV__) {
-        console.log('🔥 ReactionBar: Закрываем оба меню после добавления реакции');
-      }
-      // Сразу закрываем оба меню: реакции и кнопки в header
-      onClose();
+      onClose(); // Клик по эмодзи
     } else if (__DEV__) {
       console.warn('⚠️ ReactionBar: selectedMessageId is null!');
     }

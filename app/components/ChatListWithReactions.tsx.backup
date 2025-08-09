@@ -54,42 +54,45 @@ const ChatListWithReactions: React.FC<ChatListWithReactionsProps> = ({
 
   const handlePress = useCallback((id: string, e?: any) => {
     const now = Date.now();
-    const WIN = 300; // Увеличиваем окно для двойного тапа
+    const WIN = 260;
     
-    if (__DEV__) {
-      console.log('🔥 handlePress:', { id, lastTap, timeDiff: lastTap ? now - lastTap.t : null });
-    }
-    
-    // Если есть открытое меню - закрываем его
-    if (visible || showHeaderActions) {
-      if (__DEV__) {
-        console.log('🔥 Закрываем открытое меню');
-      }
+    // Проверяем флаг closeAll - если есть, закрываем все меню сразу
+    if (e?.closeAll) {
       handleClose();
       setLastTap(null);
       return;
     }
     
-    // Проверяем двойной тап
+    // Если сообщение уже выделено удержанием - просто убираем выделение
+    if (localSelectedMessageId === id && showHeaderActions) {
+      setLocalSelectedMessageId(null);
+      setShowHeaderActions(false);
+      onMessageSelected?.(null);
+      setLastTap(null);
+      return;
+    }
+    
     if (lastTap && lastTap.messageId === id && (now - lastTap.t) < WIN) {
-      if (__DEV__) {
-        console.log('🔥 ДВОЙНОЙ ТАП!');
-      }
-      // ДАБЛ-ТАП = открываем реакции
-      const ref = messageRefs.current.get(id);
-      if (__DEV__) {
-        console.log('🔥 ref found:', !!ref);
-      }
+      // double-tap → ОТКРЫТЬ РЕАКЦИИ + ПОКАЗАТЬ КНОПКИ В HEADER
+      setShowHeaderActions(true);
       setLocalSelectedMessageId(id);
+      onMessageSelected?.(id); // Показываем кнопки в header при double-tap
       setLastTouch?.(e?.nativeEvent?.pageX, e?.nativeEvent?.pageY);
+      const ref = messageRefs.current.get(id);
       if (ref) openAtMessage(id, ref);
       setLastTap(null);
       return;
     }
     
-    // Обычный тап - запоминаем для возможного двойного тапа
+    // Обычный тап → закрываем реакции если они открыты
+    if (visible) {
+      close();
+      setLocalSelectedMessageId(null);
+      onMessageSelected?.(null);
+    }
+    
     setLastTap({ messageId: id, t: now });
-  }, [lastTap, openAtMessage, setLastTouch, visible, showHeaderActions, handleClose]);
+  }, [lastTap, openAtMessage, setLastTouch, onMessageSelected, visible, close, localSelectedMessageId, showHeaderActions, handleClose]);
 
   const renderMessage = useCallback(({ item }: { item: Message }) => {
     const isMyMessage = item.sender === 'me';
@@ -133,15 +136,15 @@ const ChatListWithReactions: React.FC<ChatListWithReactionsProps> = ({
         onScrollEndDrag={handleScrollEndDrag}
       />
       
-             <Portal>
-                  <ReactionBar
-            visible={visible}
-            anchor={anchor}
-            onClose={handleClose}
-            selectedMessageId={selectedMessageId}
-            keyboardHeight={keyboardHeight}
-          />
-       </Portal>
+      <Portal>
+                 <ReactionBar
+           visible={visible}
+           anchor={anchor}
+           onClose={handleClose}
+           selectedMessageId={localSelectedMessageId}
+           keyboardHeight={keyboardHeight}
+         />
+      </Portal>
     </View>
   );
 };

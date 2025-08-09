@@ -170,7 +170,7 @@ if (__DEV__) console.warn('removeMessage: Невалидный ID сообщен
       }
 
       if (__DEV__) {
-        console.log('🔥 addReaction: Добавляем реакцию', { messageId, reaction });
+if (__DEV__) console.log('🔥 addReaction: Добавляем реакцию', { messageId, reaction });
       }
 
       set((state) => {
@@ -188,7 +188,7 @@ if (__DEV__) console.warn('removeMessage: Невалидный ID сообщен
         
         if (__DEV__) {
           const updatedMsg = newMessages.find(m => m.id === messageId);
-          console.log('🔥 addReaction: Обновленное сообщение', updatedMsg);
+if (__DEV__) console.log('🔥 addReaction: Обновленное сообщение', updatedMsg);
         }
         
         return { messages: newMessages };
@@ -208,7 +208,7 @@ if (__DEV__) console.warn('removeMessage: Невалидный ID сообщен
       }
 
       if (__DEV__) {
-        console.log('🔥 removeReaction: Удаляем реакцию', { messageId, reaction });
+if (__DEV__) console.log('🔥 removeReaction: Удаляем реакцию', { messageId, reaction });
       }
 
       set((state) => {
@@ -218,7 +218,7 @@ if (__DEV__) console.warn('removeMessage: Невалидный ID сообщен
         
         if (__DEV__) {
           const updatedMsg = newMessages.find(m => m.id === messageId);
-          console.log('🔥 removeReaction: Обновленное сообщение', updatedMsg);
+if (__DEV__) console.log('🔥 removeReaction: Обновленное сообщение', updatedMsg);
         }
         
         return { messages: newMessages };
