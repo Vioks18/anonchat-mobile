@@ -56,26 +56,16 @@ const ChatListWithReactions: React.FC<ChatListWithReactionsProps> = ({
 
   const handlePress = useCallback((id: string, e?: any) => {
     const now = Date.now();
-    const WIN = 250; // Оптимальное окно для двойного тапа 220-300ms
+    const WIN = 400; // Увеличиваем окно для двойного тапа до 400ms
     
     if (__DEV__) {
-      if (__DEV__) console.log('🔥 handlePress:', { id, lastTap, timeDiff: lastTap ? now - lastTap.t : null });
+      console.log('🔥 handlePress:', { id, lastTap, timeDiff: lastTap ? now - lastTap.t : null });
     }
     
-    // Если есть открытое меню - закрываем его
-    if (visible || showHeaderActions) {
-      if (__DEV__) {
-        if (__DEV__) console.log('🔥 Закрываем открытое меню');
-      }
-      handleClose();
-      setLastTap(null);
-      return;
-    }
-    
-    // Проверяем двойной тап
+    // Проверяем двойной тап ПЕРЕД проверкой открытых меню
     if (lastTap && lastTap.messageId === id && (now - lastTap.t) < WIN) {
       if (__DEV__) {
-        if (__DEV__) console.log('🔥 ДВОЙНОЙ ТАП!');
+        console.log('🔥 ДВОЙНОЙ ТАП!');
         GestureProbe.log({ 
           type: 'doubleTap', 
           t: Date.now(), 
@@ -87,11 +77,21 @@ const ChatListWithReactions: React.FC<ChatListWithReactionsProps> = ({
       // ДАБЛ-ТАП = открываем реакции
       const ref = messageRefs.current.get(id);
       if (__DEV__) {
-        if (__DEV__) console.log('🔥 ref found:', !!ref);
+        console.log('🔥 ref found:', !!ref);
       }
       setLocalSelectedMessageId(id);
       setLastTouch?.(e?.nativeEvent?.pageX, e?.nativeEvent?.pageY);
       if (ref) openAtMessage(id, ref);
+      setLastTap(null);
+      return;
+    }
+    
+    // Если есть открытое меню - закрываем его
+    if (visible || showHeaderActions) {
+      if (__DEV__) {
+        console.log('🔥 Закрываем открытое меню');
+      }
+      handleClose();
       setLastTap(null);
       return;
     }
@@ -103,16 +103,6 @@ const ChatListWithReactions: React.FC<ChatListWithReactionsProps> = ({
     
     // Обычный тап - запоминаем для возможного двойного тапа
     setLastTap({ messageId: id, t: now });
-    
-    // Автоматически очищаем lastTap через 1 секунду
-    setTimeout(() => {
-      setLastTap((current) => {
-        if (current && current.messageId === id && (Date.now() - current.t) > 1000) {
-          return null;
-        }
-        return current;
-      });
-    }, 1000);
   }, [lastTap, openAtMessage, setLastTouch, visible, showHeaderActions, handleClose]);
 
   const renderMessage = useCallback(({ item }: { item: Message }) => {
