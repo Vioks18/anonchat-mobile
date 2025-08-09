@@ -71,7 +71,7 @@ const MessageWithReactions: React.FC<MessageWithReactionsProps> = ({
   const { removeReaction } = useMessageStore();
   
   // Анимация выбранного сообщения
-  const { animatedStyle, shadowStyle } = useSelectedMessageAnimation({ isSelected });
+  const { animatedStyle } = useSelectedMessageAnimation({ isSelected });
 
   // Умная обработка тапов
   const onPressWrap = (e: any) => {
@@ -151,10 +151,9 @@ const MessageWithReactions: React.FC<MessageWithReactionsProps> = ({
                styles.bubble,
                bubbleStyle,
                isMyMessage ? styles.bubbleMe : styles.bubbleOther,
-               isSelected && {
-                 ...styles.selectedBubble,
-                 ...shadowStyle,
-               }
+                               isSelected && {
+                  ...styles.selectedBubble,
+                }
              ]}
           >
                       <Text style={textStyle}>{message.text}</Text>
