@@ -1,8 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
 import React, { useMemo, useRef } from 'react';
-import { Dimensions, Pressable, Text, TouchableOpacity, View } from 'react-native';
+import { Animated, Dimensions, Pressable, Text, TouchableOpacity, View } from 'react-native';
 import { THEMES } from '../constants/themes';
 import { useMessageStore } from '../hooks/useMessageStore';
+import { useSelectedMessageAnimation } from '../hooks/useSelectedMessageAnimation';
 import { Message } from '../types/message';
 import { formatTimestamp } from '../utils/formatTimestamp';
 
@@ -68,6 +69,9 @@ const MessageWithReactions: React.FC<MessageWithReactionsProps> = ({
 }) => {
   const rootRef = useRef<View>(null);
   const { removeReaction } = useMessageStore();
+  
+  // Анимация выбранного сообщения
+  const { animatedStyle, shadowAnim } = useSelectedMessageAnimation({ isSelected });
 
   // Умная обработка тапов
   const onPressWrap = (e: any) => {
@@ -135,40 +139,45 @@ const MessageWithReactions: React.FC<MessageWithReactionsProps> = ({
         styles.messageContent,
         isMyMessage ? styles.messageContentMe : styles.messageContentOther
       ]}>
-        <Pressable
-          ref={rootRef}
-          onPress={onPressWrap}
-          onLongPress={onLongPressWrap}
-          delayLongPress={500}
-          hitSlop={{ top: 6, bottom: 6, left: 4, right: 4 }}
-          android_disableSound
-          style={[
-            styles.bubble,
-            bubbleStyle,
-            isMyMessage ? styles.bubbleMe : styles.bubbleOther,
-            isSelected && styles.selectedBubble
-          ]}
-        >
-          <Text style={textStyle}>{message.text}</Text>
-          
-          {/* Метаданные (время + галочки) */}
-          {isMyMessage && (
-            <View style={styles.metaRow} pointerEvents="none">
-              <Text style={[styles.time, { color: metaColor }]}>{time}</Text>
-                             <Ionicons
-                 name={
-                   status === 'sending'   ? 'time-outline' :
-                   status === 'delivered' ? 'checkmark-done-outline' :
-                   status === 'read'      ? 'checkmark-done-outline' :
-                                            'checkmark-outline'
-                 }
-                 size={16}
-                 color={tickColor}
-                 style={{ marginLeft: 4 }}
-               />
-            </View>
-          )}
-        </Pressable>
+        <Animated.View style={[animatedStyle]}>
+          <Pressable
+            ref={rootRef}
+            onPress={onPressWrap}
+            onLongPress={onLongPressWrap}
+            delayLongPress={500}
+            hitSlop={{ top: 6, bottom: 6, left: 4, right: 4 }}
+            android_disableSound
+            style={[
+              styles.bubble,
+              bubbleStyle,
+              isMyMessage ? styles.bubbleMe : styles.bubbleOther,
+              isSelected && {
+                ...styles.selectedBubble,
+                shadowOpacity: shadowAnim,
+              }
+            ]}
+          >
+                      <Text style={textStyle}>{message.text}</Text>
+            
+            {/* Метаданные (время + галочки) */}
+            {isMyMessage && (
+              <View style={styles.metaRow} pointerEvents="none">
+                <Text style={[styles.time, { color: metaColor }]}>{time}</Text>
+                <Ionicons
+                  name={
+                    status === 'sending'   ? 'time-outline' :
+                    status === 'delivered' ? 'checkmark-done-outline' :
+                    status === 'read'      ? 'checkmark-done-outline' :
+                                             'checkmark-outline'
+                  }
+                  size={16}
+                  color={tickColor}
+                  style={{ marginLeft: 4 }}
+                />
+              </View>
+            )}
+          </Pressable>
+        </Animated.View>
         
         {/* Отображение реакций */}
         {message.reactions && message.reactions.length > 0 && (
@@ -301,4 +310,13 @@ const styles = {
   },
 };
 
-export default MessageWithReactions;
+export default React.memo(MessageWithReactions, (prevProps, nextProps) => {
+  return (
+    prevProps.message.id === nextProps.message.id &&
+    prevProps.message.text === nextProps.message.text &&
+    prevProps.message.status === nextProps.message.status &&
+    prevProps.message.reactions?.length === nextProps.message.reactions?.length &&
+    prevProps.isMyMessage === nextProps.isMyMessage &&
+    prevProps.isSelected === nextProps.isSelected
+  );
+});

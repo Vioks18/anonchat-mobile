@@ -2,6 +2,7 @@ import React from 'react';
 import { Animated, Dimensions, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { THEMES } from '../../constants/themes';
+import { pickOverlayForBg } from '../../constants/themeUtils';
 import { useMessageStore } from '../../hooks/useMessageStore';
 import { ReactionAnchor } from '../../hooks/useReactionState';
 
@@ -61,6 +62,9 @@ const ReactionBar: React.FC<ReactionBarProps> = ({
 
   if (!visible || !anchor) return null;
 
+  // Адаптивные цвета для панели реакций
+  const overlayColors = pickOverlayForBg(THEMES.dark.inputBg, 'dark');
+
   const styles = {
     container: {
       position: 'absolute' as const,
@@ -74,13 +78,13 @@ const ReactionBar: React.FC<ReactionBarProps> = ({
       paddingVertical: 10,
       borderRadius: 28,
       backgroundColor: THEMES.dark.inputBg + 'F0', // Более прозрачный фон для реакций
-      shadowColor: '#000',
+      shadowColor: overlayColors.shadowColor,
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.25,
       shadowRadius: 8,
       elevation: 8,
       borderWidth: 1,
-      borderColor: THEMES.dark.border + '40', // Тонкая рамка
+      borderColor: overlayColors.overlayColor,
     },
     emojiRow: {
       flexDirection: 'row' as const,
