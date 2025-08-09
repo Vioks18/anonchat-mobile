@@ -65,12 +65,12 @@ const ChatStateProviderInner: React.FC<ChatStateProviderProps> = React.memo(({ c
   const safeSetInputText = useCallback((text: string) => {
     try {
       if (typeof text !== 'string') {
-        console.warn('ChatState: Невалидный тип текста', typeof text);
+        if (__DEV__) console.warn('ChatState: Невалидный тип текста', typeof text);
         return;
       }
       setInputText(text);
     } catch (error) {
-      console.error('ChatState: Ошибка изменения текста', error);
+      if (__DEV__) console.error('ChatState: Ошибка изменения текста', error);
     }
   }, []);
 
@@ -78,12 +78,12 @@ const ChatStateProviderInner: React.FC<ChatStateProviderProps> = React.memo(({ c
   const safeSetInputFocused = useCallback((focused: boolean) => {
     try {
       if (typeof focused !== 'boolean') {
-        console.warn('ChatState: Невалидный тип фокуса', typeof focused);
+        if (__DEV__) console.warn('ChatState: Невалидный тип фокуса', typeof focused);
         return;
       }
       setInputFocused(focused);
     } catch (error) {
-      console.error('ChatState: Ошибка изменения фокуса', error);
+      if (__DEV__) console.error('ChatState: Ошибка изменения фокуса', error);
     }
   }, []);
 
@@ -91,12 +91,12 @@ const ChatStateProviderInner: React.FC<ChatStateProviderProps> = React.memo(({ c
   const safeSetShowMenu = useCallback((show: boolean) => {
     try {
       if (typeof show !== 'boolean') {
-        console.warn('ChatState: Невалидный тип меню', typeof show);
+        if (__DEV__) console.warn('ChatState: Невалидный тип меню', typeof show);
         return;
       }
       setShowMenu(show);
     } catch (error) {
-      console.error('ChatState: Ошибка изменения меню', error);
+      if (__DEV__) console.error('ChatState: Ошибка изменения меню', error);
     }
   }, []);
 
@@ -104,12 +104,12 @@ const ChatStateProviderInner: React.FC<ChatStateProviderProps> = React.memo(({ c
   const safeSetIsSearching = useCallback((searching: boolean) => {
     try {
       if (typeof searching !== 'boolean') {
-        console.warn('ChatState: Невалидный тип поиска', typeof searching);
+        if (__DEV__) console.warn('ChatState: Невалидный тип поиска', typeof searching);
         return;
       }
       setIsSearching(searching);
     } catch (error) {
-      console.error('ChatState: Ошибка изменения поиска', error);
+      if (__DEV__) console.error('ChatState: Ошибка изменения поиска', error);
     }
   }, []);
 
@@ -117,12 +117,12 @@ const ChatStateProviderInner: React.FC<ChatStateProviderProps> = React.memo(({ c
   const safeSetSearchQuery = useCallback((query: string) => {
     try {
       if (typeof query !== 'string') {
-        console.warn('ChatState: Невалидный тип запроса', typeof query);
+        if (__DEV__) console.warn('ChatState: Невалидный тип запроса', typeof query);
         return;
       }
       setSearchQuery(query);
     } catch (error) {
-      console.error('ChatState: Ошибка изменения запроса', error);
+      if (__DEV__) console.error('ChatState: Ошибка изменения запроса', error);
     }
   }, []);
 
@@ -130,12 +130,12 @@ const ChatStateProviderInner: React.FC<ChatStateProviderProps> = React.memo(({ c
   const safeSetShowThemeSelector = useCallback((show: boolean) => {
     try {
       if (typeof show !== 'boolean') {
-        console.warn('ChatState: Невалидный тип селектора тем', typeof show);
+        if (__DEV__) console.warn('ChatState: Невалидный тип селектора тем', typeof show);
         return;
       }
       setShowThemeSelector(show);
     } catch (error) {
-      console.error('ChatState: Ошибка изменения селектора тем', error);
+      if (__DEV__) console.error('ChatState: Ошибка изменения селектора тем', error);
     }
   }, []);
 
@@ -166,7 +166,7 @@ const ChatStateProviderInner: React.FC<ChatStateProviderProps> = React.memo(({ c
         safeSetShowThemeSelector,
       };
     } catch (error) {
-      console.error('ChatState: Ошибка создания контекста', error);
+      if (__DEV__) console.error('ChatState: Ошибка создания контекста', error);
       return {
         inputText: '',
         setInputText: () => {},
@@ -210,7 +210,7 @@ const ChatStateProviderInner: React.FC<ChatStateProviderProps> = React.memo(({ c
       </ChatStateContext.Provider>
     );
   } catch (error) {
-    console.error('ChatState: Критическая ошибка рендеринга', error);
+    if (__DEV__) console.error('ChatState: Критическая ошибка рендеринга', error);
     return <>{children}</>;
   }
 });

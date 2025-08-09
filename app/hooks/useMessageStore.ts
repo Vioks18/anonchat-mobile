@@ -36,7 +36,7 @@ const validateMessage = (text: string): boolean => {
   try {
     return typeof text === 'string' && text.trim().length > 0;
   } catch (error) {
-    console.error('validateMessage: Ошибка валидации', error);
+    if (__DEV__) console.error('validateMessage: Ошибка валидации', error);
     return false;
   }
 };
@@ -46,7 +46,7 @@ const generateId = (): string => {
   try {
     return Date.now().toString() + '_' + Math.random().toString(36).substr(2, 9);
   } catch (error) {
-    console.error('generateId: Ошибка генерации ID', error);
+    if (__DEV__) console.error('generateId: Ошибка генерации ID', error);
     return Date.now().toString();
   }
 };
@@ -95,9 +95,9 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
         }, 500);
       }, 1000);
       
-      if (__DEV__) { /* console.log('useMessageStore: Сообщение добавлено', text); */ }
+
     } catch (error) {
-      console.error('useMessageStore: Ошибка добавления сообщения', error);
+      if (__DEV__) console.error('useMessageStore: Ошибка добавления сообщения', error);
     }
   },
 
@@ -120,9 +120,9 @@ if (__DEV__) console.warn('addBotMessage: Невалидный текст соо
         messages: [...state.messages, newMessage]
       }));
       
-      if (__DEV__) { /* console.log('addBotMessage: Сообщение бота добавлено', newMessage.id); */ }
+
     } catch (error) {
-      console.error('addBotMessage: Ошибка добавления сообщения бота', error);
+      if (__DEV__) console.error('addBotMessage: Ошибка добавления сообщения бота', error);
     }
   },
   
@@ -139,9 +139,9 @@ if (__DEV__) console.warn('updateMessage: Невалидный ID сообщен
         )
       }));
       
-      if (__DEV__) { /* console.log('updateMessage: Сообщение обновлено', id); */ }
+
     } catch (error) {
-      console.error('updateMessage: Ошибка обновления сообщения', error);
+      if (__DEV__) console.error('updateMessage: Ошибка обновления сообщения', error);
     }
   },
   
@@ -156,9 +156,9 @@ if (__DEV__) console.warn('removeMessage: Невалидный ID сообщен
         messages: state.messages.filter(msg => msg.id !== id)
       }));
       
-      if (__DEV__) { /* console.log('removeMessage: Сообщение удалено', id); */ }
+
     } catch (error) {
-      console.error('removeMessage: Ошибка удаления сообщения', error);
+      if (__DEV__) console.error('removeMessage: Ошибка удаления сообщения', error);
     }
   },
   
@@ -167,10 +167,6 @@ if (__DEV__) console.warn('removeMessage: Невалидный ID сообщен
       if (!messageId || typeof messageId !== 'string' || !reaction || typeof reaction !== 'string') {
         if (__DEV__) console.warn('addReaction: Невалидные параметры реакции');
         return;
-      }
-
-      if (__DEV__) {
-if (__DEV__) console.log('🔥 addReaction: Добавляем реакцию', { messageId, reaction });
       }
 
       set((state) => {
@@ -186,17 +182,12 @@ if (__DEV__) console.log('🔥 addReaction: Добавляем реакцию', 
           return msg;
         });
         
-        if (__DEV__) {
-          const updatedMsg = newMessages.find(m => m.id === messageId);
-if (__DEV__) console.log('🔥 addReaction: Обновленное сообщение', updatedMsg);
-        }
-        
         return { messages: newMessages };
       });
       
-      if (__DEV__) { console.log('addReaction: Реакция добавлена', messageId, reaction); }
+      
     } catch (error) {
-      console.error('addReaction: Ошибка добавления реакции', error);
+      if (__DEV__) console.error('addReaction: Ошибка добавления реакции', error);
     }
   },
 
@@ -207,26 +198,17 @@ if (__DEV__) console.log('🔥 addReaction: Обновленное сообще�
         return;
       }
 
-      if (__DEV__) {
-if (__DEV__) console.log('🔥 removeReaction: Удаляем реакцию', { messageId, reaction });
-      }
-
       set((state) => {
         const newMessages = state.messages.map(msg => 
           msg.id === messageId ? { ...msg, reactions: (msg.reactions || []).filter((r: string) => r !== reaction) } : msg
         );
         
-        if (__DEV__) {
-          const updatedMsg = newMessages.find(m => m.id === messageId);
-if (__DEV__) console.log('🔥 removeReaction: Обновленное сообщение', updatedMsg);
-        }
-        
         return { messages: newMessages };
       });
       
-      if (__DEV__) { console.log('removeReaction: Реакция удалена', messageId, reaction); }
+      
     } catch (error) {
-      console.error('removeReaction: Ошибка удаления реакции', error);
+      if (__DEV__) console.error('removeReaction: Ошибка удаления реакции', error);
     }
   },
 
@@ -263,7 +245,7 @@ if (__DEV__) console.log('🔥 removeReaction: Обновленное сообщ
         }, 500);
       }, 1000);
     } catch (error) {
-      console.error('addReply: Ошибка создания ответа', error);
+      if (__DEV__) console.error('addReply: Ошибка создания ответа', error);
     }
   },
 
@@ -271,7 +253,7 @@ if (__DEV__) console.log('🔥 removeReaction: Обновленное сообщ
     try {
       set({ replyDraft: message });
     } catch (error) {
-      console.error('setReplyDraft: Ошибка установки черновика ответа', error);
+      if (__DEV__) console.error('setReplyDraft: Ошибка установки черновика ответа', error);
     }
   },
   
@@ -291,18 +273,18 @@ if (__DEV__) console.warn('toggleMessageSelection: Невалидный ID со�
         return { selectedMessages: newSelectedMessages };
       });
       
-      if (__DEV__) console.log('toggleMessageSelection: Выбор переключен', messageId);
+
     } catch (error) {
-      console.error('toggleMessageSelection: Ошибка переключения выбора', error);
+      if (__DEV__) console.error('toggleMessageSelection: Ошибка переключения выбора', error);
     }
   },
 
   clearMessageSelection: () => {
     try {
       set({ selectedMessages: [] });
-      if (__DEV__) console.log('clearMessageSelection: Выбор очищен');
+
     } catch (error) {
-      console.error('clearMessageSelection: Ошибка очистки выбора', error);
+      if (__DEV__) console.error('clearMessageSelection: Ошибка очистки выбора', error);
     }
   },
 
@@ -311,9 +293,9 @@ if (__DEV__) console.warn('toggleMessageSelection: Невалидный ID со�
       const state = get();
       const allMessageIds = state.messages.map(msg => msg.id);
       set({ selectedMessages: allMessageIds });
-      if (__DEV__) console.log('selectAllMessages: Выбраны все сообщения');
+
     } catch (error) {
-      console.error('selectAllMessages: Ошибка выбора всех сообщений', error);
+      if (__DEV__) console.error('selectAllMessages: Ошибка выбора всех сообщений', error);
     }
   },
 
@@ -325,18 +307,18 @@ if (__DEV__) console.warn('toggleMessageSelection: Невалидный ID со�
         messages: newMessages,
         selectedMessages: [] // Очищаем выбор после удаления
       });
-      if (__DEV__) console.log('removeSelectedMessages: Удалены выбранные сообщения');
+
     } catch (error) {
-      console.error('removeSelectedMessages: Ошибка удаления выбранных сообщений', error);
+      if (__DEV__) console.error('removeSelectedMessages: Ошибка удаления выбранных сообщений', error);
     }
   },
 
   reset: () => {
     try {
       set({ messages: initialMessages, selectedMessages: [] });
-if (__DEV__) console.log('reset: Store сброшен');
+  
     } catch (error) {
-      console.error('reset: Ошибка сброса store', error);
+      if (__DEV__) console.error('reset: Ошибка сброса store', error);
     }
   },
 
@@ -351,7 +333,7 @@ if (__DEV__) console.warn('getMessageById: Невалидный ID');
       const state = get();
       return state.messages.find(msg => msg.id === id);
     } catch (error) {
-      console.error('getMessageById: Ошибка получения сообщения', error);
+      if (__DEV__) console.error('getMessageById: Ошибка получения сообщения', error);
       return undefined;
     }
   },
@@ -366,7 +348,7 @@ if (__DEV__) console.warn('getMessagesBySender: Невалидный отпра�
       const state = get();
       return state.messages.filter(msg => msg.sender === sender);
     } catch (error) {
-      console.error('getMessagesBySender: Ошибка получения сообщений', error);
+      if (__DEV__) console.error('getMessagesBySender: Ошибка получения сообщений', error);
       return [];
     }
   },
@@ -381,7 +363,7 @@ if (__DEV__) console.warn('getMessagesByStatus: Невалидный стату�
       const state = get();
       return state.messages.filter(msg => msg.status === status);
     } catch (error) {
-      console.error('getMessagesByStatus: Ошибка получения сообщений по статусу', error);
+      if (__DEV__) console.error('getMessagesByStatus: Ошибка получения сообщений по статусу', error);
       return [];
     }
   },
@@ -391,7 +373,7 @@ if (__DEV__) console.warn('getMessagesByStatus: Невалидный стату�
       const state = get();
       return state.messages.length;
     } catch (error) {
-      console.error('getMessageCount: Ошибка подсчета сообщений', error);
+      if (__DEV__) console.error('getMessageCount: Ошибка подсчета сообщений', error);
       return 0;
     }
   },
@@ -401,7 +383,7 @@ if (__DEV__) console.warn('getMessagesByStatus: Невалидный стату�
       const state = get();
       return state.messages[state.messages.length - 1];
     } catch (error) {
-      console.error('getLatestMessage: Ошибка получения последнего сообщения', error);
+      if (__DEV__) console.error('getLatestMessage: Ошибка получения последнего сообщения', error);
       return undefined;
     }
   },
@@ -423,7 +405,7 @@ export const useMessageSelectors = () => {
     
     return memoizedSelectors;
   } catch (error) {
-    console.error('useMessageSelectors: Ошибка создания селекторов', error);
+    if (__DEV__) console.error('useMessageSelectors: Ошибка создания селекторов', error);
     return {
       getMessageById: () => undefined,
       getMessagesBySender: () => [],

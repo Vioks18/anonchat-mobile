@@ -91,7 +91,7 @@ const HeaderInner: React.FC<HeaderProps> = React.memo(({
     try {
       setShowMenu(!showMenu);
     } catch (error) {
-      console.error('Header: Ошибка переключения меню', error);
+      if (__DEV__) console.error('Header: Ошибка переключения меню', error);
     }
   }, [showMenu, setShowMenu]);
 
@@ -107,7 +107,7 @@ const HeaderInner: React.FC<HeaderProps> = React.memo(({
         friction: 8,
       }).start();
     } catch (error) {
-      console.error('Header: Ошибка закрытия поиска', error);
+      if (__DEV__) console.error('Header: Ошибка закрытия поиска', error);
     }
   }, [setIsSearching, setSearchQuery, searchAnimation]);
 
@@ -119,7 +119,7 @@ const HeaderInner: React.FC<HeaderProps> = React.memo(({
         deleteMessage(messageId);
       }
     } catch (error) {
-      console.error('Header: Ошибка удаления сообщения', error);
+      if (__DEV__) console.error('Header: Ошибка удаления сообщения', error);
     }
   }, [selectedMessages, deleteMessage]);
 
@@ -131,7 +131,7 @@ const HeaderInner: React.FC<HeaderProps> = React.memo(({
         copyMessage(messageId);
       }
     } catch (error) {
-      console.error('Header: Ошибка копирования сообщения', error);
+      if (__DEV__) console.error('Header: Ошибка копирования сообщения', error);
     }
   }, [selectedMessages, copyMessage]);
 
@@ -143,7 +143,7 @@ const HeaderInner: React.FC<HeaderProps> = React.memo(({
         replyToMessage(messageId);
       }
     } catch (error) {
-      console.error('Header: Ошибка ответа на сообщение', error);
+      if (__DEV__) console.error('Header: Ошибка ответа на сообщение', error);
     }
   }, [selectedMessages, replyToMessage]);
 
@@ -154,7 +154,7 @@ const HeaderInner: React.FC<HeaderProps> = React.memo(({
       setShowReactions(null);
       setShowDeleteOptions(false);
     } catch (error) {
-      console.error('Header: Ошибка отмены выбора', error);
+      if (__DEV__) console.error('Header: Ошибка отмены выбора', error);
     }
   }, [setSelectedMessages, setShowReactions, setShowDeleteOptions]);
 
@@ -164,10 +164,10 @@ const HeaderInner: React.FC<HeaderProps> = React.memo(({
       if (typeof text === 'string') {
         setSearchQuery(text);
       } else {
-        console.warn('Header: Невалидный тип текста поиска', typeof text);
+        if (__DEV__) console.warn('Header: Невалидный тип текста поиска', typeof text);
       }
     } catch (error) {
-      console.error('Header: Ошибка изменения поиска', error);
+      if (__DEV__) console.error('Header: Ошибка изменения поиска', error);
     }
   }, [setSearchQuery]);
 
@@ -242,7 +242,7 @@ const HeaderInner: React.FC<HeaderProps> = React.memo(({
       </Animated.View>
     );
   } catch (error) {
-    console.error('Header: Ошибка рендеринга', error);
+    if (__DEV__) console.error('Header: Ошибка рендеринга', error);
     return null;
   }
 

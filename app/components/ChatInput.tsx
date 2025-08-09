@@ -50,7 +50,7 @@ const ChatInputInner: React.FC<ChatInputProps> = React.memo(({
       
       return true;
     } catch (error) {
-      console.error('ChatInput: Ошибка валидации', error);
+      if (__DEV__) console.error('ChatInput: Ошибка валидации', error);
       setValidationError('Ошибка проверки сообщения');
       return false;
     }
@@ -71,7 +71,7 @@ const ChatInputInner: React.FC<ChatInputProps> = React.memo(({
         setValidationWarning(null);
       }
     } catch (error) {
-      console.error('ChatInput: Ошибка изменения текста', error);
+      if (__DEV__) console.error('ChatInput: Ошибка изменения текста', error);
     }
   }, [setInputText, validationError, validationWarning]);
 
@@ -92,7 +92,7 @@ const ChatInputInner: React.FC<ChatInputProps> = React.memo(({
 
       onSendMessage();
     } catch (error) {
-      console.error('ChatInput: Ошибка отправки сообщения', error);
+      if (__DEV__) console.error('ChatInput: Ошибка отправки сообщения', error);
       Alert.alert('Ошибка', 'Не удалось отправить сообщение');
     }
   }, [inputText, validateInput, validationError, onSendMessage]);
@@ -129,7 +129,7 @@ const ChatInputInner: React.FC<ChatInputProps> = React.memo(({
     try {
       setInputFocused(true);
     } catch (error) {
-      console.error('ChatInput: Ошибка установки фокуса', error);
+      if (__DEV__) console.error('ChatInput: Ошибка установки фокуса', error);
     }
   }, [setInputFocused]);
 
@@ -137,7 +137,7 @@ const ChatInputInner: React.FC<ChatInputProps> = React.memo(({
     try {
       setInputFocused(false);
     } catch (error) {
-      console.error('ChatInput: Ошибка снятия фокуса', error);
+      if (__DEV__) console.error('ChatInput: Ошибка снятия фокуса', error);
     }
   }, [setInputFocused]);
 

@@ -19,7 +19,7 @@ const ReplyPreviewInner: React.FC<ReplyPreviewProps> = React.memo(({ replyTo, se
     try {
       setReplyTo(null);
     } catch (error) {
-      console.error('ReplyPreview: Ошибка закрытия превью', error);
+      if (__DEV__) console.error('ReplyPreview: Ошибка закрытия превью', error);
     }
   }, [setReplyTo]);
 
@@ -30,18 +30,18 @@ const ReplyPreviewInner: React.FC<ReplyPreviewProps> = React.memo(({ replyTo, se
       
       // Проверяем обязательные поля
       if (!replyTo.text || typeof replyTo.text !== 'string') {
-        console.warn('ReplyPreview: Невалидный текст ответа', replyTo);
+        if (__DEV__) console.warn('ReplyPreview: Невалидный текст ответа', replyTo);
         return false;
       }
 
       if (!replyTo.id || typeof replyTo.id !== 'string') {
-        console.warn('ReplyPreview: Невалидный ID ответа', replyTo);
+        if (__DEV__) console.warn('ReplyPreview: Невалидный ID ответа', replyTo);
         return false;
       }
 
       return true;
     } catch (error) {
-      console.error('ReplyPreview: Ошибка валидации replyTo', error);
+      if (__DEV__) console.error('ReplyPreview: Ошибка валидации replyTo', error);
       return false;
     }
   }, [replyTo]);
@@ -68,7 +68,7 @@ const ReplyPreviewInner: React.FC<ReplyPreviewProps> = React.memo(({ replyTo, se
       </View>
     );
   } catch (error) {
-    console.error('ReplyPreview: Ошибка рендеринга', error);
+    if (__DEV__) console.error('ReplyPreview: Ошибка рендеринга', error);
     return null;
   }
 });

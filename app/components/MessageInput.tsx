@@ -38,10 +38,10 @@ const MessageInputInner: React.FC<MessageInputProps> = React.memo(({
       if (typeof text === 'string') {
         setInput(text);
       } else {
-        console.warn('MessageInput: Невалидный тип текста', typeof text);
+        if (__DEV__) console.warn('MessageInput: Невалидный тип текста', typeof text);
       }
     } catch (error) {
-      console.error('MessageInput: Ошибка изменения текста', error);
+      if (__DEV__) console.error('MessageInput: Ошибка изменения текста', error);
     }
   }, [setInput]);
 
@@ -56,7 +56,7 @@ const MessageInputInner: React.FC<MessageInputProps> = React.memo(({
         sendMessage();
       }
     } catch (error) {
-      console.error('MessageInput: Ошибка отправки сообщения', error);
+      if (__DEV__) console.error('MessageInput: Ошибка отправки сообщения', error);
     }
   }, [sendMessage, input, replyDraft, addReply, setReplyDraft]);
 
@@ -67,7 +67,7 @@ const MessageInputInner: React.FC<MessageInputProps> = React.memo(({
         sendMessage();
       }
     } catch (error) {
-      console.error('MessageInput: Ошибка отправки по Enter', error);
+      if (__DEV__) console.error('MessageInput: Ошибка отправки по Enter', error);
     }
   }, [input, isSending, sendMessage]);
 
@@ -101,7 +101,7 @@ const MessageInputInner: React.FC<MessageInputProps> = React.memo(({
       </View>
     );
   } catch (error) {
-    console.error('MessageInput: Ошибка рендеринга', error);
+    if (__DEV__) console.error('MessageInput: Ошибка рендеринга', error);
     return null;
   }
 });

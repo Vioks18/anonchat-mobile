@@ -57,7 +57,7 @@ class ErrorMonitor {
 
   // Обработка превышения лимита критических ошибок
   private handleCriticalErrorThreshold() {
-    console.error('ErrorMonitor: Превышен лимит критических ошибок');
+    if (__DEV__) console.error('ErrorMonitor: Превышен лимит критических ошибок');
     
     Alert.alert(
       'Критическая ошибка',
@@ -72,7 +72,7 @@ class ErrorMonitor {
   // Перезапуск приложения
   private restartApp() {
     // Здесь можно добавить логику перезапуска
-    console.log('ErrorMonitor: Перезапуск приложения...');
+    if (__DEV__) console.log('ErrorMonitor: Перезапуск приложения...');
   }
 
   // Логирование ошибки
@@ -81,16 +81,16 @@ class ErrorMonitor {
     
     switch (errorInfo.severity) {
       case ErrorSeverity.LOW:
-        console.log(logMessage);
+        if (__DEV__) console.log(logMessage);
         break;
       case ErrorSeverity.MEDIUM:
-        console.warn(logMessage);
+        if (__DEV__) console.warn(logMessage);
         break;
       case ErrorSeverity.HIGH:
-        console.error(logMessage);
+        if (__DEV__) console.error(logMessage);
         break;
       case ErrorSeverity.CRITICAL:
-        console.error(`🚨 ${logMessage}`);
+        if (__DEV__) console.error(`🚨 ${logMessage}`);
         break;
     }
   }

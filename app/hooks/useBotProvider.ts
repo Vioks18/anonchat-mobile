@@ -35,7 +35,7 @@ export const useBotProvider = () => {
     try {
       setIsBotEnabled(value);
     } catch (error) {
-      console.error('useBotProvider: Ошибка установки состояния бота', error);
+      if (__DEV__) console.error('useBotProvider: Ошибка установки состояния бота', error);
     }
   };
 
@@ -59,7 +59,7 @@ export const useBotProvider = () => {
       addBotMessage(randomMessage);
       if (__DEV__) console.warn('🤖 Bot message sent:', randomMessage);
     } catch (error) {
-      console.error('❌ Error sending bot message:', error);
+      if (__DEV__) console.error('❌ Error sending bot message:', error);
     }
   };
 
@@ -76,9 +76,9 @@ export const useBotProvider = () => {
         }
       }, 5000 + Math.random() * 10000); // 5-15 секунд
       
-      if (__DEV__) { /* console.log('useBotProvider: Интервал запущен'); */ }
+  
     } catch (error) {
-      console.error('useBotProvider: Ошибка запуска интервала', error);
+      if (__DEV__) console.error('useBotProvider: Ошибка запуска интервала', error);
     }
   }, [isBotEnabled, sendBotMessage]);
 
@@ -88,10 +88,10 @@ export const useBotProvider = () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
-        if (__DEV__) { /* console.log('useBotProvider: Интервал остановлен'); */ }
+    
       }
     } catch (error) {
-      console.error('useBotProvider: Ошибка остановки интервала', error);
+      if (__DEV__) console.error('useBotProvider: Ошибка остановки интервала', error);
     }
   }, []);
 
@@ -109,7 +109,7 @@ export const useBotProvider = () => {
         stopInterval();
       }
     } catch (error) {
-      console.error('useBotProvider: Ошибка переключения бота', error);
+      if (__DEV__) console.error('useBotProvider: Ошибка переключения бота', error);
     }
   }, [isBotEnabled, safeSetIsBotEnabled, startInterval, stopInterval]);
 
@@ -122,14 +122,14 @@ export const useBotProvider = () => {
         stopInterval();
       }
     } catch (error) {
-      console.error('useBotProvider: Ошибка в useEffect', error);
+      if (__DEV__) console.error('useBotProvider: Ошибка в useEffect', error);
     }
 
     return () => {
       try {
         stopInterval();
       } catch (error) {
-        console.error('useBotProvider: Ошибка очистки useEffect', error);
+        if (__DEV__) console.error('useBotProvider: Ошибка очистки useEffect', error);
       }
     };
   }, [isBotEnabled, startInterval, stopInterval]);

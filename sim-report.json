@@ -1,0 +1,12 @@
+{
+  "rendersPerMessage": "n/a",
+  "maxBubbleWidth": 263,
+  "deadZoneCount": 0,
+  "metaOutOfBoundsCount": 0,
+  "avgRenderTimeMs": 11,
+  "simulationTime": 3,
+  "messagesProcessed": 30,
+  "reactionsGenerated": 5,
+  "scrollEvents": 3,
+  "timestamp": "2025-08-09T09:08:51.360Z"
+}

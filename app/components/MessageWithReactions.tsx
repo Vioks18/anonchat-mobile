@@ -263,6 +263,7 @@ const styles = {
     lineHeight: 22,
     flexWrap: 'wrap' as const,
     alignSelf: 'flex-start' as const,
+    minWidth: 0,
   },
   selectedBubble: {
     opacity: 0.8,

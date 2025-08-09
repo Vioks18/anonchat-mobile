@@ -133,7 +133,7 @@ const ChatCoreFallback: React.FC<{ error?: string }> = ({ error }) => (
         style={styles.fallbackButton}
         onPress={() => {
           // Попытка перезагрузки
-          console.log('ChatCore: Попытка перезагрузки...');
+          if (__DEV__) console.log('ChatCore: Попытка перезагрузки...');
         }}
       >
         <Text style={styles.fallbackButtonText}>Перезапустить</Text>

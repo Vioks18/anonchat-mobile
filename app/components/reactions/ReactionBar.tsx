@@ -50,13 +50,13 @@ const ReactionBar: React.FC<ReactionBarProps> = ({
 
   const handleReaction = (reaction: string) => {
     if (__DEV__) {
-      console.log('🔥 ReactionBar: handleReaction', { reaction, selectedMessageId });
+      if (__DEV__) console.log('🔥 ReactionBar: handleReaction', { reaction, selectedMessageId });
     }
     if (selectedMessageId) {
       addReaction(selectedMessageId, reaction);
       onClose(); // Клик по эмодзи
     } else if (__DEV__) {
-      console.warn('⚠️ ReactionBar: selectedMessageId is null!');
+      if (__DEV__) console.warn('⚠️ ReactionBar: selectedMessageId is null!');
     }
   };
 

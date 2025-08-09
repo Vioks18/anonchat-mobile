@@ -47,7 +47,7 @@ export const useUIWatchDog = ({
     try {
       setStatus(updater);
     } catch (error) {
-      console.error('useUIWatchDog: Ошибка установки статуса', error);
+      if (__DEV__) console.error('useUIWatchDog: Ошибка установки статуса', error);
     }
   }, []);
 
@@ -80,20 +80,20 @@ export const useUIWatchDog = ({
             safeSetStatus(prev => ({ ...prev, scrollToEndWorking: true }));
           }
         } catch (error) {
-          console.error('useUIWatchDog: Ошибка проверки scrollToEnd', error);
+          if (__DEV__) console.error('useUIWatchDog: Ошибка проверки scrollToEnd', error);
         }
       }, 100);
     } catch (error) {
-      console.error('useUIWatchDog: Ошибка checkScrollToEnd', error);
+      if (__DEV__) console.error('useUIWatchDog: Ошибка checkScrollToEnd', error);
     }
   }, [flatListRef, onScrollToEnd, safeSetStatus]);
 
   // Проверка клавиатуры
   const checkKeyboard = useCallback(() => {
     try {
-      if (__DEV__) { /* console.log('useUIWatchDog: Проверка клавиатуры', keyboardHeight); */ }
+  
     } catch (error) {
-      console.error('useUIWatchDog: Ошибка проверки клавиатуры', error);
+      if (__DEV__) console.error('useUIWatchDog: Ошибка проверки клавиатуры', error);
     }
   }, [keyboardHeight]);
 
@@ -110,7 +110,7 @@ if (__DEV__) console.warn(`🔍 Пустой FlatList (сообщений: ${mes
         lastLogTimeRef.current = now;
       }
     } catch (error) {
-      console.error('useUIWatchDog: Ошибка checkMessageCount', error);
+      if (__DEV__) console.error('useUIWatchDog: Ошибка checkMessageCount', error);
     }
   }, [messageCount]);
 
@@ -124,7 +124,7 @@ if (__DEV__) console.warn(`🔍 Пустой FlatList (сообщений: ${mes
         safeSetStatus(prev => ({ ...prev, scrollStuck: false }));
       }
     } catch (error) {
-      console.error('useUIWatchDog: Ошибка checkScrollStuck', error);
+      if (__DEV__) console.error('useUIWatchDog: Ошибка checkScrollStuck', error);
     }
   }, [messageCount, status.lastScrollY, safeSetStatus]);
 
@@ -151,7 +151,7 @@ if (__DEV__) console.warn(`🔍 Пустой FlatList (сообщений: ${mes
         }));
       }
     } catch (error) {
-      console.error('useUIWatchDog: Ошибка обновления статуса', error);
+      if (__DEV__) console.error('useUIWatchDog: Ошибка обновления статуса', error);
     }
   }, [keyboardHeight, inputFocused, messageCount, status.keyboardHeight, status.inputFocused, status.messageCount, status.lastScrollY, safeSetStatus]);
 
@@ -175,7 +175,7 @@ if (__DEV__) console.warn(`🔍 Пустой FlatList (сообщений: ${mes
             setStatus(prev => ({ ...prev, keyboardIssue: false }));
           }
         } catch (error) {
-          console.error('useUIWatchDog: Ошибка обработки keyboardDidShow', error);
+          if (__DEV__) console.error('useUIWatchDog: Ошибка обработки keyboardDidShow', error);
         }
       });
 
@@ -184,22 +184,22 @@ if (__DEV__) console.warn(`🔍 Пустой FlatList (сообщений: ${mes
           keyboardShowTimeRef.current = 0;
           setStatus(prev => ({ ...prev, keyboardIssue: false }));
         } catch (error) {
-          console.error('useUIWatchDog: Ошибка обработки keyboardDidHide', error);
+          if (__DEV__) console.error('useUIWatchDog: Ошибка обработки keyboardDidHide', error);
         }
       });
       
-      if (__DEV__) { /* console.log('useUIWatchDog: Слушатели клавиатуры добавлены'); */ }
+  
     } catch (error) {
-      console.error('useUIWatchDog: Ошибка добавления слушателей клавиатуры', error);
+      if (__DEV__) console.error('useUIWatchDog: Ошибка добавления слушателей клавиатуры', error);
     }
 
     return () => {
       try {
         keyboardDidShowListener?.remove();
         keyboardDidHideListener?.remove();
-        if (__DEV__) { /* console.log('useUIWatchDog: Слушатели клавиатуры удалены'); */ }
+    
       } catch (error) {
-        console.error('useUIWatchDog: Ошибка удаления слушателей клавиатуры', error);
+        if (__DEV__) console.error('useUIWatchDog: Ошибка удаления слушателей клавиатуры', error);
       }
     };
   }, [keyboardHeight, inputFocused]); // Убираем функции из зависимостей
@@ -227,10 +227,10 @@ if (__DEV__) console.warn(`🔍 Пустой FlatList (сообщений: ${mes
       // Проверяем scrollToEnd при добавлении сообщения
       if (messageCount > 0) {
         // Простая проверка без сложной логики
-        if (__DEV__) { /* console.log('useUIWatchDog: Проверка scrollToEnd'); */ }
+    
       }
     } catch (error) {
-      console.error('useUIWatchDog: Ошибка проверки сообщений', error);
+      if (__DEV__) console.error('useUIWatchDog: Ошибка проверки сообщений', error);
     }
   }, [messageCount, status.lastScrollY]); // Убираем функции из зависимостей
 
@@ -243,7 +243,7 @@ if (__DEV__) console.warn(`🔍 Пустой FlatList (сообщений: ${mes
 if (__DEV__) console.warn('useUIWatchDog: Невалидная позиция скролла', scrollY);
       }
     } catch (error) {
-      console.error('useUIWatchDog: Ошибка обновления позиции скролла', error);
+      if (__DEV__) console.error('useUIWatchDog: Ошибка обновления позиции скролла', error);
     }
   }, []);
 
@@ -256,7 +256,7 @@ if (__DEV__) console.warn('useUIWatchDog: Невалидная позиция с
       checkMessageCount();
       checkScrollStuck();
     } catch (error) {
-      console.error('useUIWatchDog: Ошибка принудительной проверки', error);
+      if (__DEV__) console.error('useUIWatchDog: Ошибка принудительной проверки', error);
     }
   }, [checkScrollToEnd, checkKeyboard, checkMessageCount, checkScrollStuck]);
 

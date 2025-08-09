@@ -133,7 +133,7 @@ const ThemeSelectorInner: React.FC<ThemeSelectorProps> = React.memo(({
     try {
       // Проверяем существование темы
       if (!THEMES[themeKey]) {
-        console.error('ThemeSelector: Неизвестная тема', themeKey);
+        if (__DEV__) console.error('ThemeSelector: Неизвестная тема', themeKey);
         return false;
       }
 
@@ -143,7 +143,7 @@ const ThemeSelectorInner: React.FC<ThemeSelectorProps> = React.memo(({
       
       for (const field of requiredFields) {
         if (!theme[field]) {
-          console.error(`ThemeSelector: Отсутствует поле ${field} в теме ${themeKey}`);
+          if (__DEV__) console.error(`ThemeSelector: Отсутствует поле ${field} в теме ${themeKey}`);
           return false;
         }
       }
@@ -153,14 +153,14 @@ const ThemeSelectorInner: React.FC<ThemeSelectorProps> = React.memo(({
       for (const field of colorFields) {
         const color = theme[field];
         if (!color || typeof color !== 'string' || !color.startsWith('#')) {
-          console.error(`ThemeSelector: Невалидный цвет ${field} в теме ${themeKey}: ${color}`);
+          if (__DEV__) console.error(`ThemeSelector: Невалидный цвет ${field} в теме ${themeKey}: ${color}`);
           return false;
         }
       }
 
       return true;
     } catch (error) {
-      console.error('ThemeSelector: Ошибка валидации темы', error);
+      if (__DEV__) console.error('ThemeSelector: Ошибка валидации темы', error);
       return false;
     }
   }, []);
@@ -182,7 +182,7 @@ const ThemeSelectorInner: React.FC<ThemeSelectorProps> = React.memo(({
 
       // Проверяем, что тема изменилась
       if (themeKey === currentTheme) {
-        // console.log('ThemeSelector: Тема уже выбрана', themeKey);
+
         onClose();
         return;
       }
@@ -192,7 +192,7 @@ const ThemeSelectorInner: React.FC<ThemeSelectorProps> = React.memo(({
       onClose();
 
     } catch (error) {
-      console.error('ThemeSelector: Ошибка выбора темы', error);
+      if (__DEV__) console.error('ThemeSelector: Ошибка выбора темы', error);
       Alert.alert('Ошибка', 'Не удалось применить тему');
     } finally {
       setIsProcessing(false);
@@ -207,7 +207,7 @@ const ThemeSelectorInner: React.FC<ThemeSelectorProps> = React.memo(({
       }
       onClose();
     } catch (error) {
-      console.error('ThemeSelector: Ошибка закрытия модала', error);
+      if (__DEV__) console.error('ThemeSelector: Ошибка закрытия модала', error);
     }
   }, [isProcessing, onClose]);
 

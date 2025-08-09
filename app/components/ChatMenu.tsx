@@ -38,7 +38,7 @@ const ChatMenuInner: React.FC<ChatMenuProps> = React.memo(({
     try {
       onMenuToggle();
     } catch (error) {
-      console.error('ChatMenu: Ошибка переключения меню', error);
+      if (__DEV__) console.error('ChatMenu: Ошибка переключения меню', error);
     }
   }, [onMenuToggle]);
 
@@ -46,7 +46,7 @@ const ChatMenuInner: React.FC<ChatMenuProps> = React.memo(({
     try {
       onSearchToggle();
     } catch (error) {
-      console.error('ChatMenu: Ошибка переключения поиска', error);
+      if (__DEV__) console.error('ChatMenu: Ошибка переключения поиска', error);
     }
   }, [onSearchToggle]);
 
@@ -54,7 +54,7 @@ const ChatMenuInner: React.FC<ChatMenuProps> = React.memo(({
     try {
       onThemeToggle();
     } catch (error) {
-      console.error('ChatMenu: Ошибка переключения тем', error);
+      if (__DEV__) console.error('ChatMenu: Ошибка переключения тем', error);
     }
   }, [onThemeToggle]);
 
@@ -62,7 +62,7 @@ const ChatMenuInner: React.FC<ChatMenuProps> = React.memo(({
     try {
       onBotToggle();
     } catch (error) {
-      console.error('ChatMenu: Ошибка переключения бота', error);
+      if (__DEV__) console.error('ChatMenu: Ошибка переключения бота', error);
     }
   }, [onBotToggle]);
 

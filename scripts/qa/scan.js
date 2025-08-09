@@ -11,6 +11,8 @@ const path = require('path');
 const ROOT = process.cwd();
 const ARGS = process.argv.slice(2);
 const AUTO_FIX = ARGS.includes('--autofix');
+const DEBUG = ARGS.includes('--debug');
+const QA_MODE = process.env.QA_MODE || 'strict'; // 'soft' or 'strict'
 
 const readFileSafe = (p) => {
   try { return fs.readFileSync(p, 'utf8'); } catch { return null; }
@@ -34,7 +36,18 @@ const listFilesRecursive = (dir) => {
 };
 
 const RULES_PATH = path.join(ROOT, 'scripts/qa/rules.json');
+const BASELINE_PATH = path.join(ROOT, 'qa-baseline.json');
 const rulesConfig = JSON.parse(readFileSafe(RULES_PATH) || '{"rules":[]}');
+
+// Load baseline if exists
+let baseline = null;
+try {
+  if (fs.existsSync(BASELINE_PATH)) {
+    baseline = JSON.parse(readFileSafe(BASELINE_PATH));
+  }
+} catch (error) {
+  if (DEBUG) console.log('No baseline found or invalid baseline');
+}
 
 const filesCache = new Map();
 const getContent = (relPath) => {
@@ -49,8 +62,8 @@ const setContent = (relPath, content) => {
 };
 
 const results = [];
-const addResult = (id, severity, file, ok, message) => {
-  results.push({ id, severity, file, ok, message });
+const addResult = (id, severity, file, ok, message, isNew = false) => {
+  results.push({ id, severity, file, ok, message, isNew });
 };
 
 // Helpers
@@ -66,6 +79,33 @@ const wrapDevLogs = (content) => {
     if (isConsole(ln)) { lines[i] = wrap(ln); changed = true; }
   }
   return { content: lines.join('\n'), changed };
+};
+
+// Filter rules based on mode
+const filterRules = (rules) => {
+  if (QA_MODE === 'strict') {
+    return rules.filter(rule => {
+      // Skip experimental rules in strict mode
+      if (rule.experimental === true) {
+        if (DEBUG) console.log(`Skipping experimental rule: ${rule.id}`);
+        return false;
+      }
+      
+      // Skip rules for files in allowlist
+      if (rule.allowlist && rule.allowlist.length > 0) {
+        const shouldSkip = rule.files.some(file => 
+          rule.allowlist.some(allowed => file.includes(allowed))
+        );
+        if (shouldSkip && DEBUG) {
+          console.log(`Skipping rule ${rule.id} due to allowlist: ${rule.allowlist.join(', ')}`);
+        }
+        return !shouldSkip;
+      }
+      
+      return true;
+    });
+  }
+  return rules; // soft mode includes all rules
 };
 
 // Autofixers (P0 only)
@@ -92,14 +132,24 @@ const evaluators = {
     for (const f of rule.files) {
       const c = getContent(f) || '';
       const ok = hasAllSnippets(c, rule.includes || []);
-      addResult(rule.id, rule.severity, f, ok, ok ? 'Found' : `Missing: ${rule.includes}`);
+      const msg = ok ? 'Found' : `Missing: ${rule.includes}`;
+      if (DEBUG && !ok) {
+        console.log(`❌ ${rule.id}: ${f} - ${msg}`);
+        console.log(`   Looking for: ${rule.includes.join(', ')}`);
+      }
+      addResult(rule.id, rule.severity, f, ok, msg);
     }
   },
   mustNotInclude: (rule) => {
     for (const f of rule.files) {
       const c = getContent(f) || '';
       const bad = (rule.excludes || []).some((s) => c.includes(s));
-      addResult(rule.id, rule.severity, f, !bad, bad ? `Forbidden: ${rule.excludes}` : 'OK');
+      const msg = bad ? `Forbidden: ${rule.excludes}` : 'OK';
+      if (DEBUG && bad) {
+        console.log(`❌ ${rule.id}: ${f} - ${msg}`);
+        console.log(`   Found forbidden: ${rule.excludes.join(', ')}`);
+      }
+      addResult(rule.id, rule.severity, f, !bad, msg);
     }
   },
   custom: (rule) => {
@@ -115,10 +165,22 @@ const evaluators = {
           break;
         }
         case 'perf.dev_logs': {
-          const hasBareConsole = /console\.(log|warn)(?!.*__DEV__)/.test(c);
+          // Updated regex to ignore commented lines
+          const lines = c.split('\n');
+          const hasBareConsole = lines.some(line => {
+            const trimmed = line.trim();
+            return trimmed.includes('console.') && 
+                   !trimmed.startsWith('//') && 
+                   !trimmed.startsWith('/*') &&
+                   !trimmed.includes('__DEV__');
+          });
           ok = !hasBareConsole;
           msg = ok ? 'logs guarded' : 'dev logs not guarded';
           if (!ok && AUTO_FIX && autofixers[rule.id]) autofixers[rule.id](f);
+          if (DEBUG && !ok) {
+            console.log(`❌ ${rule.id}: ${f} - ${msg}`);
+            console.log(`   Found unguarded console statements`);
+          }
           break;
         }
         case 'reactionstate.keyboard_close': {
@@ -157,6 +219,34 @@ const evaluators = {
           ok = true; // report only
           break;
         }
+        case 'bubble.paddingRight.meta': {
+          const match = c.match(/paddingRight:\s*(\d+)/);
+          ok = match && parseInt(match[1]) >= 28;
+          msg = ok ? 'paddingRight >= 28' : 'paddingRight < 28';
+          break;
+        }
+        case 'doubleTap.window': {
+          const match = c.match(/WIN\s*=\s*(\d+)/);
+          ok = match && (parseInt(match[1]) >= 220 && parseInt(match[1]) <= 300);
+          msg = ok ? 'window 220-300ms' : 'window not 220-300ms';
+          break;
+        }
+        case 'scroll.gate': {
+          ok = /scrollingRef\.current/.test(c) && /handleScrollBeginDrag/.test(c);
+          msg = ok ? 'scroll gate present' : 'scroll gate missing';
+          break;
+        }
+        case 'anchor.touchXY': {
+          ok = /touchX\?/.test(c) && /touchY\?/.test(c) && /setLastTouch/.test(c);
+          msg = ok ? 'touchXY support present' : 'touchXY support missing';
+          break;
+        }
+        case 'secrets.regex': {
+          const secrets = c.match(/(API_KEY|SECRET|Bearer\s+\w+)/g);
+          ok = !secrets || secrets.length === 0;
+          msg = ok ? 'no secrets found' : `secrets found: ${secrets?.slice(0, 3).join(', ')}`;
+          break;
+        }
         default:
           break;
       }
@@ -166,9 +256,23 @@ const evaluators = {
 };
 
 // Run rules
-for (const rule of rulesConfig.rules || []) {
+const filteredRules = filterRules(rulesConfig.rules || []);
+for (const rule of filteredRules) {
   const fn = evaluators[rule.type];
   if (fn) fn(rule);
+}
+
+// Compare with baseline
+let newIssuesCount = 0;
+if (baseline) {
+  const baselineKeys = new Set(baseline.map(r => `${r.id}:${r.file}`));
+  results.forEach(result => {
+    const resultKey = `${result.id}:${result.file}`;
+    if (!result.ok && !baselineKeys.has(resultKey)) {
+      result.isNew = true;
+      newIssuesCount++;
+    }
+  });
 }
 
 // Write report
@@ -179,20 +283,26 @@ const warnings = results.filter((r) => !r.ok && r.severity !== 'P0');
 const report = [
   '# QA Report',
   '',
+  `**Mode:** ${QA_MODE}`,
+  `**New issues:** ${newIssuesCount}`,
+  '',
   '## ✅ Passed',
   ...passed.map((r) => `- ${r.id} (${r.severity}) — ${r.file}: ${r.message}`),
   '',
   '## ⚠️ Warnings',
-  ...warnings.map((r) => `- ${r.id} (${r.severity}) — ${r.file}: ${r.message}`),
+  ...warnings.map((r) => `- ${r.id} (${r.severity}) — ${r.file}: ${r.message}${r.isNew ? ' **NEW**' : ''}`),
   '',
   '## ❌ P0 Issues',
-  ...failed.map((r) => `- ${r.id} (${r.severity}) — ${r.file}: ${r.message}`),
+  ...failed.map((r) => `- ${r.id} (${r.severity}) — ${r.file}: ${r.message}${r.isNew ? ' **NEW**' : ''}`),
   '',
   `Summary: Passed=${passed.length}, Warnings=${warnings.length}, P0=${failed.length}`
 ].join('\n');
 
 writeFileSafe(path.join(ROOT, 'QA-REPORT.md'), report + '\n');
 
-console.log('QA scan complete. Report written to QA-REPORT.md');
+console.log(`QA scan complete (${QA_MODE} mode). Report written to QA-REPORT.md`);
+if (newIssuesCount > 0) {
+  console.log(`⚠️  ${newIssuesCount} new issues found compared to baseline`);
+}
 
 

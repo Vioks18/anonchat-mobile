@@ -28,7 +28,7 @@ const ChatSearchInner: React.FC<ChatSearchProps> = React.memo(({
     try {
       onSearchToggle();
     } catch (error) {
-      console.error('ChatSearch: Ошибка переключения поиска', error);
+      if (__DEV__) console.error('ChatSearch: Ошибка переключения поиска', error);
     }
   }, [onSearchToggle]);
 
@@ -36,7 +36,7 @@ const ChatSearchInner: React.FC<ChatSearchProps> = React.memo(({
     try {
       onSearchClose();
     } catch (error) {
-      console.error('ChatSearch: Ошибка закрытия поиска', error);
+      if (__DEV__) console.error('ChatSearch: Ошибка закрытия поиска', error);
     }
   }, [onSearchClose]);
 
@@ -57,7 +57,7 @@ const ChatSearchInner: React.FC<ChatSearchProps> = React.memo(({
       setSearchError(null);
       onSearchChange(sanitizedText);
     } catch (error) {
-      console.error('ChatSearch: Ошибка изменения поиска', error);
+      if (__DEV__) console.error('ChatSearch: Ошибка изменения поиска', error);
       setSearchError('Ошибка обработки поиска');
     }
   }, [onSearchChange]);

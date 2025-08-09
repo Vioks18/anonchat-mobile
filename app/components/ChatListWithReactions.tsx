@@ -32,15 +32,13 @@ const ChatListWithReactions: React.FC<ChatListWithReactionsProps> = ({
 
   const handleClose = useCallback(() => {
     if (__DEV__) {
-      console.log('🔥 ChatList: handleClose - закрываем оба меню одновременно');
+      if (__DEV__) console.log('🔥 ChatList: handleClose - закрываем оба меню одновременно');
     }
-    // Закрываем оба меню одновременно
-    setTimeout(() => {
-      setShowHeaderActions(false);
-      setLocalSelectedMessageId(null);
-      onMessageSelected?.(null);
-      close();
-    }, 0);
+    // Закрываем оба меню одновременно без задержки
+    setShowHeaderActions(false);
+    setLocalSelectedMessageId(null);
+    onMessageSelected?.(null);
+    close();
   }, [close, onMessageSelected]);
 
   const handleLongPress = useCallback((id: string, e?: any) => {
@@ -54,16 +52,16 @@ const ChatListWithReactions: React.FC<ChatListWithReactionsProps> = ({
 
   const handlePress = useCallback((id: string, e?: any) => {
     const now = Date.now();
-    const WIN = 800; // Увеличиваем окно для двойного тапа до 800ms
+    const WIN = 250; // Оптимальное окно для двойного тапа 220-300ms
     
     if (__DEV__) {
-      console.log('🔥 handlePress:', { id, lastTap, timeDiff: lastTap ? now - lastTap.t : null });
+      if (__DEV__) console.log('🔥 handlePress:', { id, lastTap, timeDiff: lastTap ? now - lastTap.t : null });
     }
     
     // Если есть открытое меню - закрываем его
     if (visible || showHeaderActions) {
       if (__DEV__) {
-        console.log('🔥 Закрываем открытое меню');
+        if (__DEV__) console.log('🔥 Закрываем открытое меню');
       }
       handleClose();
       setLastTap(null);
@@ -73,18 +71,23 @@ const ChatListWithReactions: React.FC<ChatListWithReactionsProps> = ({
     // Проверяем двойной тап
     if (lastTap && lastTap.messageId === id && (now - lastTap.t) < WIN) {
       if (__DEV__) {
-        console.log('🔥 ДВОЙНОЙ ТАП!');
+        if (__DEV__) console.log('🔥 ДВОЙНОЙ ТАП!');
       }
       // ДАБЛ-ТАП = открываем реакции
       const ref = messageRefs.current.get(id);
       if (__DEV__) {
-        console.log('🔥 ref found:', !!ref);
+        if (__DEV__) console.log('🔥 ref found:', !!ref);
       }
       setLocalSelectedMessageId(id);
       setLastTouch?.(e?.nativeEvent?.pageX, e?.nativeEvent?.pageY);
       if (ref) openAtMessage(id, ref);
       setLastTap(null);
       return;
+    }
+    
+    // Если тапаем по другому сообщению - сбрасываем lastTap
+    if (lastTap && lastTap.messageId !== id) {
+      setLastTap(null);
     }
     
     // Обычный тап - запоминаем для возможного двойного тапа
