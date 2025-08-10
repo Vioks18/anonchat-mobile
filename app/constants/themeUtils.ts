@@ -29,26 +29,27 @@ export function luminance(hexColor: string): number {
 /**
  * Выбирает подходящий цвет оверлея для фона
  */
-export function pickOverlayForBg(backgroundColor: string, theme: 'dark' | 'light' = 'dark'): {
+export function pickOverlayForBg(backgroundColor: string, themeName: keyof typeof THEMES = 'dark'): {
   shadowColor: string;
   glowColor: string;
   overlayColor: string;
 } {
   const bgLuminance = luminance(backgroundColor);
   const isLightBg = bgLuminance > 0.5;
+  const theme = THEMES[themeName];
   
   if (isLightBg) {
     // Для светлого фона - темные тени
     return {
       shadowColor: 'rgba(0, 0, 0, 0.3)',
-      glowColor: withOpacity(THEMES[theme].accent, 0.4),
+      glowColor: withOpacity(theme.accent, 0.4),
       overlayColor: 'rgba(0, 0, 0, 0.05)',
     };
   } else {
     // Для темного фона - светлые тени
     return {
       shadowColor: 'rgba(255, 255, 255, 0.2)',
-      glowColor: withOpacity(THEMES[theme].accent, 0.6),
+      glowColor: withOpacity(theme.accent, 0.6),
       overlayColor: 'rgba(255, 255, 255, 0.05)',
     };
   }

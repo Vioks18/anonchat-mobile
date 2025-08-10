@@ -15,6 +15,9 @@
     "expo-env.d.ts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "backup/**/*",
+    "**/*.backup.tsx",
+    "auto-fix-backups/**/*"
   ]
 }
