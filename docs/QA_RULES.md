@@ -92,6 +92,17 @@ npm run qa:baseline:update  # Обновить baseline
 - **.env.gitignore** - .env файл в .gitignore
 - **deps.heavy_inactive** - Тяжелые неиспользуемые пакеты (reanimated, gesture-handler, camera, notifications, etc.)
 
+## 🧪 Self-test фикстуры
+
+| Фикстура | Ожидаемое правило | Описание |
+|----------|------------------|----------|
+| `bubble_bad_padding.tsx` | `ui.layout.meta_inside` | Нет paddingBottom при наличии меты |
+| `text_no_minwidth.tsx` | `ui.text.shrink_ok` | Текст без minWidth: 0 и flexShrink: 1 |
+| `pointer_bad.tsx` | `ui.pointer.safe` | Неправильные pointerEvents |
+| `console_spam.ts` | `perf.dev_logs` | Голые console.log без __DEV__ |
+| `memo_missing.tsx` | `perf.memo` | Компонент без React.memo |
+| `reaction_guard_missing.tsx` | `reactionbar.guard` | Без проверки if (!visible \|\| !anchor) |
+
 ## 🎨 Новые UI правила (v2.1)
 
 ### ui.layout.meta_inside

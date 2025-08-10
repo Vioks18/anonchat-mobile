@@ -1,0 +1,8 @@
+warning: in the working copy of 'QA-REPORT.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'README.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'package.json', LF will be replaced by CRLF the next time Git touches it
+QA-REPORT.md
+README.md
+docs/QA_RULES.md
+package.json
+scripts/qa/scan.js

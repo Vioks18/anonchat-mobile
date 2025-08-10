@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { FlatList, Keyboard } from 'react-native';
+import { FlatList } from 'react-native';
 
 interface UIWatchDogStatus {
   scrollToEndWorking: boolean;
@@ -17,6 +17,7 @@ interface UIWatchDogProps {
   keyboardHeight: number;
   inputFocused: boolean;
   onScrollToEnd?: () => void;
+  onKeyboardHeightChange?: (height: number) => void;
 }
 
 export const useUIWatchDog = ({
@@ -24,7 +25,8 @@ export const useUIWatchDog = ({
   messageCount,
   keyboardHeight,
   inputFocused,
-  onScrollToEnd
+  onScrollToEnd,
+  onKeyboardHeightChange
 }: UIWatchDogProps) => {
   const [status, setStatus] = useState<UIWatchDogStatus>({
     scrollToEndWorking: true,
@@ -51,41 +53,9 @@ export const useUIWatchDog = ({
     }
   }, []);
 
-  // Проверка scrollToEnd
+  // Проверка scrollToEnd - отключена
   const checkScrollToEnd = useCallback(() => {
-    try {
-      if (!flatListRef.current) {
-        if (__DEV__) console.warn('useUIWatchDog: flatListRef.current отсутствует');
-        return;
-      }
-
-      const startTime = Date.now();
-      
-      // Запоминаем текущую позицию скролла
-      const currentOffset = lastScrollYRef.current;
-      
-      // Вызываем scrollToEnd
-      onScrollToEnd?.();
-      
-      // Проверяем результат через 100ms
-      setTimeout(() => {
-        try {
-          const endTime = Date.now();
-          const duration = endTime - startTime;
-          
-          if (duration > 100) {
-            if (__DEV__) console.warn(`📡 scrollToEnd не сработал через ${duration}ms`);
-            safeSetStatus(prev => ({ ...prev, scrollToEndWorking: false }));
-          } else {
-            safeSetStatus(prev => ({ ...prev, scrollToEndWorking: true }));
-          }
-        } catch (error) {
-          if (__DEV__) console.error('useUIWatchDog: Ошибка проверки scrollToEnd', error);
-        }
-      }, 100);
-    } catch (error) {
-      if (__DEV__) console.error('useUIWatchDog: Ошибка checkScrollToEnd', error);
-    }
+    // Отключено чтобы не было ложных предупреждений
   }, [flatListRef, onScrollToEnd, safeSetStatus]);
 
   // Проверка клавиатуры
@@ -97,36 +67,15 @@ export const useUIWatchDog = ({
     }
   }, [keyboardHeight]);
 
-  // Проверка количества сообщений (только при изменении)
+  // Проверка количества сообщений - отключена
   const checkMessageCount = useCallback(() => {
-    try {
-      const now = Date.now();
-      // Логируем только если количество изменилось или прошло больше 5 секунд
-      if (messageCount !== lastMessageCountRef.current || (now - lastLogTimeRef.current > 5000)) {
-        if (__DEV__ && messageCount === 0) {
-if (__DEV__) console.warn(`🔍 Пустой FlatList (сообщений: ${messageCount})`);
-        }
-        lastMessageCountRef.current = messageCount;
-        lastLogTimeRef.current = now;
-      }
-    } catch (error) {
-      if (__DEV__) console.error('useUIWatchDog: Ошибка checkMessageCount', error);
-    }
+    // Отключено чтобы не было ложных предупреждений
   }, [messageCount]);
 
-  // Проверка застревания скролла
+  // Проверка застревания скролла - отключена
   const checkScrollStuck = useCallback(() => {
-    try {
-      if (lastScrollYRef.current === status.lastScrollY && messageCount > 0) {
-        if (__DEV__) console.warn(`💤 scrollY не изменился после добавления сообщения`);
-        safeSetStatus(prev => ({ ...prev, scrollStuck: true }));
-      } else {
-        safeSetStatus(prev => ({ ...prev, scrollStuck: false }));
-      }
-    } catch (error) {
-      if (__DEV__) console.error('useUIWatchDog: Ошибка checkScrollStuck', error);
-    }
-  }, [messageCount, status.lastScrollY, safeSetStatus]);
+    // Отключено чтобы не было ложных предупреждений
+  }, []);
 
   // Обновление статуса (только при реальных изменениях)
   useEffect(() => {
@@ -155,54 +104,10 @@ if (__DEV__) console.warn(`🔍 Пустой FlatList (сообщений: ${mes
     }
   }, [keyboardHeight, inputFocused, messageCount, status.keyboardHeight, status.inputFocused, status.messageCount, status.lastScrollY, safeSetStatus]);
 
-  // Мониторинг клавиатуры
+  // Мониторинг клавиатуры - отключен, ChatCore сам обрабатывает
   useEffect(() => {
-    let keyboardDidShowListener: any = null;
-    let keyboardDidHideListener: any = null;
-
-    try {
-      keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', () => {
-        try {
-          keyboardShowTimeRef.current = Date.now();
-          // Вызываем checkKeyboard напрямую без зависимости
-          if (keyboardHeight > 0 && !inputFocused) {
-            if (__DEV__) console.warn(`⚠️ TextInput не был в фокусе при keyboardDidShow (высота: ${keyboardHeight})`);
-            setStatus(prev => ({ ...prev, keyboardIssue: true }));
-          } else if (keyboardHeight === 0 && keyboardShowTimeRef.current > 0) {
-            if (__DEV__) console.warn(`🔇 клавиатура открыта, но высота = 0`);
-            setStatus(prev => ({ ...prev, keyboardIssue: true }));
-          } else {
-            setStatus(prev => ({ ...prev, keyboardIssue: false }));
-          }
-        } catch (error) {
-          if (__DEV__) console.error('useUIWatchDog: Ошибка обработки keyboardDidShow', error);
-        }
-      });
-
-      keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
-        try {
-          keyboardShowTimeRef.current = 0;
-          setStatus(prev => ({ ...prev, keyboardIssue: false }));
-        } catch (error) {
-          if (__DEV__) console.error('useUIWatchDog: Ошибка обработки keyboardDidHide', error);
-        }
-      });
-      
-  
-    } catch (error) {
-      if (__DEV__) console.error('useUIWatchDog: Ошибка добавления слушателей клавиатуры', error);
-    }
-
-    return () => {
-      try {
-        keyboardDidShowListener?.remove();
-        keyboardDidHideListener?.remove();
-    
-      } catch (error) {
-        if (__DEV__) console.error('useUIWatchDog: Ошибка удаления слушателей клавиатуры', error);
-      }
-    };
-  }, [keyboardHeight, inputFocused]); // Убираем функции из зависимостей
+    // Отключено чтобы ChatCore сам обрабатывал клавиатуру
+  }, []);
 
   // Проверка при изменении количества сообщений
   useEffect(() => {

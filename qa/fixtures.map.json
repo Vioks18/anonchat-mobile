@@ -1,0 +1,11 @@
+{
+  "ui.layout.meta_inside": ["qa/fixtures/bubble_bad_padding.tsx"],
+  "ui.text.shrink_ok": ["qa/fixtures/text_no_minwidth.tsx"],
+  "ui.pointer.safe": ["qa/fixtures/pointer_bad.tsx"],
+  "perf.dev_logs": ["qa/fixtures/console_spam.ts"],
+  "perf.memo": ["qa/fixtures/memo_missing.tsx"],
+  "reactionbar.guard": ["qa/fixtures/reaction_guard_missing.tsx"],
+  "bubble.meta.pointerEvents": ["qa/fixtures/bubble_bad_padding.tsx"],
+  "bubble.text.minWidth0": ["qa/fixtures/text_no_minwidth.tsx"],
+  "bubble.paddingRight.meta": ["qa/fixtures/bubble_bad_padding.tsx"]
+}

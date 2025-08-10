@@ -13,6 +13,9 @@ const ARGS = process.argv.slice(2);
 const AUTO_FIX = ARGS.includes('--autofix');
 const AUTO_FIX_SAFE = ARGS.includes('--autofix-safe');
 const DEBUG = ARGS.includes('--debug');
+const FIXTURES_MODE = ARGS.includes('--fixtures');
+const REPORT_JSON_INDEX = ARGS.indexOf('--report-json');
+const REPORT_JSON_PATH = REPORT_JSON_INDEX >= 0 ? ARGS[REPORT_JSON_INDEX + 1] : null;
 const QA_MODE = process.env.QA_MODE || 'strict'; // 'soft' or 'strict'
 
 // Safe autofix configuration
@@ -64,6 +67,7 @@ const listFilesRecursive = (dir) => {
 
 const RULES_PATH = path.join(ROOT, 'scripts/qa/rules.json');
 const BASELINE_PATH = path.join(ROOT, 'qa-baseline.json');
+const FIXTURES_MAP_PATH = path.join(ROOT, 'qa/fixtures.map.json');
 const rulesConfig = JSON.parse(readFileSafe(RULES_PATH) || '{"rules":[]}');
 
 // Load baseline if exists
@@ -78,7 +82,7 @@ try {
 
 const filesCache = new Map();
 const getContent = (relPath) => {
-  const abs = path.join(ROOT, relPath);
+  const abs = path.isAbsolute(relPath) ? relPath : path.join(ROOT, relPath);
   if (!filesCache.has(abs)) filesCache.set(abs, readFileSafe(abs));
   return filesCache.get(abs);
 };
@@ -410,7 +414,8 @@ const autofixers = {
 // Rule evaluators
 const evaluators = {
   mustInclude: (rule) => {
-    for (const f of rule.files) {
+    const filesToCheck = FIXTURES_MODE ? filesToScan : rule.files;
+    for (const f of filesToCheck) {
       const c = getContent(f) || '';
       const ok = hasAllSnippets(c, rule.includes || []);
       const msg = ok ? 'Found' : `Missing: ${rule.includes}`;
@@ -422,7 +427,8 @@ const evaluators = {
     }
   },
   mustNotInclude: (rule) => {
-    for (const f of rule.files) {
+    const filesToCheck = FIXTURES_MODE ? filesToScan : rule.files;
+    for (const f of filesToCheck) {
       const c = getContent(f) || '';
       const bad = (rule.excludes || []).some((s) => c.includes(s));
       const msg = bad ? `Forbidden: ${rule.excludes}` : 'OK';
@@ -434,7 +440,8 @@ const evaluators = {
     }
   },
   custom: (rule) => {
-    for (const f of rule.files) {
+    const filesToCheck = FIXTURES_MODE ? filesToScan : rule.files;
+    for (const f of filesToCheck) {
       const c = getContent(f) || '';
       let ok = true;
       let msg = 'OK';
@@ -610,6 +617,32 @@ const evaluators = {
   }
 };
 
+// Determine files to scan
+let filesToScan = [];
+if (FIXTURES_MODE) {
+  // Load fixtures mapping
+  const fixturesMap = JSON.parse(readFileSafe(FIXTURES_MAP_PATH) || '{}');
+  const fixturesDir = path.join(ROOT, 'qa/fixtures');
+  const fixtureFiles = listFilesRecursive(fixturesDir)
+    .filter(f => f.endsWith('.ts') || f.endsWith('.tsx'));
+  
+  // Map fixture files to rules
+  for (const [ruleId, fixturePaths] of Object.entries(fixturesMap)) {
+    for (const fixturePath of fixturePaths) {
+      const fullPath = path.join(ROOT, fixturePath);
+      if (fs.existsSync(fullPath)) {
+        filesToScan.push(fullPath);
+      }
+    }
+  }
+  
+  // Add all fixture files for scanning
+  filesToScan = [...new Set([...filesToScan, ...fixtureFiles])];
+} else {
+  // Normal app scanning
+  filesToScan = listFilesRecursive('app').filter(f => f.endsWith('.ts') || f.endsWith('.tsx'));
+}
+
 // Run rules
 const filteredRules = filterRules(rulesConfig.rules || []);
 for (const rule of filteredRules) {
@@ -739,6 +772,31 @@ const report = [
 ].join('\n');
 
 writeFileSafe(path.join(ROOT, 'QA-REPORT.md'), report + '\n');
+
+// Save JSON report if requested
+if (REPORT_JSON_PATH) {
+  const jsonReport = {
+    mode: QA_MODE,
+    timestamp: new Date().toISOString(),
+    summary: {
+      passed: passed.length,
+      warnings: warnings.length,
+      p0: failed.length,
+      newIssues: newIssuesCount
+    },
+    results: results.map(r => ({
+      id: r.id,
+      severity: r.severity,
+      file: r.file,
+      ok: r.ok,
+      message: r.message,
+      isNew: r.isNew
+    }))
+  };
+  
+  writeFileSafe(REPORT_JSON_PATH, JSON.stringify(jsonReport, null, 2));
+  console.log(`📄 JSON report written to ${REPORT_JSON_PATH}`);
+}
 
 console.log(`QA scan complete (${QA_MODE} mode). Report written to QA-REPORT.md`);
 if (newIssuesCount > 0) {

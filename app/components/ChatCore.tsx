@@ -23,7 +23,7 @@
  */
 
 import { Ionicons } from '@expo/vector-icons';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Animated,
   FlatList,
@@ -32,15 +32,15 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View
+  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useMessageStore } from '../hooks/useMessageStore';
-
-import * as Clipboard from 'expo-clipboard';
 import { useUIWatchDog } from '../hooks/useUIWatchDog';
 import { ErrorSeverity, useErrorMonitor } from '../utils/errorBoundary';
 import ChatListWithReactions from './ChatListWithReactions';
+
+import * as Clipboard from 'expo-clipboard';
 
 // Темы
 const THEMES = {
@@ -178,6 +178,33 @@ const ChatCoreInner: React.FC<ChatCoreProps> = ({ onSendMessage, onError, isBotE
   const [inputText, setInputText] = useState('');
   const [inputFocused, setInputFocused] = useState(false);
   
+  // Состояния для темы
+  const [currentTheme, setCurrentTheme] = useState("dark");
+  const [showThemeSelector, setShowThemeSelector] = useState(false);
+  
+  // Состояние для модального окна удаления
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteAction, setDeleteAction] = useState<'forMe' | 'forAll' | null>(null);
+  
+  // Состояние для принудительного закрытия ReactionBar
+  const [forceCloseReactionBar, setForceCloseReactionBar] = useState(false);
+  
+  // Состояние для отмены удаления
+  const [showUndo, setShowUndo] = useState(false);
+  const [lastDeletedMessages, setLastDeletedMessages] = useState<string[]>([]);
+  const [lastDeleteAction, setLastDeleteAction] = useState<'forMe' | 'forAll' | null>(null);
+  
+  // Состояния для меню и поиска
+  const [showMenu, setShowMenu] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  
+  // Состояние для клавиатуры
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const flatListRef = useRef<FlatList>(null); // Пустой ref для совместимости
+  
+  // ВСЕ ХУКИ ДОЛЖНЫ БЫТЬ ЗДЕСЬ, ДО ЛЮБЫХ УСЛОВНЫХ RETURN
+  
   // Автоматический скролл к концу текста при изменении
   useEffect(() => {
     if (textInputRef.current && inputText.length > 0) {
@@ -197,6 +224,102 @@ const ChatCoreInner: React.FC<ChatCoreProps> = ({ onSendMessage, onError, isBotE
     });
     
     return unsubscribe;
+  }, []);
+
+  // Сбрасываем флаг после использования
+  useEffect(() => {
+    if (forceCloseReactionBar) {
+      // Сбрасываем флаг через небольшую задержку
+      const timer = setTimeout(() => {
+        setForceCloseReactionBar(false);
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [forceCloseReactionBar]);
+
+  // Вычисляем данные темы
+  const currentThemeData = React.useMemo(() => {
+    if (currentTheme && THEMES[currentTheme as keyof typeof THEMES]) {
+      return THEMES[currentTheme as keyof typeof THEMES] || THEMES.dark;
+    }
+    return THEMES.dark;
+  }, [currentTheme]);
+
+  // Фильтруем сообщения
+  const filteredMessages = React.useMemo(() => {
+    if (!messages || messages.length === 0) {
+      return [];
+    }
+    
+    if (searchQuery.trim() === '') {
+      const filtered = [...messages];
+      return filtered.reverse();
+    }
+    
+    const filtered = messages.filter(msg => 
+      msg.text.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    return filtered.reverse();
+  }, [messages, searchQuery]);
+
+  // UI WatchDog - упрощенная версия
+  const watchDogResult = useUIWatchDog({
+    flatListRef: flatListRef,
+    messageCount: filteredMessages.length,
+    inputFocused,
+    keyboardHeight,
+  });
+
+  // Функция безопасного выполнения
+  const safeExecute = useCallback((fn: () => void, errorMessage: string, severity: ErrorSeverity = ErrorSeverity.MEDIUM) => {
+    try {
+      fn();
+    } catch (error) {
+      addError(new Error(errorMessage), severity);
+      if (__DEV__) console.warn(errorMessage, error);
+    }
+  }, [addError]);
+
+  // Обработка ошибок
+  useEffect(() => {
+    if (!isStable) {
+      setHasCriticalError(true);
+      setErrorMessage('Критическая ошибка в системе');
+    }
+  }, [isStable]);
+
+  // Обработка клавиатуры
+  useEffect(() => {
+    let keyboardDidShowListener: any;
+    let keyboardDidHideListener: any;
+
+    try {
+      keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', (e) => {
+        setKeyboardHeight(e.endCoordinates.height);
+      });
+
+      keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
+        setKeyboardHeight(0);
+      });
+    } catch (error) {
+      if (__DEV__) console.warn('Ошибка обработки клавиатуры:', error);
+    }
+
+    return () => {
+      try {
+        keyboardDidShowListener?.remove();
+        keyboardDidHideListener?.remove();
+      } catch (error) {
+        if (__DEV__) console.warn('Ошибка удаления слушателей клавиатуры:', error);
+      }
+    };
+  }, []);
+
+  // Функция для закрытия ReactionBar
+  const closeReactionBar = useCallback(() => {
+    // Устанавливаем флаг для принудительного закрытия
+    setForceCloseReactionBar(true);
+    if (__DEV__) console.log('closeReactionBar вызвана через флаг');
   }, []);
 
   // Функции для действий с сообщениями
@@ -252,176 +375,163 @@ const ChatCoreInner: React.FC<ChatCoreProps> = ({ onSendMessage, onError, isBotE
         setSelectedMessages(new Set());
         setSelectedMessagesCount(0);
       } catch (error) {
-        if (__DEV__) console.warn('Ошибка копирования множественных сообщений:', error);
+        if (__DEV__) console.warn('Ошибка копирования:', error);
       }
     }
   }, [selectedMessages, getMessageById]);
 
-  const handleDeleteSelected = useCallback(() => {
-    // Удаляем только свои сообщения
-    const myMessages = Array.from(selectedMessages).filter(id => {
+  // Проверяем можно ли удалить для всех
+  const canDeleteForAll = useMemo(() => {
+    return Array.from(selectedMessages).every(id => {
       const message = getMessageById(id);
       return message?.sender === 'me';
     });
-    
-    myMessages.forEach(id => {
-      removeMessage(id);
-    });
-    
-    // Очищаем выбор после удаления
-    const clearSelection = useMessageStore.getState().clearSelection;
-    clearSelection();
-    setSelectedMessages(new Set());
-    setSelectedMessagesCount(0);
-  }, [selectedMessages, getMessageById, removeMessage]);
-  
-  // Состояния для тем с защитой
-  const [currentTheme, setCurrentTheme] = useState("dark");
-  const [showThemeSelector, setShowThemeSelector] = useState(false);
-  
-  // Состояния для меню
-  const [showMenu, setShowMenu] = useState(false);
-  const [isSearching, setIsSearching] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  
-  const [keyboardHeight, setKeyboardHeight] = useState(0);
-  const flatListRef = useRef<FlatList>(null); // Пустой ref для совместимости
-  
-  // Простая анимация клавиатуры без сложных вычислений
-  const keyboardAnimation = useRef(new Animated.Value(0)).current;
-  
-  // Синхронизируем анимацию с состоянием - упрощенная версия
-  useEffect(() => {
-    Animated.timing(keyboardAnimation, {
-      toValue: keyboardHeight,
-      duration: 250,
-      useNativeDriver: false,
-    }).start();
-  }, [keyboardHeight, keyboardAnimation]);
+  }, [selectedMessages, getMessageById]);
 
-  // Применение текущей темы с защитой
-  const currentThemeData = React.useMemo(() => {
-    try {
-      return THEMES[currentTheme as keyof typeof THEMES] || THEMES.dark;
-    } catch (error) {
-      addError(error instanceof Error ? error : new Error(String(error)), 'ChatCore', ErrorSeverity.MEDIUM);
-      return THEMES.dark;
-    }
-  }, [currentTheme, addError]);
-  
-  // Отфильтрованные сообщения с поиском и правильным порядком
-  const filteredMessages = React.useMemo(() => {
-    try {
-      if (!Array.isArray(messages)) {
-        addError(new Error('messages не является массивом'), 'ChatCore', ErrorSeverity.MEDIUM);
-        return [];
-      }
+  // Функции для удаления
+  const handleDeleteForMe = useCallback(() => {
+    setDeleteAction('forMe');
+    setShowDeleteConfirm(true);
+  }, []);
 
-      let filtered = [...messages];
+  const handleDeleteForAll = useCallback(() => {
+    setDeleteAction('forAll');
+    setShowDeleteConfirm(true);
+  }, []);
 
-      // Применяем поиск если есть запрос
-      if (searchQuery.trim().length > 0) {
-        const query = searchQuery.toLowerCase().trim();
-        filtered = filtered.filter(message => 
-          message.text.toLowerCase().includes(query)
-        );
-      }
-
-      // Возвращаем в обратном порядке для inverted FlatList
-      return filtered.reverse();
-    } catch (error) {
-      addError(error instanceof Error ? error : new Error(String(error)), 'ChatCore', ErrorSeverity.HIGH);
-      return [];
-    }
-  }, [messages, searchQuery, addError]);
-
-  // WatchDog для мониторинга UI с защитой
-  const watchDogResult = useUIWatchDog({
-    flatListRef,
-    messageCount: messages.length,
-    keyboardHeight,
-    inputFocused,
-    onScrollToEnd: () => {
+  const confirmDelete = useCallback(async () => {
+    const messageIds = Array.from(selectedMessages);
+    if (messageIds.length > 0) {
       try {
-        // Прокрутка теперь обрабатывается в ChatListWithReactions
+        const { deleteForMe, deleteForAll } = useMessageStore.getState();
+        
+        if (deleteAction === 'forMe') {
+          deleteForMe(messageIds, 'me');
+          
+          // Сохраняем для отмены
+          setLastDeletedMessages(messageIds);
+          setLastDeleteAction(deleteAction);
+          setShowUndo(true);
+          
+          // Автоматически скрываем через 3 секунды
+          setTimeout(() => {
+            setShowUndo(false);
+            setLastDeletedMessages([]);
+            setLastDeleteAction(null);
+          }, 3000);
+        } else if (deleteAction === 'forAll') {
+          await deleteForAll(messageIds, 'me');
+        }
+        
+        // Очищаем выбор после удаления
+        const clearSelection = useMessageStore.getState().clearSelection;
+        clearSelection();
+        setSelectedMessages(new Set());
+        setSelectedMessagesCount(0);
+        
+        // Закрываем ReactionBar
+        closeReactionBar();
       } catch (error) {
-        addError(error instanceof Error ? error : new Error(String(error)), 'ChatCore', ErrorSeverity.LOW);
+        if (__DEV__) console.warn('Ошибка удаления:', error);
       }
-    },
-  });
-
-  const { status: watchDogStatus, updateScrollPosition, forceCheck } = watchDogResult;
-
-  // Улучшенная безопасная обработка ошибок
-  const safeExecute = useCallback((fn: () => void, errorMessage: string, severity: ErrorSeverity = ErrorSeverity.MEDIUM) => {
-    try {
-      fn();
-    } catch (error) {
-      const errorObj = error instanceof Error ? error : new Error(String(error));
-      addError(errorObj, 'ChatCore', severity);
-      
-      // Проверяем на критические ошибки
-      if (severity === ErrorSeverity.CRITICAL || errorObj.message.includes('critical')) {
-        setHasCriticalError(true);
-        setErrorMessage(errorObj.message);
-      }
-      
-      onError?.(errorObj);
     }
-  }, [onError, addError]);
+    
+    // Закрываем меню подтверждения
+    setShowDeleteConfirm(false);
+    setDeleteAction(null);
+  }, [selectedMessages, deleteAction, closeReactionBar]);
 
-  // Обработка клавиатуры для Android с защитой
-  useEffect(() => {
-    let keyboardDidShowListener: any;
-    let keyboardDidHideListener: any;
-
-    try {
-      keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', (e) => {
-        safeExecute(() => {
-          setKeyboardHeight(e.endCoordinates.height);
-        }, 'keyboardDidShow', ErrorSeverity.LOW);
-      });
-
-      keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
-        safeExecute(() => {
-          setKeyboardHeight(0);
-        }, 'keyboardDidHide', ErrorSeverity.LOW);
-      });
-    } catch (error) {
-      addError(error instanceof Error ? error : new Error(String(error)), 'ChatCore', ErrorSeverity.MEDIUM);
-    }
-
-    return () => {
+  const executeDelete = useCallback(async (action: 'forMe' | 'forAll') => {
+    const messageIds = Array.from(selectedMessages);
+    if (__DEV__) console.log('executeDelete:', { messageIds, action, selectedMessages: selectedMessages.size });
+    
+    if (messageIds.length > 0) {
       try {
-        keyboardDidShowListener?.remove();
-        keyboardDidHideListener?.remove();
+        const { deleteForMe, deleteForAll } = useMessageStore.getState();
+        if (__DEV__) console.log('Store methods:', { deleteForMe: !!deleteForMe, deleteForAll: !!deleteForAll });
+        
+        if (action === 'forMe') {
+          if (__DEV__) console.log('Вызываем deleteForMe');
+          deleteForMe(messageIds, 'me');
+          
+          // Сохраняем для отмены
+          setLastDeletedMessages(messageIds);
+          setLastDeleteAction(action);
+          setShowUndo(true);
+          
+          // Автоматически скрываем через 3 секунды
+          setTimeout(() => {
+            setShowUndo(false);
+            setLastDeletedMessages([]);
+            setLastDeleteAction(null);
+          }, 3000);
+        } else if (action === 'forAll') {
+          if (__DEV__) console.log('Вызываем deleteForAll');
+          await deleteForAll(messageIds, 'me');
+        }
+        
+        // Очищаем выбор после удаления
+        const clearSelection = useMessageStore.getState().clearSelection;
+        clearSelection();
+        setSelectedMessages(new Set());
+        setSelectedMessagesCount(0);
+        
+        // Закрываем ReactionBar
+        closeReactionBar();
+        
+        if (__DEV__) console.log('Удаление завершено');
       } catch (error) {
-        addError(error instanceof Error ? error : new Error(String(error)), 'ChatCore', ErrorSeverity.LOW);
+        if (__DEV__) console.warn('Ошибка удаления:', error);
       }
-    };
-  }, [safeExecute, addError, setKeyboardHeight]);
+    }
+    
+    // Закрываем меню подтверждения
+    setShowDeleteConfirm(false);
+    setDeleteAction(null);
+  }, [selectedMessages, closeReactionBar]);
 
+  const undoDelete = useCallback(() => {
+    if (lastDeletedMessages.length > 0 && lastDeleteAction === 'forMe') {
+      try {
+        // Восстанавливаем сообщения (убираем из deletedFor)
+        const { updateMessage } = useMessageStore.getState();
+        
+        lastDeletedMessages.forEach(messageId => {
+          const message = getMessageById(messageId);
+          if (message && message.deletedFor) {
+            const updatedDeletedFor = message.deletedFor.filter(id => id !== 'me');
+            updateMessage(messageId, { 
+              deletedFor: updatedDeletedFor.length > 0 ? updatedDeletedFor : undefined 
+            });
+          }
+        });
+      } catch (error) {
+        if (__DEV__) console.warn('Ошибка отмены удаления:', error);
+      }
+    }
+    
+    // Скрываем undo
+    setShowUndo(false);
+    setLastDeletedMessages([]);
+    setLastDeleteAction(null);
+  }, [lastDeletedMessages, lastDeleteAction, getMessageById]);
 
-
-  // Безопасная отправка сообщения
+  // Функция отправки сообщения
   const handleSendMessage = useCallback(() => {
+    if (inputText.trim() === "") return;
+    
     safeExecute(() => {
-      if (inputText.trim() === "") return;
-
-      // Проверяем, не является ли это командой DevBot
-      if (inputText.trim().startsWith('/')) {
-        // Команда DevBot - передаем внешней логике
-        onSendMessage?.(inputText.trim());
-        setInputText("");
-        return;
-      }
-
-      // Используем addMessage из store
-      addMessage(inputText.trim());
-      setInputText("");
+      const trimmedText = inputText.trim();
+      if (trimmedText.length === 0) return;
       
-      // Уведомляем внешнюю логику
-      onSendMessage?.(inputText.trim());
+      addMessage(trimmedText);
+      
+      setInputText('');
+      
+      // Вызываем callback если передан
+      if (onSendMessage) {
+        onSendMessage(trimmedText);
+      }
       
       // Безопасный скролл вниз (при inverted={true} это scrollToOffset)
       setTimeout(() => {
@@ -450,9 +560,9 @@ const ChatCoreInner: React.FC<ChatCoreProps> = ({ onSendMessage, onError, isBotE
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: currentThemeData.bg }]} edges={["top", "bottom"]}>
-      <View style={styles.flex}>
+      <View style={[styles.flex, showDeleteConfirm && { pointerEvents: 'none' }]}>
         {/* Header */}
-        <View style={[styles.header, { backgroundColor: currentThemeData.headerBg }]}>
+        <View style={[styles.header, { backgroundColor: currentThemeData.headerBg, pointerEvents: 'auto' }]}>
           {!isSearching ? (
             <>
               {selectedMessagesCount > 0 ? (
@@ -501,7 +611,10 @@ const ChatCoreInner: React.FC<ChatCoreProps> = ({ onSendMessage, onError, isBotE
                     </TouchableOpacity>
                     <TouchableOpacity 
                       style={styles.actionButton}
-                      onPress={handleDeleteSelected}
+                      onPress={() => {
+                        closeReactionBar(); // Закрываем ReactionBar
+                        setShowDeleteConfirm(true);
+                      }}
                       activeOpacity={0.7}
                     >
                       <Ionicons name="trash" size={18} color="#fff" />
@@ -682,13 +795,15 @@ const ChatCoreInner: React.FC<ChatCoreProps> = ({ onSendMessage, onError, isBotE
           onMessageSelected={setSelectedMessageId}
           onSelectionChange={setSelectedMessagesCount}
           onSelectedMessagesChange={setSelectedMessages}
+          onCloseReactionBar={closeReactionBar}
+          forceCloseReactionBar={forceCloseReactionBar}
         />
 
         {/* Строка ввода - критически важный компонент */}
         <Animated.View style={[
           styles.inputContainer, 
           { 
-            marginBottom: keyboardHeight, // Простое значение без интерполяции
+            marginBottom: keyboardHeight, // Используем keyboardHeight напрямую как было
             backgroundColor: currentThemeData.inputBg,
             borderTopColor: currentThemeData.border
           }
@@ -735,8 +850,63 @@ const ChatCoreInner: React.FC<ChatCoreProps> = ({ onSendMessage, onError, isBotE
         {/* Реакции теперь обрабатываются в ChatListWithReactions */}
       </View>
       
-      {/* DevHUD для отображения статуса WatchDog (временно отключен) */}
-      {/* <DevHUD status={watchDogStatus} /> */}
+      {/* DevHUD - отключен, только мешает */}
+      {/* <DevHUD status={watchDogResult.status} /> */}
+      
+      {/* Меню подтверждения удаления */}
+      {showDeleteConfirm && (
+        <View style={styles.confirmOverlay}>
+          <View style={styles.confirmModal}>
+            <Text style={styles.confirmTitle}>Удалить сообщение(я)?</Text>
+            <Text style={styles.confirmSubtitle}>
+              Выберите тип удаления
+            </Text>
+            <View style={styles.confirmButtons}>
+              <TouchableOpacity 
+                style={styles.confirmButtonCancel}
+                onPress={() => {
+                  setShowDeleteConfirm(false);
+                  setDeleteAction(null);
+                }}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.confirmButtonText}>Отмена</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={styles.confirmButtonMe}
+                onPress={() => executeDelete('forMe')}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.confirmButtonText}>У меня</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={[styles.confirmButtonAll, !canDeleteForAll && styles.confirmButtonDisabled]}
+                onPress={() => executeDelete('forAll')}
+                activeOpacity={0.7}
+                disabled={!canDeleteForAll}
+              >
+                <Text style={[styles.confirmButtonText, !canDeleteForAll && styles.confirmButtonTextDisabled]}>
+                  У всех
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      )}
+      
+      {/* Уведомление об отмене удаления */}
+      {showUndo && (
+        <View style={styles.undoContainer}>
+          <Text style={styles.undoText}>Сообщение скрыто</Text>
+          <TouchableOpacity 
+            style={styles.undoButton}
+            onPress={undoDelete}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.undoButtonText}>Отменить</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </SafeAreaView>
   );
 };
@@ -788,6 +958,9 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.1)",
     justifyContent: "center",
     alignItems: "center",
+  },
+  actionButtonDisabled: {
+    backgroundColor: "rgba(255,255,255,0.05)",
   },
 
   menuButton: {
@@ -1097,4 +1270,111 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "600",
   },
-}); 
+  // Стили для меню подтверждения
+  confirmOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 3000,
+  },
+  confirmModal: {
+    backgroundColor: "#23234d",
+    borderRadius: 16,
+    padding: 24,
+    margin: 20,
+    maxWidth: 320,
+    width: '100%',
+    shadowColor: "#000",
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 8,
+  },
+  confirmTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#fff',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  confirmSubtitle: {
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.7)',
+    textAlign: 'center',
+    marginBottom: 24,
+  },
+  confirmButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+  confirmButtonCancel: {
+    flex: 1,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  confirmButtonMe: {
+    flex: 1,
+    backgroundColor: '#3498db',
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  confirmButtonAll: {
+    flex: 1,
+    backgroundColor: '#e74c3c',
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  confirmButtonDisabled: {
+    backgroundColor: 'rgba(255,255,255,0.05)',
+  },
+  confirmButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#fff',
+  },
+  confirmButtonTextDisabled: {
+    color: 'rgba(255,255,255,0.3)',
+  },
+  undoContainer: {
+    position: 'absolute',
+    bottom: 100,
+    left: 20,
+    right: 20,
+    backgroundColor: 'rgba(0,0,0,0.8)',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    zIndex: 4000,
+  },
+  undoText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  undoButton: {
+    backgroundColor: '#6c5ce7',
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+    borderRadius: 8,
+  },
+  undoButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+});

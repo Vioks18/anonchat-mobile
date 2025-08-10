@@ -5,7 +5,7 @@ import { useMessageStore } from '../hooks/useMessageStore';
 import useReactionState from '../hooks/useReactionState';
 import { Message } from '../types/message';
 import MessageWithReactions from './MessageWithReactions';
-import { ReactionBar } from './reactions';
+import ReactionBar from './reactions/ReactionBar';
 
 interface ChatListWithReactionsProps {
   messages: Message[];
@@ -13,6 +13,8 @@ interface ChatListWithReactionsProps {
   onMessageSelected?: (messageId: string | null) => void;
   onSelectionChange?: (selectedCount: number) => void;
   onSelectedMessagesChange?: (selectedMessages: Set<string>) => void;
+  onCloseReactionBar?: () => void;
+  forceCloseReactionBar?: boolean;
 }
 
 const ChatListWithReactions: React.FC<ChatListWithReactionsProps> = ({
@@ -21,6 +23,8 @@ const ChatListWithReactions: React.FC<ChatListWithReactionsProps> = ({
   onMessageSelected,
   onSelectionChange,
   onSelectedMessagesChange,
+  onCloseReactionBar,
+  forceCloseReactionBar = false,
 }) => {
   const { selectedMessageId, anchor, visible, openAtMessage, close, setLastTouch, keyboardHeight } = useReactionState();
   const messageRefs = useRef(new Map<string, any>());
@@ -72,8 +76,9 @@ const ChatListWithReactions: React.FC<ChatListWithReactionsProps> = ({
       // В режиме выбора - просто toggle
       toggleSelection(id);
       close(); // Закрываем реакции если были открыты
+      onCloseReactionBar?.(); // Уведомляем родительский компонент
     }
-  }, [getSelectedCount, enterSelection, toggleSelection, setLastTouch, openAtMessage, close]);
+  }, [getSelectedCount, enterSelection, toggleSelection, setLastTouch, openAtMessage, close, onCloseReactionBar]);
 
   // Tap: в режиме выбора - toggle, иначе - ничего
   const handlePress = useCallback((id: string) => {
@@ -111,8 +116,9 @@ const ChatListWithReactions: React.FC<ChatListWithReactionsProps> = ({
     const currentCount = getSelectedCount();
     if (currentCount !== 1) {
       close(); // >1 или 0 — прячем панель
+      onCloseReactionBar?.(); // Уведомляем родительский компонент
     }
-  }, [getSelectedCount, close]);
+  }, [getSelectedCount, close, onCloseReactionBar]);
 
   // Back handler для Android
   useEffect(() => {
@@ -126,6 +132,20 @@ const ChatListWithReactions: React.FC<ChatListWithReactionsProps> = ({
 
     return () => subscription.remove();
   }, [isSelectionMode, clearSelection]);
+
+  // Принудительное закрытие ReactionBar
+  useEffect(() => {
+    if (forceCloseReactionBar) {
+      close();
+      onCloseReactionBar?.();
+    }
+  }, [forceCloseReactionBar, close, onCloseReactionBar]);
+
+  // Функция для закрытия ReactionBar извне
+  const handleCloseReactionBar = useCallback(() => {
+    close(); // Закрываем ReactionBar
+    onCloseReactionBar?.(); // Уведомляем родительский компонент
+  }, [close, onCloseReactionBar]);
 
   const renderMessage = useCallback(({ item }: { item: Message }) => {
     

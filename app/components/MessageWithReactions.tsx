@@ -33,6 +33,15 @@ const MessageWithReactions: React.FC<MessageWithReactionsProps> = ({
   const rootRef = useRef<View>(null);
   const { removeReaction } = useMessageStore();
   
+  // Проверяем удаление
+  const isDeletedForMe = message.deletedFor?.includes('me');
+  const isDeletedForAll = message.deletedForAll;
+  
+  // Если сообщение удалено для меня - не показываем
+  if (isDeletedForMe) {
+    return null;
+  }
+  
   // Метаданные
   const status = isMyMessage ? (message.status ?? 'sent') : undefined;
   const time = formatTime(message.timestamp);
@@ -101,32 +110,47 @@ const MessageWithReactions: React.FC<MessageWithReactionsProps> = ({
             getBubbleStyle(), // Динамическая ширина
           ]}
         >
-          <Text style={[styles.messageText, getTextStyle()]}>
-            {message.text}
-          </Text>
-          
-          <View style={styles.metaRow}>
-            <Text style={styles.timeText}>{time}</Text>
-            {isMyMessage && status !== 'sending' && (
-              <Ionicons
-                style={styles.statusIcon}
-                size={14}
-                name={
-                  status === 'read' || status === 'delivered'
-                    ? 'checkmark-done-outline'
-                    : 'checkmark-outline'
-                }
-                color={status === 'read' ? '#FFFFFF' : 'rgba(255,255,255,0.9)'}
-              />
-            )}
-            {isMyMessage && status === 'sending' && (
-              <ActivityIndicator 
-                size={12} 
-                style={styles.statusIcon} 
-                color="rgba(255,255,255,0.9)"
-              />
-            )}
-          </View>
+          {isDeletedForAll ? (
+            // Tombstone для удаленного сообщения
+            <>
+              <Text style={[styles.messageText, styles.deletedText]}>
+                Сообщение удалено
+              </Text>
+              <View style={styles.metaRow}>
+                <Text style={styles.timeText}>{time}</Text>
+              </View>
+            </>
+          ) : (
+            // Обычное сообщение
+            <>
+              <Text style={[styles.messageText, getTextStyle()]}>
+                {message.text}
+              </Text>
+              
+              <View style={styles.metaRow}>
+                <Text style={styles.timeText}>{time}</Text>
+                {isMyMessage && status !== 'sending' && (
+                  <Ionicons
+                    style={styles.statusIcon}
+                    size={14}
+                    name={
+                      status === 'read' || status === 'delivered'
+                        ? 'checkmark-done-outline'
+                        : 'checkmark-outline'
+                    }
+                    color={status === 'read' ? '#FFFFFF' : 'rgba(255,255,255,0.9)'}
+                  />
+                )}
+                {isMyMessage && status === 'sending' && (
+                  <ActivityIndicator 
+                    size={12} 
+                    style={styles.statusIcon} 
+                    color="rgba(255,255,255,0.9)"
+                  />
+                )}
+              </View>
+            </>
+          )}
         </TouchableOpacity>
         
         {/* Реакции */}
@@ -191,6 +215,10 @@ const styles = StyleSheet.create({
     paddingTop: 2,
     flexShrink: 1,
     minWidth: 0, // Исправляем warning bubble.text.minWidth0
+  },
+  deletedText: {
+    color: 'rgba(255,255,255,0.6)',
+    fontStyle: 'italic',
   },
   metaRow: {
     position: 'absolute',

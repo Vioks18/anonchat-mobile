@@ -1,0 +1,1164 @@
+{
+  "mode": "strict",
+  "timestamp": "2025-08-10T14:30:19.646Z",
+  "summary": {
+    "passed": 36,
+    "warnings": 91,
+    "p0": 17,
+    "newIssues": 0
+  },
+  "results": [
+    {
+      "id": "store.status_read",
+      "severity": "P0",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\bubble_bad_padding.tsx",
+      "ok": false,
+      "message": "read missing in statuses",
+      "isNew": false
+    },
+    {
+      "id": "store.status_read",
+      "severity": "P0",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\text_no_minwidth.tsx",
+      "ok": false,
+      "message": "read missing in statuses",
+      "isNew": false
+    },
+    {
+      "id": "store.status_read",
+      "severity": "P0",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\pointer_bad.tsx",
+      "ok": false,
+      "message": "read missing in statuses",
+      "isNew": false
+    },
+    {
+      "id": "store.status_read",
+      "severity": "P0",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\console_spam.ts",
+      "ok": false,
+      "message": "read missing in statuses",
+      "isNew": false
+    },
+    {
+      "id": "store.status_read",
+      "severity": "P0",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\memo_missing.tsx",
+      "ok": false,
+      "message": "read missing in statuses",
+      "isNew": false
+    },
+    {
+      "id": "store.status_read",
+      "severity": "P0",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\reaction_guard_missing.tsx",
+      "ok": false,
+      "message": "read missing in statuses",
+      "isNew": false
+    },
+    {
+      "id": "perf.dev_logs",
+      "severity": "P0",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\bubble_bad_padding.tsx",
+      "ok": true,
+      "message": "logs guarded",
+      "isNew": false
+    },
+    {
+      "id": "perf.dev_logs",
+      "severity": "P0",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\text_no_minwidth.tsx",
+      "ok": true,
+      "message": "logs guarded",
+      "isNew": false
+    },
+    {
+      "id": "perf.dev_logs",
+      "severity": "P0",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\pointer_bad.tsx",
+      "ok": true,
+      "message": "logs guarded",
+      "isNew": false
+    },
+    {
+      "id": "perf.dev_logs",
+      "severity": "P0",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\console_spam.ts",
+      "ok": false,
+      "message": "dev logs not guarded",
+      "isNew": false
+    },
+    {
+      "id": "perf.dev_logs",
+      "severity": "P0",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\memo_missing.tsx",
+      "ok": true,
+      "message": "logs guarded",
+      "isNew": false
+    },
+    {
+      "id": "perf.dev_logs",
+      "severity": "P0",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\reaction_guard_missing.tsx",
+      "ok": true,
+      "message": "logs guarded",
+      "isNew": false
+    },
+    {
+      "id": "ui.layout.meta_inside",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\bubble_bad_padding.tsx",
+      "ok": false,
+      "message": "meta positioning issues",
+      "isNew": false
+    },
+    {
+      "id": "ui.layout.meta_inside",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\text_no_minwidth.tsx",
+      "ok": false,
+      "message": "meta positioning issues",
+      "isNew": false
+    },
+    {
+      "id": "ui.layout.meta_inside",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\pointer_bad.tsx",
+      "ok": false,
+      "message": "meta positioning issues",
+      "isNew": false
+    },
+    {
+      "id": "ui.layout.meta_inside",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\console_spam.ts",
+      "ok": false,
+      "message": "meta positioning issues",
+      "isNew": false
+    },
+    {
+      "id": "ui.layout.meta_inside",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\memo_missing.tsx",
+      "ok": false,
+      "message": "meta positioning issues",
+      "isNew": false
+    },
+    {
+      "id": "ui.layout.meta_inside",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\reaction_guard_missing.tsx",
+      "ok": false,
+      "message": "meta positioning issues",
+      "isNew": false
+    },
+    {
+      "id": "ui.text.shrink_ok",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\bubble_bad_padding.tsx",
+      "ok": false,
+      "message": "text shrink issues",
+      "isNew": false
+    },
+    {
+      "id": "ui.text.shrink_ok",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\text_no_minwidth.tsx",
+      "ok": true,
+      "message": "text shrink ok",
+      "isNew": false
+    },
+    {
+      "id": "ui.text.shrink_ok",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\pointer_bad.tsx",
+      "ok": false,
+      "message": "text shrink issues",
+      "isNew": false
+    },
+    {
+      "id": "ui.text.shrink_ok",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\console_spam.ts",
+      "ok": false,
+      "message": "text shrink issues",
+      "isNew": false
+    },
+    {
+      "id": "ui.text.shrink_ok",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\memo_missing.tsx",
+      "ok": false,
+      "message": "text shrink issues",
+      "isNew": false
+    },
+    {
+      "id": "ui.text.shrink_ok",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\reaction_guard_missing.tsx",
+      "ok": false,
+      "message": "text shrink issues",
+      "isNew": false
+    },
+    {
+      "id": "ui.pointer.safe",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\bubble_bad_padding.tsx",
+      "ok": false,
+      "message": "pointer events issues",
+      "isNew": false
+    },
+    {
+      "id": "ui.pointer.safe",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\text_no_minwidth.tsx",
+      "ok": false,
+      "message": "pointer events issues",
+      "isNew": false
+    },
+    {
+      "id": "ui.pointer.safe",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\pointer_bad.tsx",
+      "ok": false,
+      "message": "pointer events issues",
+      "isNew": false
+    },
+    {
+      "id": "ui.pointer.safe",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\console_spam.ts",
+      "ok": false,
+      "message": "pointer events issues",
+      "isNew": false
+    },
+    {
+      "id": "ui.pointer.safe",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\memo_missing.tsx",
+      "ok": false,
+      "message": "pointer events issues",
+      "isNew": false
+    },
+    {
+      "id": "ui.pointer.safe",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\reaction_guard_missing.tsx",
+      "ok": false,
+      "message": "pointer events issues",
+      "isNew": false
+    },
+    {
+      "id": "perf.memo",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\bubble_bad_padding.tsx",
+      "ok": false,
+      "message": "not memoized",
+      "isNew": false
+    },
+    {
+      "id": "perf.memo",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\text_no_minwidth.tsx",
+      "ok": false,
+      "message": "not memoized",
+      "isNew": false
+    },
+    {
+      "id": "perf.memo",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\pointer_bad.tsx",
+      "ok": false,
+      "message": "not memoized",
+      "isNew": false
+    },
+    {
+      "id": "perf.memo",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\console_spam.ts",
+      "ok": false,
+      "message": "not memoized",
+      "isNew": false
+    },
+    {
+      "id": "perf.memo",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\memo_missing.tsx",
+      "ok": true,
+      "message": "memo present",
+      "isNew": false
+    },
+    {
+      "id": "perf.memo",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\reaction_guard_missing.tsx",
+      "ok": false,
+      "message": "not memoized",
+      "isNew": false
+    },
+    {
+      "id": "secrets.env_gitignore",
+      "severity": "P0",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\bubble_bad_padding.tsx",
+      "ok": false,
+      "message": "Missing: .env",
+      "isNew": false
+    },
+    {
+      "id": "secrets.env_gitignore",
+      "severity": "P0",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\text_no_minwidth.tsx",
+      "ok": false,
+      "message": "Missing: .env",
+      "isNew": false
+    },
+    {
+      "id": "secrets.env_gitignore",
+      "severity": "P0",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\pointer_bad.tsx",
+      "ok": false,
+      "message": "Missing: .env",
+      "isNew": false
+    },
+    {
+      "id": "secrets.env_gitignore",
+      "severity": "P0",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\console_spam.ts",
+      "ok": true,
+      "message": "Found",
+      "isNew": false
+    },
+    {
+      "id": "secrets.env_gitignore",
+      "severity": "P0",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\memo_missing.tsx",
+      "ok": false,
+      "message": "Missing: .env",
+      "isNew": false
+    },
+    {
+      "id": "secrets.env_gitignore",
+      "severity": "P0",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\reaction_guard_missing.tsx",
+      "ok": false,
+      "message": "Missing: .env",
+      "isNew": false
+    },
+    {
+      "id": "secrets.patterns",
+      "severity": "P0",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\bubble_bad_padding.tsx",
+      "ok": true,
+      "message": "no secrets found",
+      "isNew": false
+    },
+    {
+      "id": "secrets.patterns",
+      "severity": "P0",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\text_no_minwidth.tsx",
+      "ok": true,
+      "message": "no secrets found",
+      "isNew": false
+    },
+    {
+      "id": "secrets.patterns",
+      "severity": "P0",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\pointer_bad.tsx",
+      "ok": true,
+      "message": "no secrets found",
+      "isNew": false
+    },
+    {
+      "id": "secrets.patterns",
+      "severity": "P0",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\console_spam.ts",
+      "ok": true,
+      "message": "no secrets found",
+      "isNew": false
+    },
+    {
+      "id": "secrets.patterns",
+      "severity": "P0",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\memo_missing.tsx",
+      "ok": true,
+      "message": "no secrets found",
+      "isNew": false
+    },
+    {
+      "id": "secrets.patterns",
+      "severity": "P0",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\reaction_guard_missing.tsx",
+      "ok": true,
+      "message": "no secrets found",
+      "isNew": false
+    },
+    {
+      "id": "deps.heavy_inactive",
+      "severity": "P2",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\bubble_bad_padding.tsx",
+      "ok": false,
+      "message": "heavy unused deps found",
+      "isNew": false
+    },
+    {
+      "id": "deps.heavy_inactive",
+      "severity": "P2",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\text_no_minwidth.tsx",
+      "ok": false,
+      "message": "heavy unused deps found",
+      "isNew": false
+    },
+    {
+      "id": "deps.heavy_inactive",
+      "severity": "P2",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\pointer_bad.tsx",
+      "ok": false,
+      "message": "heavy unused deps found",
+      "isNew": false
+    },
+    {
+      "id": "deps.heavy_inactive",
+      "severity": "P2",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\console_spam.ts",
+      "ok": false,
+      "message": "heavy unused deps found",
+      "isNew": false
+    },
+    {
+      "id": "deps.heavy_inactive",
+      "severity": "P2",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\memo_missing.tsx",
+      "ok": false,
+      "message": "heavy unused deps found",
+      "isNew": false
+    },
+    {
+      "id": "deps.heavy_inactive",
+      "severity": "P2",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\reaction_guard_missing.tsx",
+      "ok": false,
+      "message": "heavy unused deps found",
+      "isNew": false
+    },
+    {
+      "id": "chatlist.scroll_close",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\bubble_bad_padding.tsx",
+      "ok": false,
+      "message": "Missing: onScrollBeginDrag={handleScrollBeginDrag},close()",
+      "isNew": false
+    },
+    {
+      "id": "chatlist.scroll_close",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\text_no_minwidth.tsx",
+      "ok": false,
+      "message": "Missing: onScrollBeginDrag={handleScrollBeginDrag},close()",
+      "isNew": false
+    },
+    {
+      "id": "chatlist.scroll_close",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\pointer_bad.tsx",
+      "ok": false,
+      "message": "Missing: onScrollBeginDrag={handleScrollBeginDrag},close()",
+      "isNew": false
+    },
+    {
+      "id": "chatlist.scroll_close",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\console_spam.ts",
+      "ok": false,
+      "message": "Missing: onScrollBeginDrag={handleScrollBeginDrag},close()",
+      "isNew": false
+    },
+    {
+      "id": "chatlist.scroll_close",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\memo_missing.tsx",
+      "ok": false,
+      "message": "Missing: onScrollBeginDrag={handleScrollBeginDrag},close()",
+      "isNew": false
+    },
+    {
+      "id": "chatlist.scroll_close",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\reaction_guard_missing.tsx",
+      "ok": false,
+      "message": "Missing: onScrollBeginDrag={handleScrollBeginDrag},close()",
+      "isNew": false
+    },
+    {
+      "id": "perf.memo_bubble",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\bubble_bad_padding.tsx",
+      "ok": false,
+      "message": "not memoized",
+      "isNew": false
+    },
+    {
+      "id": "perf.memo_bubble",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\text_no_minwidth.tsx",
+      "ok": false,
+      "message": "not memoized",
+      "isNew": false
+    },
+    {
+      "id": "perf.memo_bubble",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\pointer_bad.tsx",
+      "ok": false,
+      "message": "not memoized",
+      "isNew": false
+    },
+    {
+      "id": "perf.memo_bubble",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\console_spam.ts",
+      "ok": false,
+      "message": "not memoized",
+      "isNew": false
+    },
+    {
+      "id": "perf.memo_bubble",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\memo_missing.tsx",
+      "ok": false,
+      "message": "not memoized",
+      "isNew": false
+    },
+    {
+      "id": "perf.memo_bubble",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\reaction_guard_missing.tsx",
+      "ok": false,
+      "message": "not memoized",
+      "isNew": false
+    },
+    {
+      "id": "perf.stable_handlers",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\bubble_bad_padding.tsx",
+      "ok": false,
+      "message": "handlers not memoized",
+      "isNew": false
+    },
+    {
+      "id": "perf.stable_handlers",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\text_no_minwidth.tsx",
+      "ok": false,
+      "message": "handlers not memoized",
+      "isNew": false
+    },
+    {
+      "id": "perf.stable_handlers",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\pointer_bad.tsx",
+      "ok": false,
+      "message": "handlers not memoized",
+      "isNew": false
+    },
+    {
+      "id": "perf.stable_handlers",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\console_spam.ts",
+      "ok": false,
+      "message": "handlers not memoized",
+      "isNew": false
+    },
+    {
+      "id": "perf.stable_handlers",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\memo_missing.tsx",
+      "ok": false,
+      "message": "handlers not memoized",
+      "isNew": false
+    },
+    {
+      "id": "perf.stable_handlers",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\reaction_guard_missing.tsx",
+      "ok": false,
+      "message": "handlers not memoized",
+      "isNew": false
+    },
+    {
+      "id": "deps.unused",
+      "severity": "P2",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\bubble_bad_padding.tsx",
+      "ok": false,
+      "message": "unused: @react-navigation/bottom-tabs, @react-navigation/elements, @react-navigation/native, expo, expo-auth-session...",
+      "isNew": false
+    },
+    {
+      "id": "deps.unused",
+      "severity": "P2",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\text_no_minwidth.tsx",
+      "ok": false,
+      "message": "unused: @react-navigation/bottom-tabs, @react-navigation/elements, @react-navigation/native, expo, expo-auth-session...",
+      "isNew": false
+    },
+    {
+      "id": "deps.unused",
+      "severity": "P2",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\pointer_bad.tsx",
+      "ok": false,
+      "message": "unused: @react-navigation/bottom-tabs, @react-navigation/elements, @react-navigation/native, expo, expo-auth-session...",
+      "isNew": false
+    },
+    {
+      "id": "deps.unused",
+      "severity": "P2",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\console_spam.ts",
+      "ok": false,
+      "message": "unused: @react-navigation/bottom-tabs, @react-navigation/elements, @react-navigation/native, expo, expo-auth-session...",
+      "isNew": false
+    },
+    {
+      "id": "deps.unused",
+      "severity": "P2",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\memo_missing.tsx",
+      "ok": false,
+      "message": "unused: @react-navigation/bottom-tabs, @react-navigation/elements, @react-navigation/native, expo, expo-auth-session...",
+      "isNew": false
+    },
+    {
+      "id": "deps.unused",
+      "severity": "P2",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\reaction_guard_missing.tsx",
+      "ok": false,
+      "message": "unused: @react-navigation/bottom-tabs, @react-navigation/elements, @react-navigation/native, expo, expo-auth-session...",
+      "isNew": false
+    },
+    {
+      "id": "bubble.meta.pointerEvents",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\bubble_bad_padding.tsx",
+      "ok": false,
+      "message": "Missing: pointerEvents=\"none\"",
+      "isNew": false
+    },
+    {
+      "id": "bubble.meta.pointerEvents",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\text_no_minwidth.tsx",
+      "ok": false,
+      "message": "Missing: pointerEvents=\"none\"",
+      "isNew": false
+    },
+    {
+      "id": "bubble.meta.pointerEvents",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\pointer_bad.tsx",
+      "ok": true,
+      "message": "Found",
+      "isNew": false
+    },
+    {
+      "id": "bubble.meta.pointerEvents",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\console_spam.ts",
+      "ok": false,
+      "message": "Missing: pointerEvents=\"none\"",
+      "isNew": false
+    },
+    {
+      "id": "bubble.meta.pointerEvents",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\memo_missing.tsx",
+      "ok": false,
+      "message": "Missing: pointerEvents=\"none\"",
+      "isNew": false
+    },
+    {
+      "id": "bubble.meta.pointerEvents",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\reaction_guard_missing.tsx",
+      "ok": false,
+      "message": "Missing: pointerEvents=\"none\"",
+      "isNew": false
+    },
+    {
+      "id": "bubble.text.minWidth0",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\bubble_bad_padding.tsx",
+      "ok": false,
+      "message": "Missing: minWidth: 0",
+      "isNew": false
+    },
+    {
+      "id": "bubble.text.minWidth0",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\text_no_minwidth.tsx",
+      "ok": true,
+      "message": "Found",
+      "isNew": false
+    },
+    {
+      "id": "bubble.text.minWidth0",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\pointer_bad.tsx",
+      "ok": false,
+      "message": "Missing: minWidth: 0",
+      "isNew": false
+    },
+    {
+      "id": "bubble.text.minWidth0",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\console_spam.ts",
+      "ok": false,
+      "message": "Missing: minWidth: 0",
+      "isNew": false
+    },
+    {
+      "id": "bubble.text.minWidth0",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\memo_missing.tsx",
+      "ok": false,
+      "message": "Missing: minWidth: 0",
+      "isNew": false
+    },
+    {
+      "id": "bubble.text.minWidth0",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\reaction_guard_missing.tsx",
+      "ok": false,
+      "message": "Missing: minWidth: 0",
+      "isNew": false
+    },
+    {
+      "id": "bubble.noWidth100",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\bubble_bad_padding.tsx",
+      "ok": true,
+      "message": "OK",
+      "isNew": false
+    },
+    {
+      "id": "bubble.noWidth100",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\text_no_minwidth.tsx",
+      "ok": true,
+      "message": "OK",
+      "isNew": false
+    },
+    {
+      "id": "bubble.noWidth100",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\pointer_bad.tsx",
+      "ok": true,
+      "message": "OK",
+      "isNew": false
+    },
+    {
+      "id": "bubble.noWidth100",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\console_spam.ts",
+      "ok": true,
+      "message": "OK",
+      "isNew": false
+    },
+    {
+      "id": "bubble.noWidth100",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\memo_missing.tsx",
+      "ok": true,
+      "message": "OK",
+      "isNew": false
+    },
+    {
+      "id": "bubble.noWidth100",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\reaction_guard_missing.tsx",
+      "ok": true,
+      "message": "OK",
+      "isNew": false
+    },
+    {
+      "id": "bubble.paddingRight.meta",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\bubble_bad_padding.tsx",
+      "ok": null,
+      "message": "paddingRight < 28",
+      "isNew": false
+    },
+    {
+      "id": "bubble.paddingRight.meta",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\text_no_minwidth.tsx",
+      "ok": null,
+      "message": "paddingRight < 28",
+      "isNew": false
+    },
+    {
+      "id": "bubble.paddingRight.meta",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\pointer_bad.tsx",
+      "ok": null,
+      "message": "paddingRight < 28",
+      "isNew": false
+    },
+    {
+      "id": "bubble.paddingRight.meta",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\console_spam.ts",
+      "ok": null,
+      "message": "paddingRight < 28",
+      "isNew": false
+    },
+    {
+      "id": "bubble.paddingRight.meta",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\memo_missing.tsx",
+      "ok": null,
+      "message": "paddingRight < 28",
+      "isNew": false
+    },
+    {
+      "id": "bubble.paddingRight.meta",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\reaction_guard_missing.tsx",
+      "ok": null,
+      "message": "paddingRight < 28",
+      "isNew": false
+    },
+    {
+      "id": "scroll.gate",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\bubble_bad_padding.tsx",
+      "ok": false,
+      "message": "Missing: scrollingRef.current",
+      "isNew": false
+    },
+    {
+      "id": "scroll.gate",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\text_no_minwidth.tsx",
+      "ok": false,
+      "message": "Missing: scrollingRef.current",
+      "isNew": false
+    },
+    {
+      "id": "scroll.gate",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\pointer_bad.tsx",
+      "ok": false,
+      "message": "Missing: scrollingRef.current",
+      "isNew": false
+    },
+    {
+      "id": "scroll.gate",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\console_spam.ts",
+      "ok": false,
+      "message": "Missing: scrollingRef.current",
+      "isNew": false
+    },
+    {
+      "id": "scroll.gate",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\memo_missing.tsx",
+      "ok": false,
+      "message": "Missing: scrollingRef.current",
+      "isNew": false
+    },
+    {
+      "id": "scroll.gate",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\reaction_guard_missing.tsx",
+      "ok": false,
+      "message": "Missing: scrollingRef.current",
+      "isNew": false
+    },
+    {
+      "id": "reactionbar.guard",
+      "severity": "P0",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\bubble_bad_padding.tsx",
+      "ok": false,
+      "message": "Missing: if (!visible || !anchor)",
+      "isNew": false
+    },
+    {
+      "id": "reactionbar.guard",
+      "severity": "P0",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\text_no_minwidth.tsx",
+      "ok": false,
+      "message": "Missing: if (!visible || !anchor)",
+      "isNew": false
+    },
+    {
+      "id": "reactionbar.guard",
+      "severity": "P0",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\pointer_bad.tsx",
+      "ok": false,
+      "message": "Missing: if (!visible || !anchor)",
+      "isNew": false
+    },
+    {
+      "id": "reactionbar.guard",
+      "severity": "P0",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\console_spam.ts",
+      "ok": false,
+      "message": "Missing: if (!visible || !anchor)",
+      "isNew": false
+    },
+    {
+      "id": "reactionbar.guard",
+      "severity": "P0",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\memo_missing.tsx",
+      "ok": false,
+      "message": "Missing: if (!visible || !anchor)",
+      "isNew": false
+    },
+    {
+      "id": "reactionbar.guard",
+      "severity": "P0",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\reaction_guard_missing.tsx",
+      "ok": true,
+      "message": "Found",
+      "isNew": false
+    },
+    {
+      "id": "reactionbar.pointerEvents",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\bubble_bad_padding.tsx",
+      "ok": false,
+      "message": "Missing: pointerEvents=\"box-none\",pointerEvents=\"auto\"",
+      "isNew": false
+    },
+    {
+      "id": "reactionbar.pointerEvents",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\text_no_minwidth.tsx",
+      "ok": false,
+      "message": "Missing: pointerEvents=\"box-none\",pointerEvents=\"auto\"",
+      "isNew": false
+    },
+    {
+      "id": "reactionbar.pointerEvents",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\pointer_bad.tsx",
+      "ok": false,
+      "message": "Missing: pointerEvents=\"box-none\",pointerEvents=\"auto\"",
+      "isNew": false
+    },
+    {
+      "id": "reactionbar.pointerEvents",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\console_spam.ts",
+      "ok": false,
+      "message": "Missing: pointerEvents=\"box-none\",pointerEvents=\"auto\"",
+      "isNew": false
+    },
+    {
+      "id": "reactionbar.pointerEvents",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\memo_missing.tsx",
+      "ok": false,
+      "message": "Missing: pointerEvents=\"box-none\",pointerEvents=\"auto\"",
+      "isNew": false
+    },
+    {
+      "id": "reactionbar.pointerEvents",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\reaction_guard_missing.tsx",
+      "ok": false,
+      "message": "Missing: pointerEvents=\"box-none\",pointerEvents=\"auto\"",
+      "isNew": false
+    },
+    {
+      "id": "anchor.touchXY",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\bubble_bad_padding.tsx",
+      "ok": false,
+      "message": "touchXY support missing",
+      "isNew": false
+    },
+    {
+      "id": "anchor.touchXY",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\text_no_minwidth.tsx",
+      "ok": false,
+      "message": "touchXY support missing",
+      "isNew": false
+    },
+    {
+      "id": "anchor.touchXY",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\pointer_bad.tsx",
+      "ok": false,
+      "message": "touchXY support missing",
+      "isNew": false
+    },
+    {
+      "id": "anchor.touchXY",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\console_spam.ts",
+      "ok": false,
+      "message": "touchXY support missing",
+      "isNew": false
+    },
+    {
+      "id": "anchor.touchXY",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\memo_missing.tsx",
+      "ok": false,
+      "message": "touchXY support missing",
+      "isNew": false
+    },
+    {
+      "id": "anchor.touchXY",
+      "severity": "P1",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\reaction_guard_missing.tsx",
+      "ok": false,
+      "message": "touchXY support missing",
+      "isNew": false
+    },
+    {
+      "id": "status.read",
+      "severity": "P0",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\bubble_bad_padding.tsx",
+      "ok": true,
+      "message": "OK",
+      "isNew": false
+    },
+    {
+      "id": "status.read",
+      "severity": "P0",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\text_no_minwidth.tsx",
+      "ok": true,
+      "message": "OK",
+      "isNew": false
+    },
+    {
+      "id": "status.read",
+      "severity": "P0",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\pointer_bad.tsx",
+      "ok": true,
+      "message": "OK",
+      "isNew": false
+    },
+    {
+      "id": "status.read",
+      "severity": "P0",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\console_spam.ts",
+      "ok": true,
+      "message": "OK",
+      "isNew": false
+    },
+    {
+      "id": "status.read",
+      "severity": "P0",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\memo_missing.tsx",
+      "ok": true,
+      "message": "OK",
+      "isNew": false
+    },
+    {
+      "id": "status.read",
+      "severity": "P0",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\reaction_guard_missing.tsx",
+      "ok": true,
+      "message": "OK",
+      "isNew": false
+    },
+    {
+      "id": ".env.gitignore",
+      "severity": "P2",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\bubble_bad_padding.tsx",
+      "ok": false,
+      "message": "Missing: .env",
+      "isNew": false
+    },
+    {
+      "id": ".env.gitignore",
+      "severity": "P2",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\text_no_minwidth.tsx",
+      "ok": false,
+      "message": "Missing: .env",
+      "isNew": false
+    },
+    {
+      "id": ".env.gitignore",
+      "severity": "P2",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\pointer_bad.tsx",
+      "ok": false,
+      "message": "Missing: .env",
+      "isNew": false
+    },
+    {
+      "id": ".env.gitignore",
+      "severity": "P2",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\console_spam.ts",
+      "ok": true,
+      "message": "Found",
+      "isNew": false
+    },
+    {
+      "id": ".env.gitignore",
+      "severity": "P2",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\memo_missing.tsx",
+      "ok": false,
+      "message": "Missing: .env",
+      "isNew": false
+    },
+    {
+      "id": ".env.gitignore",
+      "severity": "P2",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\reaction_guard_missing.tsx",
+      "ok": false,
+      "message": "Missing: .env",
+      "isNew": false
+    },
+    {
+      "id": "secrets.regex",
+      "severity": "P0",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\bubble_bad_padding.tsx",
+      "ok": true,
+      "message": "no secrets found",
+      "isNew": false
+    },
+    {
+      "id": "secrets.regex",
+      "severity": "P0",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\text_no_minwidth.tsx",
+      "ok": true,
+      "message": "no secrets found",
+      "isNew": false
+    },
+    {
+      "id": "secrets.regex",
+      "severity": "P0",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\pointer_bad.tsx",
+      "ok": true,
+      "message": "no secrets found",
+      "isNew": false
+    },
+    {
+      "id": "secrets.regex",
+      "severity": "P0",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\console_spam.ts",
+      "ok": true,
+      "message": "no secrets found",
+      "isNew": false
+    },
+    {
+      "id": "secrets.regex",
+      "severity": "P0",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\memo_missing.tsx",
+      "ok": true,
+      "message": "no secrets found",
+      "isNew": false
+    },
+    {
+      "id": "secrets.regex",
+      "severity": "P0",
+      "file": "C:\\Users\\vkuli\\anonchat-mobile\\qa\\fixtures\\reaction_guard_missing.tsx",
+      "ok": true,
+      "message": "no secrets found",
+      "isNew": false
+    }
+  ]
+}

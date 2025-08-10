@@ -6,6 +6,10 @@ export interface Message {
   status: "sending" | "sent" | "delivered" | "read";
   reactions?: string[];
   replyTo?: Message;
+  // Deletion fields
+  deletedFor?: string[];         // userIds that hid this message (local-only effect)
+  deletedForAll?: boolean;       // global tombstone (as if server-broadcasted)
+  deletedAt?: number;            // timestamp of deleteForAll
 }
 
 // Default export для Expo Router
