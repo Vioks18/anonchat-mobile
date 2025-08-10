@@ -27,6 +27,8 @@
     "qa:strict": "cross-env QA_MODE=strict node scripts/qa/scan.js",
     "qa:debug": "node scripts/qa/scan.js --debug",
     "qa:fix": "node scripts/qa/scan.js --autofix",
+    "qa:ui": "node scripts/qa/scan.js --mode=ui",
+    "qa:perf": "node scripts/qa/scan.js --mode=perf",
     "qa:baseline:update": "node scripts/qa/scan.js && cp QA-REPORT.md qa-baseline.json",
     "qa:oneclick": "powershell -ExecutionPolicy Bypass -File scripts/qa/quick-fix.ps1",
     "qa:gestures": "node scripts/sim/run.js --tapdiag && node scripts/qa/scan.js",

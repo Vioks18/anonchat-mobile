@@ -1,19 +1,26 @@
 # QA Report
 
 **Mode:** strict
-**New issues:** 7
+**New issues:** 5
 
 ## ✅ Passed
 - store.status_read (P0) — app/hooks/useMessageStore.ts: read in statuses
 - perf.dev_logs (P0) — app/hooks/useUIWatchDog.ts: logs guarded
 - perf.dev_logs (P0) — app/hooks/useMessageStore.ts: logs guarded
 - perf.dev_logs (P0) — app/hooks/useBotProvider.ts: logs guarded
+- ui.layout.meta_inside (P1) — app/components/MessageWithReactions.tsx: meta positioned correctly
+- ui.text.shrink_ok (P1) — app/components/MessageWithReactions.tsx: text shrink ok
+- ui.pointer.safe (P1) — app/components/reactions/ReactionBar.tsx: pointer events safe
+- perf.memo (P1) — app/components/MessageWithReactions.tsx: memo present
+- perf.memo (P1) — app/components/ChatMessage.tsx: memo present
+- secrets.env_gitignore (P0) — .gitignore: Found
+- secrets.patterns (P0) — **/*.{ts,tsx,js,jsx}: no secrets found
 - chatlist.scroll_close (P1) — app/components/ChatListWithReactions.tsx: Found
 - perf.memo_bubble (P1) — app/components/MessageWithReactions.tsx: memo present
 - perf.memo_bubble (P1) — app/components/ChatMessage.tsx: memo present
 - perf.stable_handlers (P1) — app/components/ChatListWithReactions.tsx: callbacks memoized
-- deps.unused (P2) — package.json: unused: @react-navigation/bottom-tabs, @react-navigation/elements, @react-navigation/native, expo, expo-auth-session, expo-background-fetch, expo-blur, expo-camera, expo-constants, expo-contacts, expo-crypto, expo-dev-client, expo-device, expo-document-picker, expo-file-system, expo-image, expo-image-picker, expo-linking, expo-location, expo-media-library, expo-network, expo-notifications, expo-secure-store, expo-sharing, expo-splash-screen, expo-sqlite, expo-status-bar, expo-symbols, expo-system-ui, expo-task-manager, expo-updates, expo-web-browser, react-dom, react-native-gesture-handler, react-native-haptic-feedback, react-native-reanimated, react-native-screens, react-native-swipe-list-view, react-native-web, react-native-webview
 - bubble.meta.pointerEvents (P1) — app/components/MessageWithReactions.tsx: Found
+- bubble.text.minWidth0 (P1) — app/components/MessageWithReactions.tsx: Found
 - bubble.noWidth100 (P1) — app/components/MessageWithReactions.tsx: OK
 - bubble.paddingRight.meta (P1) — app/components/MessageWithReactions.tsx: paddingRight >= 28
 - scroll.gate (P1) — app/components/ChatListWithReactions.tsx: Found
@@ -24,14 +31,12 @@
 - secrets.regex (P0) — **/*.{ts,tsx,js,jsx}: no secrets found
 
 ## ⚠️ Warnings
+- deps.heavy_inactive (P2) — package.json: heavy unused deps found **NEW**
 - perf.stable_handlers (P1) — app/hooks/useReactions.ts: handlers not memoized **NEW**
-- chatlist.doubletap_window (P2) — app/components/ChatListWithReactions.tsx: double-tap window not in 220–300ms **NEW**
-- bubble.text.minWidth0 (P1) — app/components/MessageWithReactions.tsx: Missing: minWidth: 0 **NEW**
-- doubleTap.window (P1) — app/components/ChatListWithReactions.tsx: window not 220-300ms **NEW**
+- deps.unused (P2) — package.json: unused: @react-navigation/bottom-tabs, @react-navigation/elements, @react-navigation/native, expo, expo-auth-session... **NEW**
 
 ## ❌ P0 Issues
 - reactionbar.anchor_guard (P0) — app/components/reactions/ReactionBar.tsx: Missing: if (!visible || !anchor) return null; **NEW**
-- gestures.doubletap.behavior (P0) — tapdiag-report.json: gesture issues: lateSecondTap: 2 > 0, duringScroll: 1 > 0, openLatencyP95: 300 > 300ms, openTooFar: 1 > 0 **NEW**
 - reactionbar.guard (P0) — app/components/reactions/ReactionBar.tsx: Missing: if (!visible || !anchor) return null; **NEW**
 
-Summary: Passed=18, Warnings=4, P0=3
+Summary: Passed=25, Warnings=3, P0=2

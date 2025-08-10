@@ -81,6 +81,88 @@ const wrapDevLogs = (content) => {
   return { content: lines.join('\n'), changed };
 };
 
+// New UI/Perf check functions
+const checkUILayoutMetaInside = (content) => {
+  // Check meta positioning: position:'absolute', right>=6, bottom>=2, paddingBottom>=14
+  const hasAbsolutePosition = /position:\s*['"]absolute['"]/.test(content);
+  const hasRightPosition = /right:\s*([0-9]+)/.test(content) && parseInt(RegExp.$1) >= 6;
+  const hasBottomPosition = /bottom:\s*([0-9]+)/.test(content) && parseInt(RegExp.$1) >= 2;
+  const hasPaddingBottom = /paddingBottom:\s*([0-9]+)/.test(content) && parseInt(RegExp.$1) >= 14;
+  
+  return hasAbsolutePosition && hasRightPosition && hasBottomPosition && hasPaddingBottom;
+};
+
+const checkUITextShrinkOk = (content) => {
+  // Check minWidth: 0 on Text and flexShrink: 1 on wrapper
+  const hasMinWidth = /minWidth:\s*0/.test(content);
+  const hasFlexShrink = /flexShrink:\s*1/.test(content);
+  
+  return hasMinWidth && hasFlexShrink;
+};
+
+const checkUIPointerSafe = (content) => {
+  // Check ReactionBar pointer events: outer 'box-none', inner 'auto'
+  const hasBoxNone = /pointerEvents\s*=\s*['"]box-none['"]/.test(content);
+  const hasAuto = /pointerEvents\s*=\s*['"]auto['"]/.test(content);
+  
+  return hasBoxNone && hasAuto;
+};
+
+const checkPerfMemo = (content) => {
+  // Check React.memo or custom memo
+  const hasReactMemo = /React\.memo/.test(content);
+  const hasCustomMemo = /memo\s*\(\s*[A-Za-z]+\s*,/.test(content);
+  
+  return hasReactMemo || hasCustomMemo;
+};
+
+const checkSecretsPatterns = (content) => {
+  // Check for API_KEY|SECRET|TOKEN|DSN|BEARER patterns
+  const secretPatterns = [
+    /API_KEY\s*[=:]\s*['"][A-Za-z0-9._\-]+['"]/,
+    /SECRET\s*[=:]\s*['"][A-Za-z0-9._\-]+['"]/,
+    /TOKEN\s*[=:]\s*['"][A-Za-z0-9._\-]+['"]/,
+    /DSN\s*[=:]\s*['"][A-Za-z0-9._\-]+['"]/,
+    /BEARER\s+[A-Za-z0-9._\-]+/
+  ];
+  
+  return !secretPatterns.some(pattern => pattern.test(content));
+};
+
+const checkHeavyDeps = () => {
+  const heavyPackages = [
+    'react-native-reanimated',
+    'react-native-gesture-handler', 
+    'react-native-camera',
+    'expo-notifications',
+    'react-native-vision-camera',
+    'react-native-video',
+    '@react-native-firebase',
+    'sentry-',
+    'realm'
+  ];
+  
+  const packageJson = readFileSafe('package.json');
+  if (!packageJson) return true;
+  
+  const packageData = JSON.parse(packageJson);
+  const deps = { ...packageData.dependencies, ...packageData.devDependencies };
+  
+  const appFiles = listFilesRecursive('app').filter(f => f.endsWith('.ts') || f.endsWith('.tsx'));
+  const allImports = appFiles.map(f => getContent(f)).join('\n');
+  
+  const unusedHeavy = [];
+  for (const pkg of Object.keys(deps)) {
+    if (heavyPackages.some(heavy => pkg.includes(heavy))) {
+      if (!allImports.includes(pkg) && !allImports.includes(pkg.replace('@react-native-firebase/', ''))) {
+        unusedHeavy.push(pkg);
+      }
+    }
+  }
+  
+  return unusedHeavy.length === 0;
+};
+
 // Filter rules based on mode
 const filterRules = (rules) => {
   if (QA_MODE === 'strict') {
@@ -216,8 +298,38 @@ const evaluators = {
             .filter((p) => /\.(t|j)sx?$/.test(p));
           const appContent = appFiles.map((p) => readFileSafe(p)).join('\n');
           const unused = deps.filter((d) => !new RegExp(`from ['\"]${d}['\"]|require\(['\"]${d}['\"]\)`).test(appContent));
-          msg = `unused: ${unused.join(', ')}`;
-          ok = true; // report only
+          ok = unused.length === 0;
+          msg = ok ? 'all deps used' : `unused: ${unused.slice(0, 5).join(', ')}${unused.length > 5 ? '...' : ''}`;
+          break;
+        }
+        case 'ui.layout.meta_inside': {
+          ok = checkUILayoutMetaInside(c);
+          msg = ok ? 'meta positioned correctly' : 'meta positioning issues';
+          break;
+        }
+        case 'ui.text.shrink_ok': {
+          ok = checkUITextShrinkOk(c);
+          msg = ok ? 'text shrink ok' : 'text shrink issues';
+          break;
+        }
+        case 'ui.pointer.safe': {
+          ok = checkUIPointerSafe(c);
+          msg = ok ? 'pointer events safe' : 'pointer events issues';
+          break;
+        }
+        case 'perf.memo': {
+          ok = checkPerfMemo(c);
+          msg = ok ? 'memo present' : 'not memoized';
+          break;
+        }
+        case 'secrets.patterns': {
+          ok = checkSecretsPatterns(c);
+          msg = ok ? 'no secrets found' : 'potential secrets found';
+          break;
+        }
+        case 'deps.heavy_inactive': {
+          ok = checkHeavyDeps();
+          msg = ok ? 'no heavy unused deps' : 'heavy unused deps found';
           break;
         }
         case 'bubble.paddingRight.meta': {
