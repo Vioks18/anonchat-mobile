@@ -40,10 +40,20 @@ const ReactionBar: React.FC<ReactionBarProps> = ({
     let left = Math.max(12, Math.min(baseX - barW / 2, W - barW - 12));
     
     const safeTop = insets.top + 12;
-    const safeBottom = H - insets.bottom - 12;
-    const yTop = (anchor.touchY ?? anchor.y) - barH - 12;
-    const yBottom = (anchor.touchY ?? (anchor.y + anchor.h)) + 12;
-    let top = (yTop < safeTop) ? Math.min(yBottom, safeBottom - barH) : Math.max(yTop, safeTop);
+    const safeBottom = H - insets.bottom - keyboardHeight - 12;
+    
+    // Пытаемся разместить над сообщением
+    let top = (anchor.touchY ?? anchor.y) - barH - 12;
+    
+    // Если не помещается сверху - размещаем снизу
+    if (top < safeTop) {
+      top = (anchor.touchY ?? (anchor.y + anchor.h)) + 12;
+    }
+    
+    // Если не помещается снизу - размещаем по центру экрана
+    if (top + barH > safeBottom) {
+      top = Math.max(safeTop, (safeBottom - barH) / 2);
+    }
     
     return { x: left, y: top };
   }, [anchor, measuredWidth, insets.top, insets.bottom, keyboardHeight]);
@@ -55,6 +65,10 @@ const ReactionBar: React.FC<ReactionBarProps> = ({
     if (selectedMessageId) {
       addReaction(selectedMessageId, reaction);
       onClose(); // Клик по эмодзи
+      
+      // Очищаем выбор после добавления реакции
+      const clearSelection = useMessageStore.getState().clearSelection;
+      clearSelection();
     } else if (__DEV__) {
       if (__DEV__) console.warn('⚠️ ReactionBar: selectedMessageId is null!');
     }
@@ -65,10 +79,6 @@ const ReactionBar: React.FC<ReactionBarProps> = ({
       console.log('🔥 ReactionBar: not visible', { visible, anchor: !!anchor });
     }
     return null;
-  }
-
-  if (__DEV__) {
-    console.log('🔥 ReactionBar: rendering', { position, anchor });
   }
 
   // Адаптивные цвета для панели реакций
@@ -113,21 +123,22 @@ const ReactionBar: React.FC<ReactionBarProps> = ({
   };
 
   return (
-    <Animated.View
+    <Animated.View 
+      style={styles.container} 
       pointerEvents="box-none"
-      style={styles.container}
     >
-      <View
+      <View 
+        style={styles.panel} 
         pointerEvents="auto"
-        style={styles.panel}
         onLayout={(e) => setMeasuredWidth(e.nativeEvent.layout.width)}
       >
         <View style={styles.emojiRow}>
           {AVAILABLE_REACTIONS.map((reaction) => (
             <TouchableOpacity
               key={reaction}
-              onPress={() => handleReaction(reaction)}
               style={styles.emojiButton}
+              onPress={() => handleReaction(reaction)}
+              activeOpacity={0.7}
             >
               <Text style={styles.emojiText}>{reaction}</Text>
             </TouchableOpacity>

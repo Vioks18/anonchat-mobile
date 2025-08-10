@@ -168,7 +168,19 @@ const ChatCoreInner: React.FC<ChatCoreProps> = ({ onSendMessage, onError, isBotE
   
   // Получаем выбранное сообщение для действий
   const [selectedMessageId, setSelectedMessageId] = useState<string | null>(null);
+  const [selectedMessagesCount, setSelectedMessagesCount] = useState(0);
+  const [selectedMessages, setSelectedMessages] = useState<Set<string>>(new Set());
   
+  // Синхронизация с store
+  useEffect(() => {
+    const unsubscribe = useMessageStore.subscribe((state) => {
+      setSelectedMessages(state.selectedIds);
+      setSelectedMessagesCount(state.selectedIds.size);
+    });
+    
+    return unsubscribe;
+  }, []);
+
   // Функции для действий с сообщениями
   const handleReply = useCallback(() => {
     if (selectedMessageId) {
@@ -205,6 +217,45 @@ const ChatCoreInner: React.FC<ChatCoreProps> = ({ onSendMessage, onError, isBotE
       setSelectedMessageId(null);
     }
   }, [selectedMessageId, removeMessage]);
+
+  // Функции для работы с множественными сообщениями
+  const handleCopySelected = useCallback(async () => {
+    const selectedTexts = Array.from(selectedMessages).map(id => {
+      const message = getMessageById(id);
+      return message?.text || '';
+    }).filter(text => text.length > 0);
+    
+    if (selectedTexts.length > 0) {
+      try {
+        await Clipboard.setStringAsync(selectedTexts.join('\n\n'));
+        // Очищаем выбор после копирования
+        const clearSelection = useMessageStore.getState().clearSelection;
+        clearSelection();
+        setSelectedMessages(new Set());
+        setSelectedMessagesCount(0);
+      } catch (error) {
+        if (__DEV__) console.warn('Ошибка копирования множественных сообщений:', error);
+      }
+    }
+  }, [selectedMessages, getMessageById]);
+
+  const handleDeleteSelected = useCallback(() => {
+    // Удаляем только свои сообщения
+    const myMessages = Array.from(selectedMessages).filter(id => {
+      const message = getMessageById(id);
+      return message?.sender === 'me';
+    });
+    
+    myMessages.forEach(id => {
+      removeMessage(id);
+    });
+    
+    // Очищаем выбор после удаления
+    const clearSelection = useMessageStore.getState().clearSelection;
+    clearSelection();
+    setSelectedMessages(new Set());
+    setSelectedMessagesCount(0);
+  }, [selectedMessages, getMessageById, removeMessage]);
   
   // Состояния для тем с защитой
   const [currentTheme, setCurrentTheme] = useState("dark");
@@ -388,46 +439,104 @@ const ChatCoreInner: React.FC<ChatCoreProps> = ({ onSendMessage, onError, isBotE
         <View style={[styles.header, { backgroundColor: currentThemeData.headerBg }]}>
           {!isSearching ? (
             <>
-              <Text style={styles.headerText}>Axora</Text>
-              {selectedMessageId ? (
-                <View style={styles.headerActions}>
-                  <TouchableOpacity 
-                    style={styles.actionButton}
-                    onPress={handleReply}
-                    activeOpacity={0.7}
-                  >
-                    <Ionicons name="arrow-undo" size={18} color="#fff" />
-                  </TouchableOpacity>
-                  <TouchableOpacity 
-                    style={styles.actionButton}
-                    onPress={handleCopy}
-                    activeOpacity={0.7}
-                  >
-                    <Ionicons name="copy" size={18} color="#fff" />
-                  </TouchableOpacity>
-                  <TouchableOpacity 
-                    style={styles.actionButton}
-                    onPress={handleForward}
-                    activeOpacity={0.7}
-                  >
-                    <Ionicons name="arrow-forward" size={18} color="#fff" />
-                  </TouchableOpacity>
-                  <TouchableOpacity 
-                    style={styles.actionButton}
-                    onPress={handleDelete}
-                    activeOpacity={0.7}
-                  >
-                    <Ionicons name="trash" size={18} color="#fff" />
-                  </TouchableOpacity>
-                </View>
+              {selectedMessagesCount > 0 ? (
+                // Верхняя панель действий в режиме выбора
+                <>
+                  <View style={styles.selectionHeader}>
+                    <TouchableOpacity 
+                      style={styles.backButton}
+                      onPress={() => {
+                        // Очищаем выбор через store
+                        const clearSelection = useMessageStore.getState().clearSelection;
+                        clearSelection();
+                        setSelectedMessageId(null);
+                        setSelectedMessagesCount(0);
+                        setSelectedMessages(new Set());
+                      }}
+                      activeOpacity={0.7}
+                    >
+                      <Ionicons name="arrow-back" size={20} color="#fff" />
+                    </TouchableOpacity>
+                    <Text style={styles.selectionCount}>{selectedMessagesCount} выбрано</Text>
+                  </View>
+                  <View style={styles.headerActions}>
+                    {selectedMessagesCount === 1 && (
+                      <TouchableOpacity 
+                        style={styles.actionButton}
+                        onPress={handleReply}
+                        activeOpacity={0.7}
+                      >
+                        <Ionicons name="arrow-undo" size={18} color="#fff" />
+                      </TouchableOpacity>
+                    )}
+                    <TouchableOpacity 
+                      style={styles.actionButton}
+                      onPress={handleCopySelected}
+                      activeOpacity={0.7}
+                    >
+                      <Ionicons name="copy" size={18} color="#fff" />
+                    </TouchableOpacity>
+                    <TouchableOpacity 
+                      style={styles.actionButton}
+                      onPress={handleForward}
+                      activeOpacity={0.7}
+                    >
+                      <Ionicons name="arrow-forward" size={18} color="#fff" />
+                    </TouchableOpacity>
+                    <TouchableOpacity 
+                      style={styles.actionButton}
+                      onPress={handleDeleteSelected}
+                      activeOpacity={0.7}
+                    >
+                      <Ionicons name="trash" size={18} color="#fff" />
+                    </TouchableOpacity>
+                  </View>
+                </>
               ) : (
-                <TouchableOpacity 
-                  style={styles.menuButton}
-                  onPress={() => setShowMenu(!showMenu)}
-                  activeOpacity={0.7}
-                >
-                  <Ionicons name="ellipsis-vertical" size={20} color="#fff" />
-                </TouchableOpacity>
+                // Обычный заголовок
+                <>
+                  <Text style={styles.headerText}>Axora</Text>
+                  {selectedMessageId ? (
+                    <View style={styles.headerActions}>
+                      <TouchableOpacity 
+                        style={styles.actionButton}
+                        onPress={handleReply}
+                        activeOpacity={0.7}
+                      >
+                        <Ionicons name="arrow-undo" size={18} color="#fff" />
+                      </TouchableOpacity>
+                      <TouchableOpacity 
+                        style={styles.actionButton}
+                        onPress={handleCopy}
+                        activeOpacity={0.7}
+                      >
+                        <Ionicons name="copy" size={18} color="#fff" />
+                      </TouchableOpacity>
+                      <TouchableOpacity 
+                        style={styles.actionButton}
+                        onPress={handleForward}
+                        activeOpacity={0.7}
+                      >
+                        <Ionicons name="arrow-forward" size={18} color="#fff" />
+                      </TouchableOpacity>
+                      <TouchableOpacity 
+                        style={styles.actionButton}
+                        onPress={handleDelete}
+                        activeOpacity={0.7}
+                      >
+                        <Ionicons name="trash" size={18} color="#fff" />
+                      </TouchableOpacity>
+                    </View>
+                  ) : (
+                    <TouchableOpacity 
+                      style={styles.menuButton}
+                      onPress={() => setShowMenu(!showMenu)}
+                      activeOpacity={0.7}
+                    >
+                      <Ionicons name="ellipsis-vertical" size={20} color="#fff" />
+                    </TouchableOpacity>
+                  )}
+                </>
               )}
             </>
           ) : (
@@ -555,6 +664,8 @@ const ChatCoreInner: React.FC<ChatCoreProps> = ({ onSendMessage, onError, isBotE
             // Обработка начала скролла
           }}
           onMessageSelected={setSelectedMessageId}
+          onSelectionChange={setSelectedMessagesCount}
+          onSelectedMessagesChange={setSelectedMessages}
         />
 
         {/* Строка ввода - критически важный компонент */}
@@ -663,9 +774,9 @@ const styles = StyleSheet.create({
   },
 
   menuButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     backgroundColor: "rgba(255,255,255,0.1)",
     justifyContent: "center",
     alignItems: "center",
@@ -948,5 +1059,24 @@ const styles = StyleSheet.create({
   },
   selectedBubble: {
     // Полностью убираю стили выделения
+  },
+  selectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  backButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "rgba(255,255,255,0.1)",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 12,
+  },
+  selectionCount: {
+    fontSize: 18,
+    color: "#fff",
+    fontWeight: "600",
   },
 }); 

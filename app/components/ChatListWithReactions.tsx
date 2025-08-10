@@ -1,6 +1,7 @@
-import React, { useCallback, useRef, useState } from 'react';
-import { FlatList, View } from 'react-native';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import { BackHandler, FlatList, View } from 'react-native';
 import { Portal } from 'react-native-portalize';
+import { useMessageStore } from '../hooks/useMessageStore';
 import useReactionState from '../hooks/useReactionState';
 import { Message } from '../types/message';
 import { GestureProbe } from '../utils/gestureProbe';
@@ -11,125 +12,127 @@ interface ChatListWithReactionsProps {
   messages: Message[];
   onScrollBeginDrag?: () => void;
   onMessageSelected?: (messageId: string | null) => void;
+  onSelectionChange?: (selectedCount: number) => void;
+  onSelectedMessagesChange?: (selectedMessages: Set<string>) => void;
 }
 
 const ChatListWithReactions: React.FC<ChatListWithReactionsProps> = ({
   messages,
   onScrollBeginDrag,
   onMessageSelected,
+  onSelectionChange,
+  onSelectedMessagesChange,
 }) => {
   const { selectedMessageId, anchor, visible, openAtMessage, close, setLastTouch, keyboardHeight } = useReactionState();
   const messageRefs = useRef(new Map<string, any>());
   const scrollingRef = useRef<boolean>(false);
-  const [lastTap, setLastTap] = useState<{ messageId: string; t: number } | null>(null);
-  const [showHeaderActions, setShowHeaderActions] = useState(false);
-  const [localSelectedMessageId, setLocalSelectedMessageId] = useState<string | null>(null);
+  
+  // Используем store для выбора
+  const selectedIds = useMessageStore(s => s.selectedIds);
+  const enterSelection = useMessageStore(s => s.enterSelection);
+  const toggleSelection = useMessageStore(s => s.toggleSelection);
+  const clearSelection = useMessageStore(s => s.clearSelection);
+  const isMessageSelected = useMessageStore(s => s.isSelected);
+  const getSelectedCount = useMessageStore(s => s.getSelectedCount);
+  
+  const isSelectionMode = selectedIds.size > 0;
+  
+  // Стабильное extraData для перерисовки
+  const extraData = useMemo(
+    () => `${messages.length}:${Array.from(selectedIds).sort().join('|')}`,
+    [messages.length, selectedIds]
+  );
+  
+  // Версия сообщений для отслеживания новых сообщений
+  const messagesVersion = useMemo(() => messages.map(m => m.id).join(','), [messages]);
 
-  const registerMessageRef = useCallback((id: string, ref: any) => {
-    if (ref && id) {
-      messageRefs.current.set(id, ref);
-      if (__DEV__) {
-        console.log('🔥 registerMessageRef:', { id, refFound: !!ref, totalRefs: messageRefs.current.size });
-      }
+  // Очистка refs для удаленных сообщений
+  useEffect(() => {
+    const ids = new Set(messages.map(m => m.id));
+    for (const k of Array.from(messageRefs.current.keys())) {
+      if (!ids.has(k)) messageRefs.current.delete(k);
     }
-  }, []);
+  }, [messagesVersion]);
 
-  const handleClose = useCallback(() => {
-    if (__DEV__) {
-      if (__DEV__) console.log('🔥 ChatList: handleClose - закрываем оба меню одновременно');
-    }
-    // Закрываем оба меню одновременно без задержки
-    setShowHeaderActions(false);
-    setLocalSelectedMessageId(null);
-    onMessageSelected?.(null);
-    close();
-  }, [close, onMessageSelected]);
-
-  const handleLongPress = useCallback((id: string, e?: any) => {
-    if (scrollingRef.current) return;
-    if (__DEV__) {
-      GestureProbe.log({ type: 'longPress', t: Date.now(), msgId: id });
-    }
-    setLocalSelectedMessageId(id);
-    setShowHeaderActions(true);
-    onMessageSelected?.(id); // Показываем кнопки в header при long-press
-    close(); // на long-press реакции НЕ открываем
-    setLastTap(null); // Сбрасываем двойной тап при long-press
-  }, [close, onMessageSelected]);
-
-  const handlePress = useCallback((id: string, e?: any) => {
-    const now = Date.now();
-    const WIN = 300; // Окно двойного тапа
+  // Long press: вход в режим выбора или toggle в режиме выбора
+  const handleLongPress = useCallback((id: string, event?: any) => {
+    console.log('🔥 LONG PRESS:', id);
     
-    if (__DEV__) {
-      console.log('🔥 handlePress:', { 
-        id, 
-        lastTap, 
-        timeDiff: lastTap ? now - lastTap.t : null,
-        visible,
-        showHeaderActions,
-        scrolling: scrollingRef.current
-      });
-    }
+    const currentCount = getSelectedCount();
     
-    // Если есть открытое меню - закрываем его
-    if (visible || showHeaderActions) {
-      if (__DEV__) {
-        console.log('🔥 Закрываем открытое меню');
-      }
-      handleClose();
-      setLastTap(null);
-      return;
-    }
-    
-    // Проверяем двойной тап
-    if (lastTap && lastTap.messageId === id && (now - lastTap.t) < WIN) {
-      if (__DEV__) {
-        console.log('🔥 ДВОЙНОЙ ТАП! timeDiff:', now - lastTap.t);
-        GestureProbe.log({ 
-          type: 'doubleTap', 
-          t: Date.now(), 
-          msgId: id, 
-          x: e?.nativeEvent?.pageX, 
-          y: e?.nativeEvent?.pageY 
-        });
-      }
-      // ДАБЛ-ТАП = открываем реакции
+    if (currentCount === 0) {
+      // Вход в режим выбора
+      enterSelection(id);
+      
+      // Открываем реакции только сейчас
+      setLastTouch?.(event?.nativeEvent?.pageX, event?.nativeEvent?.pageY);
       const ref = messageRefs.current.get(id);
-      if (__DEV__) {
-        console.log('🔥 ref found:', !!ref);
-      }
       if (ref) {
-        setLocalSelectedMessageId(id);
-        setLastTouch?.(e?.nativeEvent?.pageX, e?.nativeEvent?.pageY);
-        openAtMessage(id, ref);
-      } else {
-        if (__DEV__) {
-          console.log('🔥 ERROR: ref not found for message:', id);
-        }
+        requestAnimationFrame(() => openAtMessage(id, ref)); // показать реакции
       }
-      setLastTap(null);
-      return;
+    } else {
+      // В режиме выбора - просто toggle
+      toggleSelection(id);
+      close(); // Закрываем реакции если были открыты
     }
+  }, [getSelectedCount, enterSelection, toggleSelection, setLastTouch, openAtMessage, close]);
+
+  // Tap: в режиме выбора - toggle, иначе - ничего
+  const handlePress = useCallback((id: string) => {
+    console.log('🔥 TAP:', id);
     
-    // Если тапаем по другому сообщению - сбрасываем lastTap
-    if (lastTap && lastTap.messageId !== id) {
-      if (__DEV__) {
-        console.log('🔥 Different message, resetting lastTap');
+    const currentCount = getSelectedCount();
+    
+    if (currentCount > 0) {
+      // В режиме выбора - toggle выделения
+      toggleSelection(id);
+    }
+    // В обычном режиме - ничего не делаем
+  }, [getSelectedCount, toggleSelection]);
+
+  // Эффекты для управления реакциями и выбором
+  useEffect(() => {
+    // Уведомляем родительский компонент
+    onSelectionChange?.(getSelectedCount());
+    onSelectedMessagesChange?.(selectedIds);
+  }, [selectedIds, getSelectedCount, onSelectionChange, onSelectedMessagesChange]);
+
+  useEffect(() => {
+    // Если выбрано больше одного - закрываем реакции
+    if (getSelectedCount() > 1) {
+      close();
+    }
+    // Если ничего не выбрано - закрываем реакции и сбрасываем выбор
+    if (getSelectedCount() === 0) {
+      close();
+      onMessageSelected?.(null);
+    }
+  }, [getSelectedCount, close, onMessageSelected]);
+
+  // Управление реакциями при изменении выбора
+  useEffect(() => {
+    const currentCount = getSelectedCount();
+    if (currentCount !== 1) {
+      close(); // >1 или 0 — прячем панель
+    }
+  }, [getSelectedCount, close]);
+
+  // Back handler для Android
+  useEffect(() => {
+    const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
+      if (isSelectionMode) {
+        clearSelection();
+        return true; // Предотвращаем закрытие приложения
       }
-      setLastTap(null);
-    }
-    
-    // Обычный тап - запоминаем для возможного двойного тапа
-    if (__DEV__) {
-      console.log('🔥 First tap, setting lastTap');
-    }
-    setLastTap({ messageId: id, t: now });
-  }, [lastTap, openAtMessage, setLastTouch, visible, showHeaderActions, handleClose]);
+      return false; // Позволяем обычное поведение back
+    });
+
+    return () => subscription.remove();
+  }, [isSelectionMode, clearSelection]);
 
   const renderMessage = useCallback(({ item }: { item: Message }) => {
     const isMyMessage = item.sender === 'me';
-    const isSelected = localSelectedMessageId === item.id;
+    const isSelected = isMessageSelected(item.id);
 
     return (
       <MessageWithReactions
@@ -138,19 +141,22 @@ const ChatListWithReactions: React.FC<ChatListWithReactionsProps> = ({
         isSelected={isSelected}
         onLongPress={handleLongPress}
         onPress={handlePress}
-        registerRef={registerMessageRef}
+        registerRef={(id, ref) => {
+          if (ref) messageRefs.current.set(id, ref);
+        }}
       />
     );
-  }, [localSelectedMessageId, handleLongPress, handlePress, registerMessageRef]);
+  }, [handleLongPress, handlePress, isMessageSelected]);
 
   const handleScrollBeginDrag = useCallback(() => {
     if (__DEV__) {
       GestureProbe.log({ type: 'scrollBegin', t: Date.now() });
     }
     scrollingRef.current = true;
-    handleClose();
+    // Закрываем только реакции, выбор не сбрасываем
+    close();
     onScrollBeginDrag?.();
-  }, [handleClose, onScrollBeginDrag]);
+  }, [close, onScrollBeginDrag]);
 
   const handleScrollEndDrag = useCallback(() => {
     if (__DEV__) {
@@ -167,6 +173,7 @@ const ChatListWithReactions: React.FC<ChatListWithReactionsProps> = ({
         data={messages}
         renderItem={renderMessage}
         keyExtractor={(item) => item.id}
+        extraData={extraData}
         inverted={true}
         removeClippedSubviews={true}
         windowSize={10}
@@ -175,15 +182,15 @@ const ChatListWithReactions: React.FC<ChatListWithReactionsProps> = ({
         onScrollEndDrag={handleScrollEndDrag}
       />
       
-             <Portal>
-                  <ReactionBar
-            visible={visible}
-            anchor={anchor}
-            onClose={handleClose}
-            selectedMessageId={selectedMessageId}
-            keyboardHeight={keyboardHeight}
-          />
-       </Portal>
+      <Portal>
+        <ReactionBar
+          visible={!!(visible && getSelectedCount() === 1 && selectedMessageId && isMessageSelected(selectedMessageId))}
+          anchor={anchor}
+          onClose={close}
+          selectedMessageId={selectedMessageId}
+          keyboardHeight={keyboardHeight}
+        />
+      </Portal>
     </View>
   );
 };

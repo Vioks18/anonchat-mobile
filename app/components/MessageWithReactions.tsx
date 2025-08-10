@@ -1,54 +1,39 @@
 import { Ionicons } from '@expo/vector-icons';
-import React, { useMemo, useRef } from 'react';
-import { Animated, Dimensions, Pressable, Text, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useMemo, useRef } from 'react';
+import { Animated, Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { THEMES } from '../constants/themes';
 import { useMessageStore } from '../hooks/useMessageStore';
 import { useSelectedMessageAnimation } from '../hooks/useSelectedMessageAnimation';
 import { Message } from '../types/message';
+import { flags } from '../utils/flags';
 import { formatTimestamp } from '../utils/formatTimestamp';
 
 const SCREEN_W = Dimensions.get('window').width;
 const MAX_BUBBLE_W = Math.floor(SCREEN_W * 0.78);
 const MIN_BUBBLE_W = Math.floor(SCREEN_W * 0.40);
 
-// Утилита для добавления прозрачности к цвету
+// Утилиты для работы с цветами
 const addOpacity = (color: string, opacity: number) => {
-  if (color.startsWith('#')) {
-    const hex = Math.floor(opacity * 255).toString(16).padStart(2, '0');
-    return color + hex;
-  }
-  return color;
+  const hex = color.replace('#', '');
+  const r = parseInt(hex.substr(0, 2), 16);
+  const g = parseInt(hex.substr(2, 2), 16);
+  const b = parseInt(hex.substr(4, 2), 16);
+  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
 };
 
-// Простое и красивое масштабирование пузырьков
+// Вычисление размеров пузырька
 const computeBubbleLayout = (text: string, screenW: number) => {
-  const len = (text ?? '').trim().length;
+  const textLength = text?.length || 0;
+  const maxWidth = screenW * 0.75;
   
-  // Адаптивный maxWidth для длинных сообщений
-  let maxWidth: number;
-  if (len > 20) {
-    maxWidth = Math.floor(screenW * 0.85); // Больше места для очень длинных
-  } else if (len > 10) {
-    maxWidth = Math.floor(screenW * 0.80); // Больше места для длинных
+  if (textLength <= 3) {
+    return { minWidth: 60, maxWidth: 120 };
+  } else if (textLength <= 20) {
+    return { minWidth: Math.min(textLength * 8 + 40, maxWidth), maxWidth };
   } else {
-    maxWidth = Math.floor(screenW * 0.75); // Стандарт для коротких
+    return { minWidth: 80, maxWidth };
   }
-  
-  // Расширяем пузыри влево для лучшего вида
-  let minWidth: number;
-  
-  if (len <= 3) {
-    minWidth = Math.floor(screenW * 0.25); // Шире для коротких
-  } else if (len <= 6) {
-    minWidth = Math.floor(screenW * 0.30); // Шире для средних
-  } else {
-    minWidth = Math.floor(screenW * 0.35); // Шире для длинных
-  }
-  
-  return { minWidth, maxWidth };
 };
-
-
 
 interface MessageWithReactionsProps {
   message: Message;
@@ -69,27 +54,33 @@ const MessageWithReactions: React.FC<MessageWithReactionsProps> = ({
 }) => {
   const rootRef = useRef<View>(null);
   const { removeReaction } = useMessageStore();
+  const { animatedStyle } = useSelectedMessageAnimation({ isSelected, duration: 200 });
   
-  // Анимация выбранного сообщения
-  const { animatedStyle } = useSelectedMessageAnimation({ isSelected });
-
-  // Умная обработка тапов
-  const onPressWrap = (e: any) => {
-    if (__DEV__) {
-      console.log('🔥 MessageWithReactions onPress:', { messageId: message.id, isSelected });
+  // Анимация выделения с scale и тенью
+  const scaleAnim = useRef(new Animated.Value(isSelected ? 1.03 : 1)).current;
+  const currentTheme = THEMES.dark; // Используем текущую тему
+  
+  useEffect(() => {
+    if (flags.bubbleAnim) {
+      Animated.spring(scaleAnim, {
+        toValue: isSelected ? 1.03 : 1,
+        useNativeDriver: true,
+        tension: 140,
+        friction: 10
+      }).start();
     }
-    // Передаем closeAll только если сообщение выбрано (меню открыто)
-    onPress?.(message.id, { ...e, closeAll: isSelected });
-  };
-  
-  const onLongPressWrap = (e: any) => onLongPress?.(message.id, e);
+  }, [isSelected, scaleAnim]);
 
+  // Обработчик реакций
   const handleReactionPress = (reaction: string) => {
+    if (__DEV__) {
+      console.log('🔥 ReactionBar: handleReaction', { reaction, selectedMessageId: message.id });
+    }
     removeReaction(message.id, reaction);
   };
 
   // Текущая тема для метаданных
-  const currentTheme = THEMES.dark;
+  const currentThemeData = currentTheme;
   
   // Метаданные
   const time = formatTimestamp(message.timestamp);
@@ -127,6 +118,22 @@ const MessageWithReactions: React.FC<MessageWithReactionsProps> = ({
     },
   ];
 
+  // Анимированный стиль с scale и тенью
+  const animatedBubbleStyle = useMemo(() => {
+    if (!flags.bubbleAnim) {
+      return {}; // Убираем дублирующий фон
+    }
+    
+    return {
+      transform: [{ scale: scaleAnim }],
+      shadowColor: currentThemeData.accent,
+      shadowOpacity: isSelected ? 0.25 : 0,
+      shadowRadius: isSelected ? 8 : 0,
+      shadowOffset: { width: 0, height: 2 },
+      elevation: isSelected ? 6 : 0,
+    };
+  }, [isSelected, scaleAnim, currentThemeData.accent]);
+
   React.useEffect(() => {
     if (rootRef.current) {
       registerRef(message.id, rootRef.current);
@@ -138,47 +145,65 @@ const MessageWithReactions: React.FC<MessageWithReactionsProps> = ({
       styles.messageContainer,
       isMyMessage ? styles.messageMe : styles.messageOther
     ]}>
+      {/* Overlay выделения на всю строку */}
+      {isSelected && (
+        <View 
+          style={[
+            StyleSheet.absoluteFillObject,
+            {
+              backgroundColor: addOpacity(currentThemeData.accent, 0.08),
+              borderRadius: 12,
+            }
+          ]} 
+          pointerEvents="none" 
+        />
+      )}
       <View style={[
         styles.messageContent,
         isMyMessage ? styles.messageContentMe : styles.messageContentOther
       ]}>
         <Animated.View style={[animatedStyle]}>
-          <Pressable
-            ref={rootRef}
-            onPress={onPressWrap}
-            onLongPress={onLongPressWrap}
-            delayLongPress={500}
-            hitSlop={{ top: 6, bottom: 6, left: 4, right: 4 }}
-            android_disableSound
-                         style={[
-               styles.bubble,
-               bubbleStyle,
-               isMyMessage ? styles.bubbleMe : styles.bubbleOther,
-                               isSelected && {
-                  ...styles.selectedBubble,
-                }
-             ]}
-          >
-                      <Text style={textStyle}>{message.text}</Text>
-            
-            {/* Метаданные (время + галочки) */}
-            {isMyMessage && (
-              <View style={styles.metaRow} pointerEvents="none">
-                <Text style={[styles.time, { color: metaColor }]}>{time}</Text>
-                <Ionicons
-                  name={
-                    status === 'sending'   ? 'time-outline' :
-                    status === 'delivered' ? 'checkmark-done-outline' :
-                    status === 'read'      ? 'checkmark-done-outline' :
-                                             'checkmark-outline'
-                  }
-                  size={16}
-                  color={tickColor}
-                  style={{ marginLeft: 4 }}
-                />
-              </View>
-            )}
-          </Pressable>
+          <View ref={rootRef}>
+            <Animated.View style={animatedBubbleStyle}>
+              <TouchableOpacity
+                onPress={() => {
+                  console.log('🔥 TAP DETECTED:', message.id);
+                  onPress?.(message.id);
+                }}
+                onLongPress={(e) => {
+                  console.log('🔥 LONG PRESS DETECTED:', message.id);
+                  onLongPress?.(message.id, e);
+                }}
+                delayLongPress={600}
+                hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+                style={[
+                  styles.bubble,
+                  bubbleStyle,
+                  isMyMessage ? styles.bubbleMe : styles.bubbleOther,
+                ]}
+              >
+                <Text style={textStyle}>{message.text}</Text>
+                
+                {/* Метаданные (время + галочки) */}
+                {isMyMessage && (
+                  <View style={styles.metaRow} pointerEvents="none">
+                    <Text style={[styles.time, { color: metaColor }]}>{time}</Text>
+                    <Ionicons
+                      name={
+                        status === 'sending'   ? 'time-outline' :
+                        status === 'delivered' ? 'checkmark-done-outline' :
+                        status === 'read'      ? 'checkmark-done-outline' :
+                                                 'checkmark-outline'
+                      }
+                      size={16}
+                      color={tickColor}
+                      style={{ marginLeft: 4 }}
+                    />
+                  </View>
+                )}
+              </TouchableOpacity>
+            </Animated.View>
+          </View>
         </Animated.View>
         
         {/* Отображение реакций */}
@@ -204,33 +229,35 @@ const MessageWithReactions: React.FC<MessageWithReactionsProps> = ({
   );
 };
 
-const styles = {
+const styles = StyleSheet.create({
   messageContainer: {
     marginVertical: 2,
-    flexDirection: 'row' as const,
-    paddingHorizontal: 6,
-    width: '100%' as const, // Полная ширина контейнера
+    paddingHorizontal: 12,
   },
   messageMe: {
-    justifyContent: 'flex-end' as const,
+    alignItems: 'flex-end',
   },
   messageOther: {
-    justifyContent: 'flex-start' as const,
+    alignItems: 'flex-start',
   },
   messageContent: {
-    alignItems: 'flex-end' as const,
-    maxWidth: '100%' as const, // Ограничиваем ширину контента
+    maxWidth: '80%',
   },
   messageContentMe: {
-    alignItems: 'flex-end' as const,
-    maxWidth: '100%' as const,
+    alignItems: 'flex-end',
   },
   messageContentOther: {
-    alignItems: 'flex-start' as const,
-    maxWidth: '100%' as const,
+    alignItems: 'flex-start',
   },
   bubble: {
-    // Базовые стили перенесены в bubbleBase
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    minHeight: 36,
+    minWidth: 44,
+    maxWidth: '80%',
+    paddingRight: 40, // резерв под мету
+    position: 'relative',
+    justifyContent: 'center',
   },
   bubbleBase: {
     position: 'relative' as const,
@@ -245,73 +272,64 @@ const styles = {
     elevation: 3,
   },
   bubbleMe: {
-    backgroundColor: THEMES.dark.bubbleMe,
-    shadowColor: THEMES.dark.bubbleMe,
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 3,
+    backgroundColor: THEMES.dark.accent,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 4,
+    borderBottomLeftRadius: 16,
+    borderBottomRightRadius: 16,
   },
   bubbleOther: {
     backgroundColor: THEMES.dark.bubbleOther,
-    shadowColor: THEMES.dark.bubbleOther,
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 1 },
-    elevation: 2,
+    borderTopLeftRadius: 4,
+    borderTopRightRadius: 16,
+    borderBottomLeftRadius: 16,
+    borderBottomRightRadius: 16,
   },
   bubbleText: {
-    fontSize: 17,
-    color: '#fff',
-    lineHeight: 22,
-    flexWrap: 'wrap' as const,
-    alignSelf: 'flex-start' as const,
-    minWidth: 0,
+    color: THEMES.dark.text,
+    fontSize: 16,
+    lineHeight: 20,
+    flexShrink: 1,
+    flexWrap: 'wrap',
   },
   selectedBubble: {
-    opacity: 0.8,
+    borderWidth: 0,
   },
   reactionsContainer: {
-    flexDirection: 'row' as const,
-    flexWrap: 'wrap' as const,
-    marginTop: 4,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 4,
+    marginTop: 4,
   },
   reactionsMe: {
-    justifyContent: 'flex-end' as const,
+    justifyContent: 'flex-end',
   },
   reactionsOther: {
-    justifyContent: 'flex-start' as const,
+    justifyContent: 'flex-start',
   },
   reactionChip: {
-    backgroundColor: THEMES.dark.inputBg + '80',
-    borderRadius: 12,
+    backgroundColor: THEMES.dark.inputBg,
     paddingHorizontal: 8,
     paddingVertical: 4,
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: THEMES.dark.border + '40',
+    borderColor: THEMES.dark.border,
   },
   reactionText: {
     fontSize: 14,
-    color: '#fff',
   },
   metaRow: {
-    position: 'absolute' as const,
+    position: 'absolute',
     right: 8,
     bottom: 6,
-    flexDirection: 'row' as const,
-    alignItems: 'center' as const,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.3,
-    shadowRadius: 1,
-    elevation: 2,
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   time: {
     fontSize: 12,
-    fontWeight: '500' as const,
+    opacity: 0.7,
   },
-};
+});
 
 export default React.memo(MessageWithReactions, (prevProps, nextProps) => {
   return (
