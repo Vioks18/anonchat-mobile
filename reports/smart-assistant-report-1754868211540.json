@@ -1,0 +1,32 @@
+{
+  "timestamp": "2025-08-10T23:23:31.540Z",
+  "issues": [],
+  "suggestions": [
+    "🏗️ Файл очень большой, рассмотреть разделение",
+    "🚀 Добавить removeClippedSubviews",
+    "🔒 Убрать console.log: console.log('ChatCore: Попытка перезагрузки...')",
+    "🛡️ Добавить обработку ошибок",
+    "🔒 Добавить валидацию пользовательского ввода",
+    "🛡️ Добавить обработку ошибок",
+    "🛡️ Добавить обработку ошибок",
+    "🔒 Добавить валидацию пользовательского ввода",
+    "🛡️ Добавить обработку ошибок",
+    "🧠 Рассмотреть useMemo для сложных операций",
+    "🛡️ Добавить обработку ошибок",
+    "🏗️ Файл очень большой, рассмотреть разделение",
+    "🛡️ Добавить обработку ошибок",
+    "🛡️ Добавить обработку ошибок",
+    "🏗️ Файл очень большой, рассмотреть разделение",
+    "🔒 Добавить валидацию пользовательского ввода",
+    "🚀 Добавить removeClippedSubviews",
+    "🧠 Рассмотреть useMemo для сложных операций",
+    "🔒 Убрать console.log: console.log('ErrorMonitor: Перезапуск приложения...')",
+    "🔒 Убрать console.log: console.log(logMessage)",
+    "🔒 Убрать console.log: console.log('[GestureProbe] Report saved to:', reportPath)",
+    "🔒 Убрать console.log: console.log('[GestureProbe] Report saved to globalThis.GESTURE_LOG')",
+    "🔒 Убрать console.log: console.log('📊 LayoutSentinel Report:', report)",
+    "🔒 Убрать console.log: console.log('📊 LayoutSentinel Report:', report)",
+    "🧠 Рассмотреть useMemo для сложных операций"
+  ],
+  "totalFiles": 40
+}
