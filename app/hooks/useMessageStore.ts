@@ -61,9 +61,13 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
   
   addMessage: (text: string) => {
     try {
+      if (!validateMessage(text)) {
+        return;
+      }
+      
       const newMessage: Message = {
         id: Date.now().toString(),
-        text: text.trim(),
+        text: text, // Убираем trim() чтобы сохранить оригинальный текст
         sender: "me",
         timestamp: Date.now(),
         status: "sending",

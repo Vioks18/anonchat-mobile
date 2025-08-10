@@ -4,7 +4,6 @@ import { Portal } from 'react-native-portalize';
 import { useMessageStore } from '../hooks/useMessageStore';
 import useReactionState from '../hooks/useReactionState';
 import { Message } from '../types/message';
-import { GestureProbe } from '../utils/gestureProbe';
 import MessageWithReactions from './MessageWithReactions';
 import { ReactionBar } from './reactions';
 
@@ -56,7 +55,6 @@ const ChatListWithReactions: React.FC<ChatListWithReactionsProps> = ({
 
   // Long press: вход в режим выбора или toggle в режиме выбора
   const handleLongPress = useCallback((id: string, event?: any) => {
-    console.log('🔥 LONG PRESS:', id);
     
     const currentCount = getSelectedCount();
     
@@ -79,7 +77,6 @@ const ChatListWithReactions: React.FC<ChatListWithReactionsProps> = ({
 
   // Tap: в режиме выбора - toggle, иначе - ничего
   const handlePress = useCallback((id: string) => {
-    console.log('🔥 TAP:', id);
     
     const currentCount = getSelectedCount();
     
@@ -131,6 +128,7 @@ const ChatListWithReactions: React.FC<ChatListWithReactionsProps> = ({
   }, [isSelectionMode, clearSelection]);
 
   const renderMessage = useCallback(({ item }: { item: Message }) => {
+    
     const isMyMessage = item.sender === 'me';
     const isSelected = isMessageSelected(item.id);
 
@@ -149,9 +147,7 @@ const ChatListWithReactions: React.FC<ChatListWithReactionsProps> = ({
   }, [handleLongPress, handlePress, isMessageSelected]);
 
   const handleScrollBeginDrag = useCallback(() => {
-    if (__DEV__) {
-      GestureProbe.log({ type: 'scrollBegin', t: Date.now() });
-    }
+    
     scrollingRef.current = true;
     // Закрываем только реакции, выбор не сбрасываем
     close();
@@ -159,9 +155,7 @@ const ChatListWithReactions: React.FC<ChatListWithReactionsProps> = ({
   }, [close, onScrollBeginDrag]);
 
   const handleScrollEndDrag = useCallback(() => {
-    if (__DEV__) {
-      GestureProbe.log({ type: 'scrollEnd', t: Date.now() });
-    }
+    
     setTimeout(() => {
       scrollingRef.current = false;
     }, 100);
