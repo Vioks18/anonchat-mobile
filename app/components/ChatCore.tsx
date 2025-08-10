@@ -95,11 +95,13 @@ const ChatCoreInner: React.FC<ChatCoreProps> = ({ onSendMessage, onError, isBotE
   const [errorMessage, setErrorMessage] = useState<string>('');
   
   // Подключаем Zustand store для сообщений с защитой
-  const messages = useMessageStore((s) => s?.messages || []);
+  const messages = useMessageStore((s) => (s?.messages || []).filter(msg => !msg.deletedFor?.["me"]));
   const addMessage = useMessageStore((s) => s?.addMessage || (() => {}));
   const removeMessage = useMessageStore((s) => s?.removeMessage || (() => {}));
   const setReplyDraft = useMessageStore((s) => s?.setReplyDraft || (() => {}));
   const getMessageById = useMessageStore((s) => s?.getMessageById || (() => undefined));
+  const deleteForMe = useMessageStore((s) => s?.deleteForMe || (() => {}));
+  const requestDeleteForAll = useMessageStore((s) => s?.requestDeleteForAll || (() => Promise.resolve()));
   
   // Получаем выбранное сообщение для действий
   const [selectedMessageId, setSelectedMessageId] = useState<string | null>(null);
@@ -189,23 +191,33 @@ const ChatCoreInner: React.FC<ChatCoreProps> = ({ onSendMessage, onError, isBotE
     }
   }, [selectedMessages, getMessageById]);
 
-  const handleDeleteSelected = useCallback(() => {
-    // Удаляем только свои сообщения
+  const handleDeleteForMe = useCallback(() => {
+    const selectedIds = Array.from(selectedMessages);
+    deleteForMe(selectedIds);
+    // Selection is cleared automatically by deleteForMe
+  }, [selectedMessages, deleteForMe]);
+
+  const handleDeleteForAll = useCallback(async () => {
+    // Only allow delete for all on my messages
     const myMessages = Array.from(selectedMessages).filter(id => {
       const message = getMessageById(id);
       return message?.sender === 'me';
     });
     
-    myMessages.forEach(id => {
-      removeMessage(id);
-    });
-    
-    // Очищаем выбор после удаления
-    const clearSelection = useMessageStore.getState().clearSelection;
-    clearSelection();
-    setSelectedMessages(new Set());
-    setSelectedMessagesCount(0);
-  }, [selectedMessages, getMessageById, removeMessage]);
+    if (myMessages.length > 0) {
+      try {
+        await requestDeleteForAll(myMessages);
+        // Selection is cleared automatically by requestDeleteForAll
+      } catch (error) {
+        if (__DEV__) console.error('handleDeleteForAll: Ошибка удаления сообщений', error);
+      }
+    }
+  }, [selectedMessages, getMessageById, requestDeleteForAll]);
+
+  // Legacy handler for backward compatibility
+  const handleDeleteSelected = useCallback(() => {
+    handleDeleteForMe();
+  }, [handleDeleteForMe]);
   
   // Состояния для тем с защитой
   const [currentTheme, setCurrentTheme] = useState("dark");
@@ -383,10 +395,17 @@ const ChatCoreInner: React.FC<ChatCoreProps> = ({ onSendMessage, onError, isBotE
               </TouchableOpacity>
               <TouchableOpacity 
                 style={styles.actionButton}
-                onPress={handleDeleteSelected}
+                onPress={handleDeleteForMe}
                 activeOpacity={0.7}
               >
-                <Ionicons name="trash" size={18} color="#fff" />
+                <Ionicons name="trash-outline" size={18} color="#fff" />
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={styles.actionButton}
+                onPress={handleDeleteForAll}
+                activeOpacity={0.7}
+              >
+                <Ionicons name="trash" size={18} color="#ff6b6b" />
               </TouchableOpacity>
             </View>
           </View>

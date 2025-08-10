@@ -17,7 +17,7 @@ const ChatWithReactions: React.FC<ChatWithReactionsProps> = ({
   isBotEnabled = false,
   onToggleBot
 }) => {
-  const messages = useMessageStore((s) => s.messages);
+  const messages = useMessageStore((s) => s.messages.filter(msg => !msg.deletedFor?.["me"]));
   const addMessage = useMessageStore((s) => s.addMessage);
   const currentTheme = useMessageStore((s: any) => s.currentTheme || 'dark') as keyof typeof THEMES;
   const [inputText, setInputText] = useState('');

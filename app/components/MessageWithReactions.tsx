@@ -102,7 +102,7 @@ const MessageWithReactions: React.FC<MessageWithReactionsProps> = ({
           ]}
         >
           <Text style={[styles.messageText, getTextStyle()]}>
-            {message.text}
+            {message.deletedForAll ? "Message deleted" : message.text}
           </Text>
           
           <View style={styles.metaRow}>
@@ -130,7 +130,7 @@ const MessageWithReactions: React.FC<MessageWithReactionsProps> = ({
         </TouchableOpacity>
         
         {/* Реакции */}
-        {message.reactions && message.reactions.length > 0 && (
+        {message.reactions && message.reactions.length > 0 && !message.deletedForAll && (
           <View style={[
             styles.reactionsContainer,
             isMyMessage ? styles.reactionsMe : styles.reactionsOther
