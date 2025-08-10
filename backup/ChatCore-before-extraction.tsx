@@ -25,7 +25,9 @@
 import { Ionicons } from '@expo/vector-icons';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
+  Animated,
   FlatList,
+  Keyboard,
   StyleSheet,
   Text,
   TextInput,
@@ -36,12 +38,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useMessageStore } from '../hooks/useMessageStore';
 
 import * as Clipboard from 'expo-clipboard';
+import { useUIWatchDog } from '../hooks/useUIWatchDog';
 import { ErrorSeverity, useErrorMonitor } from '../utils/errorBoundary';
 import ChatListWithReactions from './ChatListWithReactions';
-
-// Extracted components
-import useKeyboardGlue from '../hooks/chat/useKeyboardGlue';
-import { ChatMenus, HeaderBar, InputBar } from './chat';
 
 // Темы
 const THEMES = {
@@ -285,21 +284,20 @@ const ChatCoreInner: React.FC<ChatCoreProps> = ({ onSendMessage, onError, isBotE
   const [isSearching, setIsSearching] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
   const flatListRef = useRef<FlatList>(null); // Пустой ref для совместимости
   
-  // Keyboard glue hook
-  const {
-    keyboardHeight,
-    keyboardAnimation,
-    watchDogStatus,
-    updateScrollPosition,
-    forceCheck,
-  } = useKeyboardGlue({
-    flatListRef,
-    messageCount: messages.length,
-    inputFocused,
-    onError,
-  });
+  // Простая анимация клавиатуры без сложных вычислений
+  const keyboardAnimation = useRef(new Animated.Value(0)).current;
+  
+  // Синхронизируем анимацию с состоянием - упрощенная версия
+  useEffect(() => {
+    Animated.timing(keyboardAnimation, {
+      toValue: keyboardHeight,
+      duration: 250,
+      useNativeDriver: false,
+    }).start();
+  }, [keyboardHeight, keyboardAnimation]);
 
   // Применение текущей темы с защитой
   const currentThemeData = React.useMemo(() => {
@@ -337,6 +335,23 @@ const ChatCoreInner: React.FC<ChatCoreProps> = ({ onSendMessage, onError, isBotE
     }
   }, [messages, searchQuery, addError]);
 
+  // WatchDog для мониторинга UI с защитой
+  const watchDogResult = useUIWatchDog({
+    flatListRef,
+    messageCount: messages.length,
+    keyboardHeight,
+    inputFocused,
+    onScrollToEnd: () => {
+      try {
+        // Прокрутка теперь обрабатывается в ChatListWithReactions
+      } catch (error) {
+        addError(error instanceof Error ? error : new Error(String(error)), 'ChatCore', ErrorSeverity.LOW);
+      }
+    },
+  });
+
+  const { status: watchDogStatus, updateScrollPosition, forceCheck } = watchDogResult;
+
   // Улучшенная безопасная обработка ошибок
   const safeExecute = useCallback((fn: () => void, errorMessage: string, severity: ErrorSeverity = ErrorSeverity.MEDIUM) => {
     try {
@@ -354,6 +369,37 @@ const ChatCoreInner: React.FC<ChatCoreProps> = ({ onSendMessage, onError, isBotE
       onError?.(errorObj);
     }
   }, [onError, addError]);
+
+  // Обработка клавиатуры для Android с защитой
+  useEffect(() => {
+    let keyboardDidShowListener: any;
+    let keyboardDidHideListener: any;
+
+    try {
+      keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', (e) => {
+        safeExecute(() => {
+          setKeyboardHeight(e.endCoordinates.height);
+        }, 'keyboardDidShow', ErrorSeverity.LOW);
+      });
+
+      keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
+        safeExecute(() => {
+          setKeyboardHeight(0);
+        }, 'keyboardDidHide', ErrorSeverity.LOW);
+      });
+    } catch (error) {
+      addError(error instanceof Error ? error : new Error(String(error)), 'ChatCore', ErrorSeverity.MEDIUM);
+    }
+
+    return () => {
+      try {
+        keyboardDidShowListener?.remove();
+        keyboardDidHideListener?.remove();
+      } catch (error) {
+        addError(error instanceof Error ? error : new Error(String(error)), 'ChatCore', ErrorSeverity.LOW);
+      }
+    };
+  }, [safeExecute, addError, setKeyboardHeight]);
 
 
 
@@ -406,88 +452,226 @@ const ChatCoreInner: React.FC<ChatCoreProps> = ({ onSendMessage, onError, isBotE
     <SafeAreaView style={[styles.container, { backgroundColor: currentThemeData.bg }]} edges={["top", "bottom"]}>
       <View style={styles.flex}>
         {/* Header */}
-        {selectedMessagesCount > 0 ? (
-          // Верхняя панель действий в режиме выбора
-          <View style={[styles.header, { backgroundColor: currentThemeData.headerBg }]}>
-            <View style={styles.selectionHeader}>
+        <View style={[styles.header, { backgroundColor: currentThemeData.headerBg }]}>
+          {!isSearching ? (
+            <>
+              {selectedMessagesCount > 0 ? (
+                // Верхняя панель действий в режиме выбора
+                <>
+                  <View style={styles.selectionHeader}>
+                    <TouchableOpacity 
+                      style={styles.backButton}
+                      onPress={() => {
+                        // Очищаем выбор через store
+                        const clearSelection = useMessageStore.getState().clearSelection;
+                        clearSelection();
+                        setSelectedMessageId(null);
+                        setSelectedMessagesCount(0);
+                        setSelectedMessages(new Set());
+                      }}
+                      activeOpacity={0.7}
+                    >
+                      <Ionicons name="arrow-back" size={20} color="#fff" />
+                    </TouchableOpacity>
+                    <Text style={styles.selectionCount}>{selectedMessagesCount} выбрано</Text>
+                  </View>
+                  <View style={styles.headerActions}>
+                    {selectedMessagesCount === 1 && (
+                      <TouchableOpacity 
+                        style={styles.actionButton}
+                        onPress={handleReply}
+                        activeOpacity={0.7}
+                      >
+                        <Ionicons name="arrow-undo" size={18} color="#fff" />
+                      </TouchableOpacity>
+                    )}
+                    <TouchableOpacity 
+                      style={styles.actionButton}
+                      onPress={handleCopySelected}
+                      activeOpacity={0.7}
+                    >
+                      <Ionicons name="copy" size={18} color="#fff" />
+                    </TouchableOpacity>
+                    <TouchableOpacity 
+                      style={styles.actionButton}
+                      onPress={handleForward}
+                      activeOpacity={0.7}
+                    >
+                      <Ionicons name="arrow-forward" size={18} color="#fff" />
+                    </TouchableOpacity>
+                    <TouchableOpacity 
+                      style={styles.actionButton}
+                      onPress={handleDeleteSelected}
+                      activeOpacity={0.7}
+                    >
+                      <Ionicons name="trash" size={18} color="#fff" />
+                    </TouchableOpacity>
+                  </View>
+                </>
+              ) : (
+                // Обычный заголовок
+                <>
+                  <Text style={styles.headerText}>Axora</Text>
+                  {selectedMessageId ? (
+                    <View style={styles.headerActions}>
+                      <TouchableOpacity 
+                        style={styles.actionButton}
+                        onPress={handleReply}
+                        activeOpacity={0.7}
+                      >
+                        <Ionicons name="arrow-undo" size={18} color="#fff" />
+                      </TouchableOpacity>
+                      <TouchableOpacity 
+                        style={styles.actionButton}
+                        onPress={handleCopy}
+                        activeOpacity={0.7}
+                      >
+                        <Ionicons name="copy" size={18} color="#fff" />
+                      </TouchableOpacity>
+                      <TouchableOpacity 
+                        style={styles.actionButton}
+                        onPress={handleForward}
+                        activeOpacity={0.7}
+                      >
+                        <Ionicons name="arrow-forward" size={18} color="#fff" />
+                      </TouchableOpacity>
+                      <TouchableOpacity 
+                        style={styles.actionButton}
+                        onPress={handleDelete}
+                        activeOpacity={0.7}
+                      >
+                        <Ionicons name="trash" size={18} color="#fff" />
+                      </TouchableOpacity>
+                    </View>
+                  ) : (
+                    <TouchableOpacity 
+                      style={styles.menuButton}
+                      onPress={() => setShowMenu(!showMenu)}
+                      activeOpacity={0.7}
+                    >
+                      <Ionicons name="ellipsis-vertical" size={20} color="#fff" />
+                    </TouchableOpacity>
+                  )}
+                </>
+              )}
+            </>
+          ) : (
+            <View style={styles.searchContainer}>
+              <TextInput
+                style={styles.searchInput}
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                placeholder="Поиск сообщений..."
+                placeholderTextColor="#888"
+                autoFocus
+                returnKeyType="search"
+              />
               <TouchableOpacity 
-                style={styles.backButton}
+                style={styles.searchCloseButton}
                 onPress={() => {
-                  // Очищаем выбор через store
-                  const clearSelection = useMessageStore.getState().clearSelection;
-                  clearSelection();
-                  setSelectedMessageId(null);
-                  setSelectedMessagesCount(0);
-                  setSelectedMessages(new Set());
+                  setIsSearching(false);
+                  setSearchQuery("");
                 }}
                 activeOpacity={0.7}
               >
-                <Ionicons name="arrow-back" size={20} color="#fff" />
-              </TouchableOpacity>
-              <Text style={styles.selectionCount}>{selectedMessagesCount} выбрано</Text>
-            </View>
-            <View style={styles.headerActions}>
-              {selectedMessagesCount === 1 && (
-                <TouchableOpacity 
-                  style={styles.actionButton}
-                  onPress={handleReply}
-                  activeOpacity={0.7}
-                >
-                  <Ionicons name="arrow-undo" size={18} color="#fff" />
-                </TouchableOpacity>
-              )}
-              <TouchableOpacity 
-                style={styles.actionButton}
-                onPress={handleCopySelected}
-                activeOpacity={0.7}
-              >
-                <Ionicons name="copy" size={18} color="#fff" />
-              </TouchableOpacity>
-              <TouchableOpacity 
-                style={styles.actionButton}
-                onPress={handleForward}
-                activeOpacity={0.7}
-              >
-                <Ionicons name="arrow-forward" size={18} color="#fff" />
-              </TouchableOpacity>
-              <TouchableOpacity 
-                style={styles.actionButton}
-                onPress={handleDeleteSelected}
-                activeOpacity={0.7}
-              >
-                <Ionicons name="trash" size={18} color="#fff" />
+                <Ionicons name="close" size={20} color="#fff" />
               </TouchableOpacity>
             </View>
-          </View>
-        ) : (
-          <HeaderBar
-            isSearching={isSearching}
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-            setIsSearching={setIsSearching}
-            selectedMessageId={selectedMessageId}
-            handleReply={handleReply}
-            handleCopy={handleCopy}
-            handleForward={handleForward}
-            handleDelete={handleDelete}
-            showMenu={showMenu}
-            setShowMenu={setShowMenu}
-            currentThemeData={currentThemeData}
-          />
+          )}
+        </View>
+
+                {/* Меню */}
+        {showMenu && (
+          <TouchableOpacity 
+            style={styles.menuOverlay}
+            onPress={() => setShowMenu(false)}
+            activeOpacity={1}
+          >
+            <TouchableOpacity 
+              style={styles.menuContent}
+              onPress={() => {}}
+              activeOpacity={1}
+            >
+              <TouchableOpacity 
+                style={styles.menuItem}
+                onPress={() => {
+                  setIsSearching(true);
+                  setShowMenu(false);
+                }}
+                activeOpacity={0.7}
+              >
+                <Ionicons name="search" size={20} color="#fff" />
+                <Text style={styles.menuItemText}>Поиск сообщений</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={styles.menuItem}
+                onPress={() => {
+                  setShowMenu(false);
+                  setShowThemeSelector(true);
+                }}
+                activeOpacity={0.7}
+              >
+                <Ionicons name="color-palette-outline" size={20} color="#fff" />
+                <Text style={styles.menuItemText}>Темы</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={styles.menuItem}
+                onPress={() => {
+                  onToggleBot?.();
+                  setShowMenu(false);
+                }}
+                activeOpacity={0.7}
+              >
+                <Ionicons name={isBotEnabled ? "chatbubble" : "chatbubble-outline"} size={20} color="#fff" />
+                <Text style={styles.menuItemText}>
+                  {isBotEnabled ? "Отключить бота" : "Включить бота"}
+                </Text>
+              </TouchableOpacity>
+            </TouchableOpacity>
+          </TouchableOpacity>
         )}
 
-        {/* Меню */}
-        <ChatMenus
-          showMenu={showMenu}
-          setShowMenu={setShowMenu}
-          setIsSearching={setIsSearching}
-          setShowThemeSelector={setShowThemeSelector}
-          onToggleBot={onToggleBot}
-          isBotEnabled={isBotEnabled}
-          showThemeSelector={showThemeSelector}
-          currentTheme={currentTheme}
-          setCurrentTheme={setCurrentTheme}
-        />
+        {/* Модальное окно выбора темы */}
+        {showThemeSelector && (
+          <View style={styles.themeModal}>
+            <TouchableOpacity 
+              style={styles.themeModalOverlay}
+              onPress={() => setShowThemeSelector(false)}
+              activeOpacity={1}
+            >
+              <TouchableOpacity 
+                style={styles.themeModalContent}
+                onPress={() => {}}
+                activeOpacity={1}
+              >
+                <Text style={styles.themeModalTitle}>Выберите тему</Text>
+                {Object.entries(THEMES).map(([key, theme]) => (
+                  <TouchableOpacity 
+                    key={key}
+                    style={[
+                      styles.themeOption,
+                      currentTheme === key && styles.themeOptionSelected
+                    ]}
+                    onPress={() => {
+                      setCurrentTheme(key);
+                      setShowThemeSelector(false);
+                    }}
+                    activeOpacity={0.7}
+                  >
+                    <View style={[styles.themePreview, { backgroundColor: theme.bg }]}>
+                      <View style={[styles.themePreviewHeader, { backgroundColor: theme.headerBg }]} />
+                      <View style={[styles.themePreviewBubble, { backgroundColor: theme.bubbleMe }]} />
+                    </View>
+                    <Text style={styles.themeOptionText}>{theme.name}</Text>
+                    {currentTheme === key && (
+                      <Ionicons name="checkmark-circle" size={20} color={theme.accent} />
+                    )}
+                  </TouchableOpacity>
+                ))}
+              </TouchableOpacity>
+            </TouchableOpacity>
+          </View>
+        )}
 
                  {/* Список сообщений - критически важный компонент */}
          <ChatListWithReactions
@@ -501,14 +685,52 @@ const ChatCoreInner: React.FC<ChatCoreProps> = ({ onSendMessage, onError, isBotE
         />
 
         {/* Строка ввода - критически важный компонент */}
-        <InputBar
-          inputText={inputText}
-          setInputText={setInputText}
-          handleSendMessage={handleSendMessage}
-          keyboardHeight={keyboardHeight}
-          currentThemeData={currentThemeData}
-          setInputFocused={setInputFocused}
-        />
+        <Animated.View style={[
+          styles.inputContainer, 
+          { 
+            marginBottom: keyboardHeight, // Простое значение без интерполяции
+            backgroundColor: currentThemeData.inputBg,
+            borderTopColor: currentThemeData.border
+          }
+        ]}>
+          <TextInput
+            ref={textInputRef}
+            style={[
+              styles.textInput,
+              { 
+                backgroundColor: currentThemeData.inputBg,
+                color: currentThemeData.text,
+                borderColor: currentThemeData.border
+              }
+            ]}
+            value={inputText}
+            onChangeText={setInputText}
+            placeholder="Введите сообщение..."
+            placeholderTextColor="#aaa"
+            onSubmitEditing={handleSendMessage}
+            returnKeyType="send"
+            multiline={true}
+            blurOnSubmit={false}
+            keyboardType="default"
+            autoCorrect={true}
+            autoCapitalize="sentences"
+            onFocus={() => setInputFocused(true)}
+            onBlur={() => setInputFocused(false)}
+            textAlignVertical="top" // Выравнивание текста сверху
+          />
+          <TouchableOpacity
+            style={[
+              styles.sendButton, 
+              { backgroundColor: currentThemeData.accent },
+              !inputText.trim() && styles.sendButtonDisabled
+            ]}
+            onPress={handleSendMessage}
+            disabled={!inputText.trim()}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="send-outline" size={22} color="#fff" />
+          </TouchableOpacity>
+        </Animated.View>
         
         {/* Реакции теперь обрабатываются в ChatListWithReactions */}
       </View>
