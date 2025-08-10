@@ -4,9 +4,10 @@ export interface Message {
   sender: "me" | "other";
   timestamp: number;
   status: "sending" | "sent" | "delivered" | "read";
-  reactions: string[];
+  reactions?: string[];
   replyTo?: Message;
 }
 
 // Default export для Expo Router
-export default Message; 
+const MessageComponent = () => null;
+export default MessageComponent; 

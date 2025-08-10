@@ -36,18 +36,18 @@ const ChatKeyboardProviderInner: React.FC<ChatKeyboardProviderProps> = React.mem
   const safeSetKeyboardHeight = useCallback((height: number) => {
     try {
       if (typeof height !== 'number') {
-        console.warn('ChatKeyboard: Невалидный тип высоты', typeof height);
+        if (__DEV__) console.warn('ChatKeyboard: Невалидный тип высоты', typeof height);
         return;
       }
       
       if (height < 0) {
-        console.warn('ChatKeyboard: Отрицательная высота клавиатуры', height);
+        if (__DEV__) console.warn('ChatKeyboard: Отрицательная высота клавиатуры', height);
         return;
       }
       
       setKeyboardHeight(height);
     } catch (error) {
-      console.error('ChatKeyboard: Ошибка изменения высоты', error);
+      if (__DEV__) console.error('ChatKeyboard: Ошибка изменения высоты', error);
     }
   }, []);
 
@@ -57,7 +57,7 @@ const ChatKeyboardProviderInner: React.FC<ChatKeyboardProviderProps> = React.mem
       const height = event?.endCoordinates?.height || 0;
       safeSetKeyboardHeight(height);
     } catch (error) {
-      console.error('ChatKeyboard: Ошибка показа клавиатуры', error);
+      if (__DEV__) console.error('ChatKeyboard: Ошибка показа клавиатуры', error);
     }
   }, [safeSetKeyboardHeight]);
 
@@ -65,7 +65,7 @@ const ChatKeyboardProviderInner: React.FC<ChatKeyboardProviderProps> = React.mem
     try {
       safeSetKeyboardHeight(0);
     } catch (error) {
-      console.error('ChatKeyboard: Ошибка скрытия клавиатуры', error);
+      if (__DEV__) console.error('ChatKeyboard: Ошибка скрытия клавиатуры', error);
     }
   }, [safeSetKeyboardHeight]);
 
@@ -75,7 +75,7 @@ const ChatKeyboardProviderInner: React.FC<ChatKeyboardProviderProps> = React.mem
       Keyboard.addListener('keyboardDidShow', handleKeyboardShow);
       Keyboard.addListener('keyboardDidHide', handleKeyboardHide);
     } catch (error) {
-      console.error('ChatKeyboard: Ошибка добавления слушателей', error);
+      if (__DEV__) console.error('ChatKeyboard: Ошибка добавления слушателей', error);
     }
   }, [handleKeyboardShow, handleKeyboardHide]);
 
@@ -85,7 +85,7 @@ const ChatKeyboardProviderInner: React.FC<ChatKeyboardProviderProps> = React.mem
       Keyboard.removeAllListeners('keyboardDidShow');
       Keyboard.removeAllListeners('keyboardDidHide');
     } catch (error) {
-      console.error('ChatKeyboard: Ошибка удаления слушателей', error);
+      if (__DEV__) console.error('ChatKeyboard: Ошибка удаления слушателей', error);
     }
   }, []);
 
@@ -98,7 +98,7 @@ const ChatKeyboardProviderInner: React.FC<ChatKeyboardProviderProps> = React.mem
         removeKeyboardListeners();
       };
     } catch (error) {
-      console.error('ChatKeyboard: Ошибка управления слушателями', error);
+      if (__DEV__) console.error('ChatKeyboard: Ошибка управления слушателями', error);
     }
   }, [addKeyboardListeners, removeKeyboardListeners]);
 
@@ -113,7 +113,7 @@ const ChatKeyboardProviderInner: React.FC<ChatKeyboardProviderProps> = React.mem
         removeKeyboardListeners,
       };
     } catch (error) {
-      console.error('ChatKeyboard: Ошибка создания контекста', error);
+      if (__DEV__) console.error('ChatKeyboard: Ошибка создания контекста', error);
       return {
         keyboardHeight: 0,
         setKeyboardHeight: () => {},
@@ -131,7 +131,7 @@ const ChatKeyboardProviderInner: React.FC<ChatKeyboardProviderProps> = React.mem
       </ChatKeyboardContext.Provider>
     );
   } catch (error) {
-    console.error('ChatKeyboard: Критическая ошибка рендеринга', error);
+    if (__DEV__) console.error('ChatKeyboard: Критическая ошибка рендеринга', error);
     return <>{children}</>;
   }
 });

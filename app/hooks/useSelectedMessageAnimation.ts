@@ -1,50 +1,46 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { Animated } from 'react-native';
 
-export const useSelectedMessageAnimation = (isSelected: boolean) => {
-  const scaleAnim = useRef(new Animated.Value(1)).current;
-  const shadowAnim = useRef(new Animated.Value(0)).current;
+interface UseSelectedMessageAnimationProps {
+  isSelected: boolean;
+  duration?: number;
+}
 
-  const animateSelection = useCallback(() => {
+export function useSelectedMessageAnimation({ 
+  isSelected, 
+  duration = 200 
+}: UseSelectedMessageAnimationProps) {
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+  const opacityAnim = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
     if (isSelected) {
-      // Анимация выделения: scale 1.0 → 1.03 за 120ms
+      // Анимация "pop-out" при выборе
       Animated.parallel([
         Animated.timing(scaleAnim, {
-          toValue: 1.03,
-          duration: 120,
+          toValue: 1.02,
+          duration,
           useNativeDriver: true,
-        }),
-        Animated.timing(shadowAnim, {
-          toValue: 1,
-          duration: 120,
-          useNativeDriver: false,
         }),
       ]).start();
     } else {
-      // Анимация снятия выделения: возврат к нормальному состоянию
+      // Возврат к нормальному состоянию
       Animated.parallel([
         Animated.timing(scaleAnim, {
           toValue: 1,
-          duration: 120,
+          duration,
           useNativeDriver: true,
-        }),
-        Animated.timing(shadowAnim, {
-          toValue: 0,
-          duration: 120,
-          useNativeDriver: false,
         }),
       ]).start();
     }
-  }, [isSelected, scaleAnim, shadowAnim]);
-
-  // Запускаем анимацию при изменении состояния
-  useEffect(() => {
-    animateSelection();
-  }, [isSelected, animateSelection]);
+  }, [isSelected, scaleAnim, duration]);
 
   return {
     scaleAnim,
-    shadowAnim,
-    animateSelection,
+    opacityAnim,
+    animatedStyle: {
+      transform: [{ scale: scaleAnim }],
+      opacity: opacityAnim,
+    },
   };
-};
+}

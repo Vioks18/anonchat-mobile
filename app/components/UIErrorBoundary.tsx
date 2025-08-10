@@ -26,7 +26,7 @@ class UIErrorBoundaryInner extends Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     // Логируем ошибку
-    console.error('UIErrorBoundary caught an error:', error, errorInfo);
+    if (__DEV__) console.error('UIErrorBoundary caught an error:', error, errorInfo);
     
     // Уведомляем внешний код об ошибке
     this.props.onError?.(error, errorInfo);

@@ -1,149 +1,192 @@
-import React, { useCallback, useRef, useState } from 'react';
-import { FlatList, View } from 'react-native';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import { BackHandler, FlatList, View } from 'react-native';
+import { Portal } from 'react-native-portalize';
 import { useMessageStore } from '../hooks/useMessageStore';
-import { useReactionState } from '../hooks/useReactionState';
+import useReactionState from '../hooks/useReactionState';
 import { Message } from '../types/message';
 import MessageWithReactions from './MessageWithReactions';
-import ReactionBar from './reactions/ReactionBar';
+import { ReactionBar } from './reactions';
 
 interface ChatListWithReactionsProps {
   messages: Message[];
-  themedStyles: any;
-  styles: any;
-  currentThemeData?: any;
-  onScrollToEnd?: () => void;
   onScrollBeginDrag?: () => void;
+  onMessageSelected?: (messageId: string | null) => void;
+  onSelectionChange?: (selectedCount: number) => void;
+  onSelectedMessagesChange?: (selectedMessages: Set<string>) => void;
 }
 
-const ChatListWithReactions: React.FC<ChatListWithReactionsProps> = React.memo(({
+const ChatListWithReactions: React.FC<ChatListWithReactionsProps> = ({
   messages,
-  themedStyles,
-  styles,
-  currentThemeData,
-  onScrollToEnd,
   onScrollBeginDrag,
+  onMessageSelected,
+  onSelectionChange,
+  onSelectedMessagesChange,
 }) => {
-  const flatListRef = useRef<FlatList>(null);
-  const [lastTap, setLastTap] = useState<{ messageId: string; timestamp: number } | null>(null);
+  const { selectedMessageId, anchor, visible, openAtMessage, close, setLastTouch, keyboardHeight } = useReactionState();
+  const messageRefs = useRef(new Map<string, any>());
+  const scrollingRef = useRef<boolean>(false);
   
-  const { selectedMessages, toggleMessageSelection } = useMessageStore();
-  const { selectedMessageId, anchor, visible, close, handleReactionSelect } = useReactionState();
+  // Используем store для выбора
+  const selectedIds = useMessageStore(s => s.selectedIds);
+  const enterSelection = useMessageStore(s => s.enterSelection);
+  const toggleSelection = useMessageStore(s => s.toggleSelection);
+  const clearSelection = useMessageStore(s => s.clearSelection);
+  const isMessageSelected = useMessageStore(s => s.isSelected);
+  const getSelectedCount = useMessageStore(s => s.getSelectedCount);
+  
+  const isSelectionMode = selectedIds.size > 0;
+  
+  // Стабильное extraData для перерисовки
+  const extraData = useMemo(
+    () => `${messages.length}:${Array.from(selectedIds).sort().join('|')}`,
+    [messages.length, selectedIds]
+  );
+  
+  // Версия сообщений для отслеживания новых сообщений
+  const messagesVersion = useMemo(() => messages.map(m => m.id).join(','), [messages]);
 
-  // Обработчик долгого нажатия для мульти-выбора и реакций
-  const handleMessageLongPress = useCallback((messageId: string) => {
-    try {
-      // Если уже есть выбранные сообщения, то долгое нажатие добавляет к выбору
-      const currentSelectedMessages = useMessageStore.getState().selectedMessages;
-      if (currentSelectedMessages.length > 0) {
-        toggleMessageSelection(messageId);
-        return;
-      }
+  // Очистка refs для удаленных сообщений
+  useEffect(() => {
+    const ids = new Set(messages.map(m => m.id));
+    for (const k of Array.from(messageRefs.current.keys())) {
+      if (!ids.has(k)) messageRefs.current.delete(k);
+    }
+  }, [messagesVersion]);
+
+  // Long press: вход в режим выбора или toggle в режиме выбора
+  const handleLongPress = useCallback((id: string, event?: any) => {
+    
+    const currentCount = getSelectedCount();
+    
+    if (currentCount === 0) {
+      // Вход в режим выбора
+      enterSelection(id);
       
-      // Иначе открываем панель реакций (измерение происходит в MessageWithReactions)
-      // Панель уже открыта через openAtMessage в MessageWithReactions
-    } catch (error) {
-      console.error('ChatListWithReactions: Ошибка открытия панели реакций', error);
+      // Открываем реакции только сейчас
+      setLastTouch?.(event?.nativeEvent?.pageX, event?.nativeEvent?.pageY);
+      const ref = messageRefs.current.get(id);
+      if (ref) {
+        requestAnimationFrame(() => openAtMessage(id, ref)); // показать реакции
+      }
+    } else {
+      // В режиме выбора - просто toggle
+      toggleSelection(id);
+      close(); // Закрываем реакции если были открыты
     }
-  }, [toggleMessageSelection]);
+  }, [getSelectedCount, enterSelection, toggleSelection, setLastTouch, openAtMessage, close]);
 
-  // Обработчик обычного нажатия для мульти-выбора и двойного клика
-  const handleMessagePress = useCallback((messageId: string) => {
-    try {
-      const now = Date.now();
-      const DOUBLE_TAP_DELAY = 300; // 300ms для двойного клика
-
-      // Если есть активное выделение, то обычное нажатие закрывает его
-      if (selectedMessageId) {
-        close();
-        return;
-      }
-
-      // Проверяем двойной клик
-      if (lastTap && 
-          lastTap.messageId === messageId && 
-          now - lastTap.timestamp < DOUBLE_TAP_DELAY) {
-        // Двойной клик - открываем панель реакций (измерение происходит в MessageWithReactions)
-        const currentSelectedMessages = useMessageStore.getState().selectedMessages;
-        if (currentSelectedMessages.length === 0) {
-          // Панель откроется через onPress в MessageWithReactions
-        }
-        setLastTap(null);
-        return;
-      }
-
-      // Если есть выбранные сообщения, то обычное нажатие переключает выбор
-      const currentSelectedMessages = useMessageStore.getState().selectedMessages;
-      if (currentSelectedMessages.length > 0) {
-        toggleMessageSelection(messageId);
-      }
-
-      // Запоминаем первый клик
-      setLastTap({ messageId, timestamp: now });
-    } catch (error) {
-      console.error('ChatListWithReactions: Ошибка переключения выбора', error);
+  // Tap: в режиме выбора - toggle, иначе - ничего
+  const handlePress = useCallback((id: string) => {
+    
+    const currentCount = getSelectedCount();
+    
+    if (currentCount > 0) {
+      // В режиме выбора - toggle выделения
+      toggleSelection(id);
     }
-  }, [selectedMessageId, close, toggleMessageSelection, lastTap]);
+    // В обычном режиме - ничего не делаем
+  }, [getSelectedCount, toggleSelection]);
 
-  // Обработчик скролла - закрываем панель реакций
-  const handleScrollBeginDrag = useCallback(() => {
-    try {
+  // Эффекты для управления реакциями и выбором
+  useEffect(() => {
+    // Уведомляем родительский компонент
+    onSelectionChange?.(getSelectedCount());
+    onSelectedMessagesChange?.(selectedIds);
+  }, [selectedIds, getSelectedCount, onSelectionChange, onSelectedMessagesChange]);
+
+  useEffect(() => {
+    // Если выбрано больше одного - закрываем реакции
+    if (getSelectedCount() > 1) {
       close();
-      onScrollBeginDrag?.();
-    } catch (error) {
-      console.error('ChatListWithReactions: Ошибка обработки скролла', error);
     }
-  }, [close, onScrollBeginDrag]);
+    // Если ничего не выбрано - закрываем реакции и сбрасываем выбор
+    if (getSelectedCount() === 0) {
+      close();
+      onMessageSelected?.(null);
+    }
+  }, [getSelectedCount, close, onMessageSelected]);
 
-  // Рендер сообщения с реакциями
+  // Управление реакциями при изменении выбора
+  useEffect(() => {
+    const currentCount = getSelectedCount();
+    if (currentCount !== 1) {
+      close(); // >1 или 0 — прячем панель
+    }
+  }, [getSelectedCount, close]);
+
+  // Back handler для Android
+  useEffect(() => {
+    const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
+      if (isSelectionMode) {
+        clearSelection();
+        return true; // Предотвращаем закрытие приложения
+      }
+      return false; // Позволяем обычное поведение back
+    });
+
+    return () => subscription.remove();
+  }, [isSelectionMode, clearSelection]);
+
   const renderMessage = useCallback(({ item }: { item: Message }) => {
-    const isSelected = selectedMessageId === item.id;
+    
+    const isMyMessage = item.sender === 'me';
+    const isSelected = isMessageSelected(item.id);
 
     return (
       <MessageWithReactions
         message={item}
-        themedStyles={themedStyles}
-        styles={styles}
-        currentThemeData={currentThemeData}
+        isMyMessage={isMyMessage}
         isSelected={isSelected}
-        onLongPress={handleMessageLongPress}
-        onPress={handleMessagePress}
+        onLongPress={handleLongPress}
+        onPress={handlePress}
+        registerRef={(id, ref) => {
+          if (ref) messageRefs.current.set(id, ref);
+        }}
       />
     );
-  }, [selectedMessageId, themedStyles, styles, currentThemeData, handleMessageLongPress, handleMessagePress]);
+  }, [handleLongPress, handlePress, isMessageSelected]);
+
+  const handleScrollBeginDrag = useCallback(() => {
+    
+    scrollingRef.current = true;
+    // Закрываем только реакции, выбор не сбрасываем
+    close();
+    onScrollBeginDrag?.();
+  }, [close, onScrollBeginDrag]);
+
+  const handleScrollEndDrag = useCallback(() => {
+    
+    setTimeout(() => {
+      scrollingRef.current = false;
+    }, 100);
+  }, []);
 
   return (
     <View style={{ flex: 1 }}>
       <FlatList
-        ref={flatListRef}
         data={messages}
         renderItem={renderMessage}
         keyExtractor={(item) => item.id}
+        extraData={extraData}
         inverted={true}
         removeClippedSubviews={true}
         windowSize={10}
         maxToRenderPerBatch={10}
-        updateCellsBatchingPeriod={50}
-        keyboardShouldPersistTaps="handled"
-        onScrollToIndexFailed={() => {}}
         onScrollBeginDrag={handleScrollBeginDrag}
-        onEndReached={onScrollToEnd}
-        onEndReachedThreshold={0.1}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 20 }}
+        onScrollEndDrag={handleScrollEndDrag}
       />
       
-      {/* Панель реакций */}
-      {visible && anchor && (
+      <Portal>
         <ReactionBar
-          visible={visible}
+          visible={!!(visible && getSelectedCount() === 1 && selectedMessageId && isMessageSelected(selectedMessageId))}
           anchor={anchor}
           onClose={close}
-          onReactionSelect={handleReactionSelect}
-          currentThemeData={currentThemeData}
+          selectedMessageId={selectedMessageId}
+          keyboardHeight={keyboardHeight}
         />
-      )}
+      </Portal>
     </View>
   );
-});
+};
 
 export default ChatListWithReactions;

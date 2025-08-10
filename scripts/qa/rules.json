@@ -1,0 +1,262 @@
+{
+  "rules": [
+    {
+      "id": "reactionbar.anchor_guard",
+      "severity": "P0",
+      "type": "mustInclude",
+      "files": ["app/components/reactions/ReactionBar.tsx"],
+      "includes": ["if (!visible || !anchor) return null;"],
+      "experimental": false,
+      "allowlist": []
+    },
+    {
+      "id": "store.status_read",
+      "severity": "P0",
+      "type": "custom",
+      "files": ["app/hooks/useMessageStore.ts"],
+      "description": "VALID_STATUSES should include 'read'",
+      "experimental": false,
+      "allowlist": []
+    },
+    {
+      "id": "perf.dev_logs",
+      "severity": "P0",
+      "type": "custom",
+      "files": [
+        "app/hooks/useUIWatchDog.ts",
+        "app/hooks/useMessageStore.ts",
+        "app/hooks/useBotProvider.ts"
+      ],
+      "description": "console.* must be wrapped in if (__DEV__)",
+      "experimental": false,
+      "allowlist": []
+    },
+    {
+      "id": "ui.layout.meta_inside",
+      "severity": "P1",
+      "type": "custom",
+      "files": ["app/components/MessageWithReactions.tsx"],
+      "description": "Meta block (time+checks) positioned inside bubble: position:'absolute', right>=6, bottom>=2, container has paddingBottom>=14",
+      "experimental": false,
+      "allowlist": []
+    },
+    {
+      "id": "ui.text.shrink_ok",
+      "severity": "P1",
+      "type": "custom",
+      "files": ["app/components/MessageWithReactions.tsx"],
+      "description": "Text requires minWidth: 0, message wrapper needs flexShrink: 1. Ignore single-word texts < 50dp",
+      "experimental": false,
+      "allowlist": []
+    },
+    {
+      "id": "ui.pointer.safe",
+      "severity": "P1",
+      "type": "custom",
+      "files": ["app/components/reactions/ReactionBar.tsx"],
+      "description": "ReactionBar: outer container pointerEvents='box-none', inner container 'auto'",
+      "experimental": false,
+      "allowlist": []
+    },
+    {
+      "id": "perf.memo",
+      "severity": "P1",
+      "type": "custom",
+      "files": [
+        "app/components/MessageWithReactions.tsx",
+        "app/components/ChatMessage.tsx"
+      ],
+      "description": "Message components wrapped in React.memo or custom memo",
+      "experimental": false,
+      "allowlist": []
+    },
+    {
+      "id": "secrets.env_gitignore",
+      "severity": "P0",
+      "type": "mustInclude",
+      "files": [".gitignore"],
+      "includes": [".env"],
+      "experimental": false,
+      "allowlist": []
+    },
+    {
+      "id": "secrets.patterns",
+      "severity": "P0",
+      "type": "custom",
+      "files": ["**/*.{ts,tsx,js,jsx}"],
+      "description": "Search for API_KEY|SECRET|TOKEN|DSN|BEARER\\s+[A-Za-z0-9\\._\\-]+ and .env/.env.local files",
+      "experimental": false,
+      "allowlist": []
+    },
+    {
+      "id": "deps.heavy_inactive",
+      "severity": "P2",
+      "type": "custom",
+      "files": ["package.json"],
+      "description": "Heavy packages in deps but not imported in app/: react-native-reanimated, react-native-gesture-handler, react-native-camera, expo-notifications, react-native-vision-camera, react-native-video, @react-native-firebase/*, sentry-*, realm",
+      "experimental": false,
+      "allowlist": []
+    },
+    {
+      "id": "chatlist.scroll_close",
+      "severity": "P1",
+      "type": "mustInclude",
+      "files": ["app/components/ChatListWithReactions.tsx"],
+      "includes": ["onScrollBeginDrag={handleScrollBeginDrag}", "close()"],
+      "experimental": false,
+      "allowlist": []
+    },
+    {
+      "id": "reactionstate.keyboard_close",
+      "severity": "P1",
+      "type": "custom",
+      "files": ["app/hooks/useReactionState.ts"],
+      "description": "Keyboard listeners should close()",
+      "experimental": true,
+      "allowlist": []
+    },
+    {
+      "id": "perf.memo_bubble",
+      "severity": "P1",
+      "type": "custom",
+      "files": [
+        "app/components/MessageWithReactions.tsx",
+        "app/components/ChatMessage.tsx"
+      ],
+      "description": "Message component wrapped in React.memo",
+      "experimental": false,
+      "allowlist": []
+    },
+    {
+      "id": "perf.stable_handlers",
+      "severity": "P1",
+      "type": "custom",
+      "files": [
+        "app/components/ChatListWithReactions.tsx",
+        "app/hooks/useReactions.ts"
+      ],
+      "description": "Handlers via useCallback",
+      "experimental": false,
+      "allowlist": []
+    },
+    {
+      "id": "reactionbar.clamp_flip_safe",
+      "severity": "P2",
+      "type": "custom",
+      "files": ["app/components/reactions/ReactionBar.tsx"],
+      "description": "useSafeAreaInsets + clamp X + flip down",
+      "experimental": true,
+      "allowlist": []
+    },
+    {
+      "id": "deps.unused",
+      "severity": "P2",
+      "type": "custom",
+      "files": ["package.json"],
+      "description": "List unused deps",
+      "experimental": false,
+      "allowlist": []
+    },
+    {
+      "id": "bubble.meta.pointerEvents",
+      "severity": "P1",
+      "type": "mustInclude",
+      "files": ["app/components/MessageWithReactions.tsx"],
+      "includes": ["pointerEvents=\"none\""],
+      "experimental": false,
+      "allowlist": []
+    },
+    {
+      "id": "bubble.text.minWidth0",
+      "severity": "P1",
+      "type": "mustInclude",
+      "files": ["app/components/MessageWithReactions.tsx"],
+      "includes": ["minWidth: 0"],
+      "experimental": false,
+      "allowlist": []
+    },
+    {
+      "id": "bubble.noWidth100",
+      "severity": "P1",
+      "type": "mustNotInclude",
+      "files": ["app/components/MessageWithReactions.tsx"],
+      "includes": ["width: '100%'", "width: \"100%\""],
+      "experimental": false,
+      "allowlist": []
+    },
+    {
+      "id": "bubble.paddingRight.meta",
+      "severity": "P1",
+      "type": "custom",
+      "files": ["app/components/MessageWithReactions.tsx"],
+      "description": "Text container paddingRight >= 28",
+      "experimental": false,
+      "allowlist": []
+    },
+    {
+      "id": "scroll.gate",
+      "severity": "P1",
+      "type": "mustInclude",
+      "files": ["app/components/ChatListWithReactions.tsx"],
+      "includes": ["scrollingRef.current"],
+      "experimental": false,
+      "allowlist": []
+    },
+    {
+      "id": "reactionbar.guard",
+      "severity": "P0",
+      "type": "mustInclude",
+      "files": ["app/components/reactions/ReactionBar.tsx"],
+      "includes": ["if (!visible || !anchor) return null;"],
+      "experimental": false,
+      "allowlist": []
+    },
+    {
+      "id": "reactionbar.pointerEvents",
+      "severity": "P1",
+      "type": "mustInclude",
+      "files": ["app/components/reactions/ReactionBar.tsx"],
+      "includes": ["pointerEvents=\"box-none\"", "pointerEvents=\"auto\""],
+      "experimental": false,
+      "allowlist": []
+    },
+    {
+      "id": "anchor.touchXY",
+      "severity": "P1",
+      "type": "custom",
+      "files": ["app/hooks/useReactionState.ts"],
+      "description": "Support touchX/touchY and setLastTouch",
+      "experimental": false,
+      "allowlist": []
+    },
+    {
+      "id": "status.read",
+      "severity": "P0",
+      "type": "custom",
+      "files": ["app/hooks/useMessageStore.ts"],
+      "description": "read in valid statuses",
+      "experimental": false,
+      "allowlist": []
+    },
+    {
+      "id": ".env.gitignore",
+      "severity": "P2",
+      "type": "mustInclude",
+      "files": [".gitignore"],
+      "includes": [".env"],
+      "experimental": false,
+      "allowlist": []
+    },
+    {
+      "id": "secrets.regex",
+      "severity": "P0",
+      "type": "custom",
+      "files": ["**/*.{ts,tsx,js,jsx}"],
+      "description": "Search for API_KEY|SECRET|Bearer tokens",
+      "experimental": false,
+      "allowlist": []
+    }
+  ]
+}
+
+

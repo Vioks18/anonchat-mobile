@@ -2,7 +2,7 @@ export const formatTimestamp = (timestamp: number) => {
   try {
     // Валидация входных данных
     if (!timestamp || typeof timestamp !== 'number' || isNaN(timestamp)) {
-      console.warn('formatTimestamp: Невалидный timestamp', timestamp);
+      if (__DEV__) console.warn('formatTimestamp: Невалидный timestamp', timestamp);
       return '--:--';
     }
 
@@ -12,7 +12,7 @@ export const formatTimestamp = (timestamp: number) => {
     const maxTime = now + (24 * 60 * 60 * 1000); // 1 день вперед
 
     if (timestamp < minTime || timestamp > maxTime) {
-      console.warn('formatTimestamp: Timestamp вне разумных границ', timestamp);
+      if (__DEV__) console.warn('formatTimestamp: Timestamp вне разумных границ', timestamp);
       return '--:--';
     }
 
@@ -20,7 +20,7 @@ export const formatTimestamp = (timestamp: number) => {
     
     // Проверка валидности созданной даты
     if (isNaN(date.getTime())) {
-      console.warn('formatTimestamp: Невалидная дата', timestamp);
+      if (__DEV__) console.warn('formatTimestamp: Невалидная дата', timestamp);
       return '--:--';
     }
 
@@ -29,7 +29,7 @@ export const formatTimestamp = (timestamp: number) => {
       minute: '2-digit' 
     });
   } catch (error) {
-    console.error('formatTimestamp: Ошибка форматирования времени', error);
+    if (__DEV__) console.error('formatTimestamp: Ошибка форматирования времени', error);
     return '--:--';
   }
 }; 

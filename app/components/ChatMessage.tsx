@@ -37,7 +37,7 @@ const ChatMessageInner: React.FC<ChatMessageProps> = React.memo(({
         ]
       };
     } catch (error) {
-      console.error('ChatMessage: Ошибка определения стилей сообщения', error);
+      if (__DEV__) console.error('ChatMessage: Ошибка определения стилей сообщения', error);
       return {
         container: [styles.bubbleContainer],
         bubble: [styles.bubble]
@@ -50,7 +50,7 @@ const ChatMessageInner: React.FC<ChatMessageProps> = React.memo(({
     try {
       return formatTimestamp(item.timestamp);
     } catch (error) {
-      console.error('ChatMessage: Ошибка форматирования времени', error);
+      if (__DEV__) console.error('ChatMessage: Ошибка форматирования времени', error);
       return '--:--';
     }
   }, [item.timestamp]);
@@ -72,7 +72,7 @@ const ChatMessageInner: React.FC<ChatMessageProps> = React.memo(({
       }
       return null;
     } catch (error) {
-      console.error('ChatMessage: Ошибка определения статуса сообщения', error);
+      if (__DEV__) console.error('ChatMessage: Ошибка определения статуса сообщения', error);
       return null;
     }
   }, [item.status, styles, themedStyles]);
@@ -82,7 +82,7 @@ const ChatMessageInner: React.FC<ChatMessageProps> = React.memo(({
     try {
       handlePress(item.id);
     } catch (error) {
-      console.error('ChatMessage: Ошибка обработки нажатия', error);
+      if (__DEV__) console.error('ChatMessage: Ошибка обработки нажатия', error);
     }
   }, [handlePress, item.id]);
 
@@ -90,7 +90,7 @@ const ChatMessageInner: React.FC<ChatMessageProps> = React.memo(({
     try {
       handleLongPress(item.id);
     } catch (error) {
-      console.error('ChatMessage: Ошибка обработки долгого нажатия', error);
+      if (__DEV__) console.error('ChatMessage: Ошибка обработки долгого нажатия', error);
     }
   }, [handleLongPress, item.id]);
 

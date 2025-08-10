@@ -1,78 +1,234 @@
-import React, { useCallback, useRef } from 'react';
-import { View } from 'react-native';
-import { useReactions } from '../hooks/useReactions';
-import { useReactionState } from '../hooks/useReactionState';
+import { Ionicons } from '@expo/vector-icons';
+import React, { useRef } from 'react';
+import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { THEMES } from '../constants/themes';
+import { useMessageStore } from '../hooks/useMessageStore';
 import { Message } from '../types/message';
-import ChatMessageSimple from './ChatMessageSimple';
-import MessageReactions from './reactions/MessageReactions';
+
+// Форматирование времени HH:mm
+const formatTime = (timestamp: number) => {
+  const date = new Date(timestamp);
+  const hours = date.getHours().toString().padStart(2, '0');
+  const minutes = date.getMinutes().toString().padStart(2, '0');
+  return `${hours}:${minutes}`;
+};
 
 interface MessageWithReactionsProps {
   message: Message;
-  themedStyles: any;
-  styles: any;
-  currentThemeData?: any;
-  isSelected?: boolean;
-  onLongPress: (messageId: string) => void;
-  onPress?: (messageId: string) => void;
+  isMyMessage: boolean;
+  isSelected: boolean;
+  onLongPress: (messageId: string, event?: any) => void;
+  onPress: (messageId: string, event?: any) => void;
+  registerRef: (id: string, ref: any) => void;
 }
 
-const MessageWithReactions: React.FC<MessageWithReactionsProps> = React.memo(({
+const MessageWithReactions: React.FC<MessageWithReactionsProps> = ({
   message,
-  themedStyles,
-  styles,
-  currentThemeData,
-  isSelected = false,
+  isMyMessage,
+  isSelected,
   onLongPress,
   onPress,
+  registerRef,
 }) => {
   const rootRef = useRef<View>(null);
-  const { summary, onToggleReaction } = useReactions(message.id);
-  const { selectedMessageId, visible, openAtMessage } = useReactionState();
-  const isMyMessage = message.sender === "me";
+  const { removeReaction } = useMessageStore();
+  
+  // Метаданные
+  const status = isMyMessage ? (message.status ?? 'sent') : undefined;
+  const time = formatTime(message.timestamp);
 
-  // Обработчик долгого нажатия
-  const handleLongPress = useCallback(() => {
-    try {
-      openAtMessage(message.id, rootRef.current);
-      onLongPress?.(message.id);
-    } catch (error) {
-      console.error('MessageWithReactions: Ошибка долгого нажатия', error);
+  // Определяем ширину пузыря на основе длины текста
+  const getBubbleStyle = () => {
+    const textLength = message.text.length;
+    if (textLength <= 20) {
+      return { alignSelf: 'flex-start' as const }; // Короткие - компактные
+    } else {
+      return {}; // Средние и длинные - занимают всю ширину
     }
-  }, [message.id, openAtMessage, onLongPress]);
+  };
 
-  // Обработчик обычного нажатия (для двойного клика)
-  const handlePress = useCallback(() => {
-    try {
-      // Если панель реакций открыта для этого сообщения, открываем её снова
-      if (selectedMessageId === message.id && visible) {
-        openAtMessage(message.id, rootRef.current);
-      }
-      onPress?.(message.id);
-    } catch (error) {
-      console.error('MessageWithReactions: Ошибка обработки нажатия', error);
+  // Определяем отступ для текста
+  const getTextStyle = () => {
+    const textLength = message.text.length;
+    if (textLength <= 20) {
+      return { paddingRight: 50 }; // Короткие - отступ от даты
+    } else if (textLength <= 100) {
+      return { paddingRight: 50 }; // Средние - тоже отступ от даты, но не опущены
+    } else {
+      return { 
+        paddingBottom: 20, // Отступ снизу для меты
+        paddingTop: 6 // Опускаем только длинные сообщения
+      }; 
     }
-  }, [message.id, onPress, selectedMessageId, visible, openAtMessage]);
+  };
+
+  // Обработчик реакций
+  const handleReactionPress = (reaction: string) => {
+    removeReaction(message.id, reaction);
+  };
+
+  React.useEffect(() => {
+    if (rootRef.current) {
+      registerRef(message.id, rootRef.current);
+    }
+  }, [message.id, registerRef]);
 
   return (
-    <View ref={rootRef}>
-      <ChatMessageSimple
-        message={message}
-        themedStyles={themedStyles}
-        styles={styles}
-        currentThemeData={currentThemeData}
-        isSelected={isSelected}
-        onLongPress={handleLongPress}
-        onPress={handlePress}
-      />
-      <MessageReactions
-        messageId={message.id}
-        reactions={summary}
-        onReactionToggle={onToggleReaction}
-        themedStyles={themedStyles}
-        isMyMessage={isMyMessage}
-      />
+    <View style={[
+      styles.messageContainer,
+      isMyMessage ? styles.messageMe : styles.messageOther
+    ]}>
+      {/* Overlay выделения */}
+      {isSelected && (
+        <View 
+          style={[
+            StyleSheet.absoluteFillObject,
+            styles.selectionOverlay
+          ]} 
+          pointerEvents="none" 
+        />
+      )}
+      
+      <View ref={rootRef} style={styles.messageContent}>
+        <TouchableOpacity
+          onPress={() => onPress?.(message.id)}
+          onLongPress={(e) => onLongPress?.(message.id, e)}
+          delayLongPress={600}
+          hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+          style={[
+            styles.bubble,
+            isMyMessage ? styles.myBubble : styles.theirBubble,
+            getBubbleStyle(), // Динамическая ширина
+          ]}
+        >
+          <Text style={[styles.messageText, getTextStyle()]}>
+            {message.text}
+          </Text>
+          
+          <View style={styles.metaRow}>
+            <Text style={styles.timeText}>{time}</Text>
+            {isMyMessage && status !== 'sending' && (
+              <Ionicons
+                style={styles.statusIcon}
+                size={14}
+                name={
+                  status === 'read' || status === 'delivered'
+                    ? 'checkmark-done-outline'
+                    : 'checkmark-outline'
+                }
+                color={status === 'read' ? '#FFFFFF' : 'rgba(255,255,255,0.9)'}
+              />
+            )}
+            {isMyMessage && status === 'sending' && (
+              <ActivityIndicator 
+                size={12} 
+                style={styles.statusIcon} 
+                color="rgba(255,255,255,0.9)"
+              />
+            )}
+          </View>
+        </TouchableOpacity>
+        
+        {/* Реакции */}
+        {message.reactions && message.reactions.length > 0 && (
+          <View style={[
+            styles.reactionsContainer,
+            isMyMessage ? styles.reactionsMe : styles.reactionsOther
+          ]}>
+            {message.reactions.map((reaction, index) => (
+              <TouchableOpacity
+                key={index}
+                style={styles.reactionChip}
+                onPress={() => handleReactionPress(reaction)}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.reactionText}>{reaction}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
+      </View>
     </View>
   );
+};
+
+const styles = StyleSheet.create({
+  messageContainer: {
+    marginVertical: 2,
+    paddingHorizontal: 12,
+  },
+  messageMe: {
+    alignItems: 'flex-end',
+  },
+  messageOther: {
+    alignItems: 'flex-start',
+  },
+  messageContent: {
+    maxWidth: '85%',
+  },
+  selectionOverlay: {
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderRadius: 12,
+  },
+  bubble: {
+    maxWidth: '100%',
+    minWidth: 50,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    position: 'relative',
+  },
+  myBubble: {
+    backgroundColor: '#7B61FF',
+  },
+  theirBubble: {
+    backgroundColor: '#2C2C2E',
+  },
+  messageText: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    lineHeight: 20,
+    paddingTop: 2,
+    flexShrink: 1,
+    minWidth: 0, // Исправляем warning bubble.text.minWidth0
+  },
+  metaRow: {
+    position: 'absolute',
+    right: 8,
+    bottom: 6, // Выравниваем с текстом
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  timeText: {
+    fontSize: 11,
+    color: 'rgba(255,255,255,0.7)',
+  },
+  statusIcon: {
+    marginLeft: 2,
+  },
+  reactionsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 4,
+    marginTop: 4,
+  },
+  reactionsMe: {
+    justifyContent: 'flex-end',
+  },
+  reactionsOther: {
+    justifyContent: 'flex-start',
+  },
+  reactionChip: {
+    backgroundColor: THEMES.dark.inputBg,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: THEMES.dark.border,
+  },
+  reactionText: {
+    fontSize: 14,
+  },
 });
 
-export default MessageWithReactions;
+export default React.memo(MessageWithReactions);

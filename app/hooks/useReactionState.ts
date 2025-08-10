@@ -1,96 +1,68 @@
-import { useCallback, useEffect, useState } from 'react';
-import { findNodeHandle, Keyboard, UIManager } from 'react-native';
-import { useMessageStore } from './useMessageStore';
+import { useCallback, useRef, useState } from 'react';
+import { GestureProbe } from '../utils/gestureProbe';
+import { useKeyboardHeight } from './useKeyboardHeight';
 
 export type ReactionAnchor = {
   x: number;
   y: number;
   w: number;
   h: number;
+  touchX?: number;
+  touchY?: number;
 };
 
 export const useReactionState = () => {
   const [selectedMessageId, setSelectedMessageId] = useState<string | null>(null);
   const [anchor, setAnchor] = useState<ReactionAnchor | null>(null);
   const [visible, setVisible] = useState(false);
+  const lastTouchRef = useRef<{ x: number; y: number } | null>(null);
+  const keyboardHeight = useKeyboardHeight();
 
-  const addReaction = useMessageStore((s) => s.addReaction);
+  const setLastTouch = useCallback((x?: number, y?: number) => {
+    if (typeof x === 'number' && typeof y === 'number') {
+      lastTouchRef.current = { x, y };
+    }
+  }, []);
 
-  // Асинхронное измерение позиции через UIManager
-  const measureInWindowAsync = useCallback(async (ref: any): Promise<ReactionAnchor> => {
-    return new Promise((resolve, reject) => {
-      try {
-        const nodeHandle = findNodeHandle(ref);
-        if (!nodeHandle) {
-          reject(new Error('Node handle not found'));
-          return;
-        }
+  const openAtMessage = useCallback((messageId: string, viewRef: any) => {
+    if (!viewRef) return;
 
-        UIManager.measureInWindow(nodeHandle, (x, y, width, height) => {
-          resolve({ x, y, w: width, h: height });
+    viewRef.measureInWindow((x: number, y: number, w: number, h: number) => {
+      const baseAnchor: ReactionAnchor = { x, y, w, h };
+      
+      if (lastTouchRef.current) {
+        setAnchor({
+          ...baseAnchor,
+          touchX: lastTouchRef.current.x,
+          touchY: lastTouchRef.current.y,
         });
-      } catch (error) {
-        reject(error);
+      } else {
+        setAnchor(baseAnchor);
+      }
+      
+      setSelectedMessageId(messageId);
+      setVisible(true);
+      
+      if (__DEV__) {
+        GestureProbe.log({
+          type: 'openReaction',
+          t: Date.now(),
+          msgId: messageId,
+          x: lastTouchRef.current?.x,
+          y: lastTouchRef.current?.y
+        });
       }
     });
   }, []);
 
-  // Открытие панели с измерением позиции
-  const openAtMessage = useCallback(async (messageId: string, viewRef: any) => {
-    try {
-      // Ждем кадр для стабилизации
-      await new Promise(resolve => requestAnimationFrame(resolve));
-      
-      // Небольшая задержка для inverted списков
-      await new Promise(resolve => setTimeout(resolve, 0));
-      
-      const measuredAnchor = await measureInWindowAsync(viewRef);
-      
-      // Проверяем валидность измерений
-      if (measuredAnchor.x === 0 && measuredAnchor.y === 0 && measuredAnchor.w === 0 && measuredAnchor.h === 0) {
-        console.warn('useReactionState: Invalid anchor measurements');
-        return;
-      }
-
-      setSelectedMessageId(messageId);
-      setAnchor(measuredAnchor);
-      setVisible(true);
-    } catch (error) {
-      console.error('useReactionState: Ошибка открытия панели реакций', error);
-      setVisible(false);
-    }
-  }, [measureInWindowAsync]);
-
-  // Закрытие панели
   const close = useCallback(() => {
-    setVisible(false);
-    setSelectedMessageId(null);
-    setAnchor(null);
-  }, []);
-
-  // Обработка выбора реакции
-  const handleReactionSelect = useCallback((emoji: string) => {
-    if (selectedMessageId) {
-      try {
-        addReaction(selectedMessageId, emoji);
-        console.log('Добавлена реакция:', emoji, 'к сообщению:', selectedMessageId);
-      } catch (error) {
-        console.error('useReactionState: Ошибка добавления реакции', error);
-      }
+    if (__DEV__) {
+      GestureProbe.log({ type: 'closeReaction', t: Date.now() });
     }
-    close();
-  }, [selectedMessageId, addReaction, close]);
-
-  // Закрытие по клавиатуре
-  useEffect(() => {
-    const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', close);
-    const keyboardWillShowListener = Keyboard.addListener('keyboardWillShow', close);
-
-    return () => {
-      keyboardDidShowListener?.remove();
-      keyboardWillShowListener?.remove();
-    };
-  }, [close]);
+    setVisible(false);
+    setAnchor(null);
+    lastTouchRef.current = null;
+  }, []);
 
   return {
     selectedMessageId,
@@ -98,7 +70,8 @@ export const useReactionState = () => {
     visible,
     openAtMessage,
     close,
-    handleReactionSelect,
+    setLastTouch,
+    keyboardHeight,
   };
 };
 

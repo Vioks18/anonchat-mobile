@@ -18,7 +18,7 @@ const DevHUDInner: React.FC<DevHUDProps> = React.memo(({ status }) => {
   const safeStatus = React.useMemo(() => {
     try {
       if (!status) {
-        console.warn('DevHUD: Статус отсутствует');
+        if (__DEV__) console.warn('DevHUD: Статус отсутствует');
         return {
           scrollToEndWorking: false,
           keyboardHeight: 0,
@@ -40,7 +40,7 @@ const DevHUDInner: React.FC<DevHUDProps> = React.memo(({ status }) => {
         keyboardIssue: Boolean(status.keyboardIssue),
       };
     } catch (error) {
-      console.error('DevHUD: Ошибка обработки статуса', error);
+      if (__DEV__) console.error('DevHUD: Ошибка обработки статуса', error);
       return {
         scrollToEndWorking: false,
         keyboardHeight: 0,
@@ -57,7 +57,7 @@ const DevHUDInner: React.FC<DevHUDProps> = React.memo(({ status }) => {
     try {
       return safeStatus.scrollStuck || safeStatus.keyboardIssue || !safeStatus.scrollToEndWorking;
     } catch (error) {
-      console.error('DevHUD: Ошибка определения проблем', error);
+      if (__DEV__) console.error('DevHUD: Ошибка определения проблем', error);
       return false;
     }
   }, [safeStatus]);
@@ -106,7 +106,7 @@ const DevHUDInner: React.FC<DevHUDProps> = React.memo(({ status }) => {
       </View>
     );
   } catch (error) {
-    console.error('DevHUD: Ошибка рендеринга', error);
+    if (__DEV__) console.error('DevHUD: Ошибка рендеринга', error);
     return null;
   }
 });

@@ -190,7 +190,7 @@ const chatReducer = (state: ChatState, action: ChatAction): ChatState => {
         return state;
     }
   } catch (error) {
-    console.error('ChatLogicProvider: Reducer error', error);
+    if (__DEV__) console.error('ChatLogicProvider: Reducer error', error);
     // Возвращаем предыдущее состояние при ошибке
     return state;
   }
@@ -262,7 +262,7 @@ export const ChatLogicProvider: React.FC<ChatLogicProviderProps> = ({
     try {
       dispatch(action);
     } catch (error) {
-      console.error('ChatLogicProvider: Dispatch error', error);
+      if (__DEV__) console.error('ChatLogicProvider: Dispatch error', error);
       onError?.(error as Error);
     }
   }, [onError]);
@@ -303,7 +303,7 @@ export const ChatLogicProvider: React.FC<ChatLogicProviderProps> = ({
         }, 500);
       }, 1000);
     } catch (error) {
-      console.error('ChatLogicProvider: addMessage error', error);
+      if (__DEV__) console.error('ChatLogicProvider: addMessage error', error);
       onError?.(error as Error);
     }
   }, [state.replyTo, safeDispatch, onError]);

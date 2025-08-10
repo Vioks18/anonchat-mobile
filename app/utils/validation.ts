@@ -165,7 +165,7 @@ export class InputValidator {
             break;
         }
       } catch (error) {
-        console.error('Validation error:', error);
+        if (__DEV__) console.error('Validation error:', error);
         warnings.push('Ошибка валидации');
       }
     });
@@ -196,7 +196,7 @@ export class InputValidator {
         .replace(/on\w+\s*=/gi, '')
         .trim();
     } catch (error) {
-      console.error('Sanitization error:', error);
+      if (__DEV__) console.error('Sanitization error:', error);
       return text.trim();
     }
   }
@@ -224,7 +224,7 @@ export class InputValidator {
 
       return false;
     } catch (error) {
-      console.error('Spam check error:', error);
+      if (__DEV__) console.error('Spam check error:', error);
       return false;
     }
   }

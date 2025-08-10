@@ -1,113 +1,134 @@
 # Новая архитектура реакций AnonChat
 
-## Обзор изменений
+## Обзор
 
-Реализована унифицированная система реакций с улучшенным позиционированием и подготовкой к ActionsBar.
+Система реакций реализована как модульная архитектура с использованием порталов для оверлеев, без модальных окон.
 
-## Ключевые изменения
+## Архитектура
 
-### 1. Унифицированное открытие панели
-- **Long-press** и **double-tap** теперь используют один путь через `openAtMessage()`
-- Измерение позиции происходит через `UIManager.measureInWindow`
-- Добавлена задержка для стабильности в inverted списках
+### Основные компоненты
 
-### 2. Закрытие по клавиатуре
-- Добавлены слушатели `keyboardDidShow` и `keyboardWillShow`
-- Автоматическое закрытие панели при появлении клавиатуры
+- **`useReactionState.ts`** - управление состоянием панели реакций
+- **`MessageWithReactions.tsx`** - обертка сообщения с реакциями
+- **`ChatListWithReactions.tsx`** - список сообщений с поддержкой реакций
+- **`ReactionBar.tsx`** - плавающая панель с эмодзи
+- **`MessageReactions.tsx`** - отображение реакций под сообщением
+- **`ActionsBar.tsx`** - заглушка для будущих действий
 
-### 3. Безопасные зоны
-- Использование `useSafeAreaInsets` для корректного позиционирования
-- Учет status bar и других системных элементов
+### Типы
 
-### 4. Подготовка к ActionsBar
-- Создан компонент `ActionsBar.tsx` (пока скрыт)
-- API для будущих действий: `reply`, `copy`, `delete`, `share`, `pin`
-
-## API изменения
-
-### useReactionState.ts
 ```typescript
-// Новый API
-const { 
-  selectedMessageId, 
-  anchor, 
-  visible, 
-  openAtMessage, 
-  close 
-} = useReactionState();
-
-// Использование
-await openAtMessage(messageId, viewRef);
+export type ReactionAnchor = { x: number; y: number; w: number; h: number };
+export type EmojiType = '👍' | '❤️' | '😂' | '😮' | '😢' | '😡';
+export type ActionItem = { key: 'reply'|'copy'|'delete'|'share'|'pin'; icon: ReactNode; onPress: () => void; visible?: boolean; };
 ```
 
-### MessageWithReactions.tsx
-```typescript
-// Унифицированное открытие
-const handleLongPress = () => {
-  openAtMessage(message.id, rootRef.current);
-};
+## API
 
-const handlePress = () => {
-  if (selectedMessageId === message.id && visible) {
-    openAtMessage(message.id, rootRef.current);
-  }
-};
+### useReactionState
+
+```typescript
+const { selectedMessageId, anchor, visible, openAtMessage, close } = useReactionState();
 ```
 
-### ReactionBar.tsx
+- `openAtMessage(messageId, ref)` - открывает панель у сообщения
+- `close()` - закрывает панель
+- Автоматическое закрытие по клавиатуре
+
+### MessageWithReactions
+
 ```typescript
-// Новые пропсы
+<MessageWithReactions
+  message={message}
+  isMyMessage={isMyMessage}
+  isSelected={isSelected}
+  onLongPress={() => handleLongPress(item.id)}
+  onPress={() => handleMessagePress(item.id)}
+  registerRef={registerMessageRef}
+/>
+```
+
+### ChatListWithReactions
+
+```typescript
+<ChatListWithReactions
+  messages={messages}
+  onScrollBeginDrag={handleScrollBeginDrag}
+/>
+```
+
+## Последние изменения (2025-01-09)
+
+### ✅ Исправленные проблемы
+
+1. **Единый путь открытия** - long-press и double-tap теперь используют одинаковый `openAtMessage(messageId, ref)`
+2. **Закрытие по клавиатуре** - добавлены слушатели `keyboardDidShow` и `keyboardWillShow`
+3. **Правильное позиционирование** - исправлен баг с панелью "вверху" при double-tap
+4. **Подготовка ActionsBar** - добавлена заглушка для будущего меню действий
+
+### 🔧 Технические детали
+
+#### useReactionState.ts
+- Добавлен тип `ReactionAnchor`
+- Единая функция `openAtMessage` с `measureInWindowAsync`
+- Автоматическое закрытие по клавиатуре
+- Валидация anchor перед открытием
+
+#### MessageWithReactions.tsx
+- Добавлен `registerRef` для регистрации ref родителю
+- Корневой ref для точного измерения позиции
+- Поддержка анимаций выделения
+
+#### ChatListWithReactions.tsx
+- Мапа `messageRefs` для хранения ссылок на сообщения
+- Исправленный double-tap с использованием ref
+- Единый обработчик для long-press и double-tap
+
+#### ReactionBar.tsx
+- Новые пропсы: `visible`, `anchor`, `onClose`
+- Подготовка под `getActions` для ActionsBar
+- Улучшенное позиционирование с учетом safe area
+
+### 🎯 Как использовать
+
+#### Открытие панели реакций
+```typescript
+// Long-press или double-tap
+const ref = messageRefs.current.get(messageId);
+if (ref) openAtMessage(messageId, ref);
+```
+
+#### Подключение ActionsBar (будущее)
+```typescript
+const getActions = (message: Message): ActionItem[] => [
+  { key: 'reply', icon: <ReplyIcon />, onPress: () => reply(message) },
+  { key: 'copy', icon: <CopyIcon />, onPress: () => copy(message.text) },
+];
+
 <ReactionBar
   visible={visible}
   anchor={anchor}
   onClose={close}
-  onReactionSelect={handleReactionSelect}
-  currentThemeData={currentThemeData}
-  getActions={getActions} // Для будущего ActionsBar
-  message={message}
+  getActions={getActions}
 />
 ```
 
-## ActionsBar API (будущее)
+### 🧪 Проверки
 
-```typescript
-export type ActionItem = {
-  key: 'reply' | 'copy' | 'delete' | 'share' | 'pin';
-  icon: ReactNode;
-  onPress: () => void;
-  visible?: boolean;
-};
+- ✅ Long-press и double-tap открывают панель в одном месте
+- ✅ Скролл/тап вне/выбор реакции/клавиатура закрывают панель
+- ✅ Нет "прыжков" позиции при inverted списке
+- ✅ Панель не рендерится без валидного anchor
+- ✅ Учет safe area и краев экрана
 
-export type GetActions = (message: Message) => ActionItem[];
+### 📦 Зависимости
 
-// Использование
-const getActions = (message: Message) => [
-  {
-    key: 'reply',
-    icon: <ReplyIcon />,
-    onPress: () => handleReply(message),
-    visible: true
-  },
-  {
-    key: 'copy',
-    icon: <CopyIcon />,
-    onPress: () => handleCopy(message.text),
-    visible: true
-  }
-];
-```
+- `react-native-portalize` - для оверлеев
+- `react-native-safe-area-context` - для safe area
 
-## Проверки
+## Будущее развитие
 
-✅ **Long-press** и **double-tap** открывают одну панель  
-✅ **Скролл/тап вне/выбор реакции/клавиатура** закрывают панель  
-✅ **Тени/цвета/анимации** сохранены  
-✅ **Нет прыжков** позиции в inverted списках  
-✅ **Место под ActionsBar** подготовлено  
-
-## Совместимость
-
-- ✅ Сохранены все существующие реакции
-- ✅ Не изменены публичные API ChatCore
-- ✅ Оптимизации FlatList не затронуты
-- ✅ Тема и анимации работают как прежде
+1. **ActionsBar** - меню действий (reply, copy, delete)
+2. **Кастомные анимации** - уникальные переходы
+3. **Расширенные жесты** - swipe для быстрых реакций
+4. **Групповые действия** - массовые операции с сообщениями

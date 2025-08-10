@@ -39,7 +39,7 @@ const ChatThemeProviderInner: React.FC<ChatThemeProviderProps> = React.memo(({ c
     try {
       return THEMES[currentTheme as keyof typeof THEMES] || THEMES.dark;
     } catch (error) {
-      console.error('ChatTheme: Ошибка получения темы', error);
+      if (__DEV__) console.error('ChatTheme: Ошибка получения темы', error);
       return THEMES.dark;
     }
   }, [currentTheme]);
@@ -48,18 +48,18 @@ const ChatThemeProviderInner: React.FC<ChatThemeProviderProps> = React.memo(({ c
   const safeSetCurrentTheme = useCallback((theme: string) => {
     try {
       if (typeof theme !== 'string') {
-        console.warn('ChatTheme: Невалидный тип темы', typeof theme);
+        if (__DEV__) console.warn('ChatTheme: Невалидный тип темы', typeof theme);
         return;
       }
       
       if (!THEMES[theme as keyof typeof THEMES]) {
-        console.warn('ChatTheme: Неизвестная тема', theme);
+        if (__DEV__) console.warn('ChatTheme: Неизвестная тема', theme);
         return;
       }
       
       setCurrentTheme(theme);
     } catch (error) {
-      console.error('ChatTheme: Ошибка изменения темы', error);
+      if (__DEV__) console.error('ChatTheme: Ошибка изменения темы', error);
     }
   }, []);
 
@@ -81,7 +81,7 @@ const ChatThemeProviderInner: React.FC<ChatThemeProviderProps> = React.memo(({ c
         sendButton: { backgroundColor: currentThemeData.accent },
       };
     } catch (error) {
-      console.error('ChatTheme: Ошибка создания стилей', error);
+      if (__DEV__) console.error('ChatTheme: Ошибка создания стилей', error);
       return {
         safe: { backgroundColor: THEMES.dark.bg },
         header: { backgroundColor: THEMES.dark.headerBg },
@@ -110,7 +110,7 @@ const ChatThemeProviderInner: React.FC<ChatThemeProviderProps> = React.memo(({ c
         createThemedStyles,
       };
     } catch (error) {
-      console.error('ChatTheme: Ошибка создания контекста', error);
+      if (__DEV__) console.error('ChatTheme: Ошибка создания контекста', error);
       return {
         currentTheme: 'dark',
         setCurrentTheme: () => {},
@@ -128,7 +128,7 @@ const ChatThemeProviderInner: React.FC<ChatThemeProviderProps> = React.memo(({ c
       </ChatThemeContext.Provider>
     );
   } catch (error) {
-    console.error('ChatTheme: Критическая ошибка рендеринга', error);
+    if (__DEV__) console.error('ChatTheme: Критическая ошибка рендеринга', error);
     return <>{children}</>;
   }
 });

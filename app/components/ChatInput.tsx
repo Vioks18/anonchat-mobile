@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 import { InputValidator } from '../utils/validation';
 
@@ -22,8 +22,20 @@ const ChatInputInner: React.FC<ChatInputProps> = React.memo(({
   inputFocused,
   setInputFocused
 }) => {
+  const textInputRef = useRef<TextInput>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
   const [validationWarning, setValidationWarning] = useState<string | null>(null);
+
+  // Автоматический скролл к концу текста при изменении
+  useEffect(() => {
+    if (textInputRef.current && inputText.length > 0) {
+      setTimeout(() => {
+        textInputRef.current?.setNativeProps({
+          selection: { start: inputText.length, end: inputText.length }
+        });
+      }, 100);
+    }
+  }, [inputText]);
 
   // Валидация ввода с новой системой - мемоизирована
   const validateInput = useCallback((text: string): boolean => {
@@ -50,7 +62,7 @@ const ChatInputInner: React.FC<ChatInputProps> = React.memo(({
       
       return true;
     } catch (error) {
-      console.error('ChatInput: Ошибка валидации', error);
+      if (__DEV__) console.error('ChatInput: Ошибка валидации', error);
       setValidationError('Ошибка проверки сообщения');
       return false;
     }
@@ -71,7 +83,7 @@ const ChatInputInner: React.FC<ChatInputProps> = React.memo(({
         setValidationWarning(null);
       }
     } catch (error) {
-      console.error('ChatInput: Ошибка изменения текста', error);
+      if (__DEV__) console.error('ChatInput: Ошибка изменения текста', error);
     }
   }, [setInputText, validationError, validationWarning]);
 
@@ -92,7 +104,7 @@ const ChatInputInner: React.FC<ChatInputProps> = React.memo(({
 
       onSendMessage();
     } catch (error) {
-      console.error('ChatInput: Ошибка отправки сообщения', error);
+      if (__DEV__) console.error('ChatInput: Ошибка отправки сообщения', error);
       Alert.alert('Ошибка', 'Не удалось отправить сообщение');
     }
   }, [inputText, validateInput, validationError, onSendMessage]);
@@ -129,7 +141,7 @@ const ChatInputInner: React.FC<ChatInputProps> = React.memo(({
     try {
       setInputFocused(true);
     } catch (error) {
-      console.error('ChatInput: Ошибка установки фокуса', error);
+      if (__DEV__) console.error('ChatInput: Ошибка установки фокуса', error);
     }
   }, [setInputFocused]);
 
@@ -137,13 +149,14 @@ const ChatInputInner: React.FC<ChatInputProps> = React.memo(({
     try {
       setInputFocused(false);
     } catch (error) {
-      console.error('ChatInput: Ошибка снятия фокуса', error);
+      if (__DEV__) console.error('ChatInput: Ошибка снятия фокуса', error);
     }
   }, [setInputFocused]);
 
   return (
     <View style={containerStyle}>
       <TextInput
+        ref={textInputRef}
         style={textInputStyle}
         value={inputText}
         onChangeText={handleTextChange}
@@ -152,13 +165,13 @@ const ChatInputInner: React.FC<ChatInputProps> = React.memo(({
         onSubmitEditing={handleSendMessage}
         returnKeyType="send"
         multiline={true}
-        maxLength={1000}
         blurOnSubmit={false}
         keyboardType="default"
         autoCorrect={true}
         autoCapitalize="sentences"
         onFocus={handleFocus}
         onBlur={handleBlur}
+        textAlignVertical="top" // Выравнивание текста сверху
       />
       <TouchableOpacity
         style={sendButtonStyle}
@@ -196,7 +209,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     marginRight: 8,
-    maxHeight: 100,
+    maxHeight: 120, // Ограничиваем высоту чтобы не доходила до верхней панели
     fontSize: 16,
     fontFamily: "Poppins-Regular",
   },

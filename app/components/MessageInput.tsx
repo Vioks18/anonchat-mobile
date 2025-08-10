@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import React, { useCallback, useMemo } from 'react';
 import { TextInput, TouchableOpacity, View } from 'react-native';
+import { useMessageStore } from '../hooks/useMessageStore';
 
 interface MessageInputProps {
   input: string;
@@ -21,6 +22,9 @@ const MessageInputInner: React.FC<MessageInputProps> = React.memo(({
   themedStyles,
   styles,
 }) => {
+  const replyDraft = useMessageStore((s: any) => s.replyDraft);
+  const setReplyDraft = useMessageStore((s: any) => s.setReplyDraft);
+  const addReply = useMessageStore((s: any) => s.addReply);
   // Мемоизированные стили кнопки отправки
   const sendButtonStyle = useMemo(() => [
     themedStyles.sendButton, 
@@ -34,21 +38,27 @@ const MessageInputInner: React.FC<MessageInputProps> = React.memo(({
       if (typeof text === 'string') {
         setInput(text);
       } else {
-        console.warn('MessageInput: Невалидный тип текста', typeof text);
+        if (__DEV__) console.warn('MessageInput: Невалидный тип текста', typeof text);
       }
     } catch (error) {
-      console.error('MessageInput: Ошибка изменения текста', error);
+      if (__DEV__) console.error('MessageInput: Ошибка изменения текста', error);
     }
   }, [setInput]);
 
   // Безопасная обработка отправки
   const handleSendMessage = useCallback(() => {
     try {
-      sendMessage();
+      const text = input;
+      if (replyDraft && text.trim()) {
+        addReply?.(replyDraft.id, text.trim());
+        setReplyDraft?.(null);
+      } else {
+        sendMessage();
+      }
     } catch (error) {
-      console.error('MessageInput: Ошибка отправки сообщения', error);
+      if (__DEV__) console.error('MessageInput: Ошибка отправки сообщения', error);
     }
-  }, [sendMessage]);
+  }, [sendMessage, input, replyDraft, addReply, setReplyDraft]);
 
   // Безопасная обработка отправки по Enter
   const handleSubmitEditing = useCallback(() => {
@@ -57,13 +67,14 @@ const MessageInputInner: React.FC<MessageInputProps> = React.memo(({
         sendMessage();
       }
     } catch (error) {
-      console.error('MessageInput: Ошибка отправки по Enter', error);
+      if (__DEV__) console.error('MessageInput: Ошибка отправки по Enter', error);
     }
   }, [input, isSending, sendMessage]);
 
   try {
     return (
       <View style={themedStyles.inputContainer}>
+        {/* Reply preview is rendered elsewhere; send handler respects replyDraft */}
         <TextInput
           style={themedStyles.input}
           value={input}
@@ -73,7 +84,6 @@ const MessageInputInner: React.FC<MessageInputProps> = React.memo(({
           onSubmitEditing={handleSubmitEditing}
           returnKeyType="send"
           multiline={true}
-          maxLength={1000}
           blurOnSubmit={false}
           keyboardType="default"
           autoCorrect={true}
@@ -90,7 +100,7 @@ const MessageInputInner: React.FC<MessageInputProps> = React.memo(({
       </View>
     );
   } catch (error) {
-    console.error('MessageInput: Ошибка рендеринга', error);
+    if (__DEV__) console.error('MessageInput: Ошибка рендеринга', error);
     return null;
   }
 });

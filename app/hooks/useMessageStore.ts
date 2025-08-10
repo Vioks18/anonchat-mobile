@@ -4,29 +4,34 @@ import { Message } from '../types/message';
 
 interface MessageStore {
   messages: Message[];
-  selectedMessages: string[]; // Новое состояние для мульти-выбора
+  replyDraft: Message | null;
+  selectedIds: Set<string>; // Единый источник правды для выбора
   addMessage: (text: string) => void;
   addBotMessage: (text: string) => void;
   updateMessage: (id: string, partial: Partial<Message>) => void;
   removeMessage: (id: string) => void;
   addReaction: (messageId: string, reaction: string) => void;
   removeReaction: (messageId: string, reaction: string) => void;
+  addReply: (parentId: string, text: string) => void;
+  setReplyDraft: (message: Message | null) => void;
   // Методы для мульти-выбора
-  toggleMessageSelection: (messageId: string) => void;
-  clearMessageSelection: () => void;
-  selectAllMessages: () => void;
+  enterSelection: (id: string) => void;
+  toggleSelection: (id: string) => void;
+  clearSelection: () => void;
+  pruneSelection: () => void;
+  isSelected: (id: string) => boolean;
+  getSelectedCount: () => number;
   removeSelectedMessages: () => void;
   reset: () => void;
   // Селекторы для оптимизации
   getMessageById: (id: string) => Message | undefined;
   getMessagesBySender: (sender: "me" | "other") => Message[];
-  getMessagesWithReactions: () => Message[];
   getMessagesByStatus: (status: Message["status"]) => Message[];
   getMessageCount: () => number;
   getLatestMessage: () => Message | undefined;
 }
 
-// Инициализируем с пустым массивом сообщений
+// Инициализируем с пустым массивом
 const initialMessages: Message[] = [];
 
 // Безопасная валидация сообщения
@@ -34,7 +39,7 @@ const validateMessage = (text: string): boolean => {
   try {
     return typeof text === 'string' && text.trim().length > 0;
   } catch (error) {
-    console.error('validateMessage: Ошибка валидации', error);
+    if (__DEV__) console.error('validateMessage: Ошибка валидации', error);
     return false;
   }
 };
@@ -44,65 +49,111 @@ const generateId = (): string => {
   try {
     return Date.now().toString() + '_' + Math.random().toString(36).substr(2, 9);
   } catch (error) {
-    console.error('generateId: Ошибка генерации ID', error);
+    if (__DEV__) console.error('generateId: Ошибка генерации ID', error);
     return Date.now().toString();
+  }
+};
+
+// Разбиение длинных сообщений на части
+const splitLongMessage = (text: string, maxLength: number = 1000): string[] => {
+  try {
+    if (text.length <= maxLength) {
+      return [text];
+    }
+    
+    const parts: string[] = [];
+    let currentPart = '';
+    
+    // Разбиваем по словам, чтобы не резать слова пополам
+    const words = text.split(' ');
+    
+    for (const word of words) {
+      // Если добавление слова превысит лимит, начинаем новую часть
+      if ((currentPart + ' ' + word).trim().length > maxLength) {
+        if (currentPart.trim()) {
+          parts.push(currentPart.trim());
+        }
+        currentPart = word;
+      } else {
+        currentPart += (currentPart ? ' ' : '') + word;
+      }
+    }
+    
+    // Добавляем последнюю часть
+    if (currentPart.trim()) {
+      parts.push(currentPart.trim());
+    }
+    
+    return parts;
+  } catch (error) {
+    if (__DEV__) console.error('splitLongMessage: Ошибка разбиения', error);
+    return [text];
   }
 };
 
 export const useMessageStore = create<MessageStore>((set, get) => ({
   messages: initialMessages,
-  selectedMessages: [],
+  replyDraft: null,
+  selectedIds: new Set(),
   
   addMessage: (text: string) => {
     try {
-      const newMessage: Message = {
-        id: Date.now().toString(),
-        text: text.trim(),
-        sender: "me",
-        timestamp: Date.now(),
-        status: "sending",
-        reactions: [],
-      };
+      if (!validateMessage(text)) {
+        return;
+      }
       
-      set((state) => ({
-        messages: [...state.messages, newMessage]
-      }));
+      // Разбиваем длинные сообщения на части
+      const messageParts = splitLongMessage(text, 1000);
       
-      // Имитация отправки
-      setTimeout(() => {
+      // Добавляем каждую часть как отдельное сообщение
+      messageParts.forEach((part, index) => {
+        const newMessage: Message = {
+          id: generateId(),
+          text: part,
+          sender: "me",
+          timestamp: Date.now() + index * 100, // Небольшая задержка между частями
+          status: "sending",
+        };
+        
         set((state) => ({
-          messages: state.messages.map((msg) =>
-            msg.id === newMessage.id ? { ...msg, status: "sent" } : msg
-          )
+          messages: [...state.messages, newMessage]
         }));
         
+        // Имитация отправки для каждой части
         setTimeout(() => {
           set((state) => ({
             messages: state.messages.map((msg) =>
-              msg.id === newMessage.id ? { ...msg, status: "delivered" } : msg
+              msg.id === newMessage.id ? { ...msg, status: "sent" } : msg
             )
           }));
           
           setTimeout(() => {
             set((state) => ({
               messages: state.messages.map((msg) =>
-                msg.id === newMessage.id ? { ...msg, status: "read" } : msg
+                msg.id === newMessage.id ? { ...msg, status: "delivered" } : msg
               )
             }));
-          }, 1000);
-        }, 500);
-      }, 1000);
-      
-      // console.log('useMessageStore: Сообщение добавлено', text);
+            
+            setTimeout(() => {
+              set((state) => ({
+                messages: state.messages.map((msg) =>
+                  msg.id === newMessage.id ? { ...msg, status: "read" } : msg
+                )
+              }));
+            }, 1000);
+          }, 500);
+        }, 1000 + index * 200); // Задержка между частями
+      });
+
     } catch (error) {
-      console.error('useMessageStore: Ошибка добавления сообщения', error);
+      if (__DEV__) console.error('useMessageStore: Ошибка добавления сообщения', error);
     }
   },
 
   addBotMessage: (text: string) => {
     try {
       if (!validateMessage(text)) {
-        console.warn('addBotMessage: Невалидный текст сообщения');
+if (__DEV__) console.warn('addBotMessage: Невалидный текст сообщения');
         return;
       }
 
@@ -112,23 +163,22 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
         sender: "other",
         timestamp: Date.now(),
         status: "sent",
-        reactions: [],
       };
       
       set((state) => ({
         messages: [...state.messages, newMessage]
       }));
       
-      // console.log('addBotMessage: Сообщение бота добавлено', newMessage.id);
+
     } catch (error) {
-      console.error('addBotMessage: Ошибка добавления сообщения бота', error);
+      if (__DEV__) console.error('addBotMessage: Ошибка добавления сообщения бота', error);
     }
   },
   
   updateMessage: (id: string, partial: Partial<Message>) => {
     try {
       if (!id || typeof id !== 'string') {
-        console.warn('updateMessage: Невалидный ID сообщения');
+if (__DEV__) console.warn('updateMessage: Невалидный ID сообщения');
         return;
       }
 
@@ -138,16 +188,16 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
         )
       }));
       
-      // console.log('updateMessage: Сообщение обновлено', id);
+
     } catch (error) {
-      console.error('updateMessage: Ошибка обновления сообщения', error);
+      if (__DEV__) console.error('updateMessage: Ошибка обновления сообщения', error);
     }
   },
   
   removeMessage: (id: string) => {
     try {
       if (!id || typeof id !== 'string') {
-        console.warn('removeMessage: Невалидный ID сообщения');
+if (__DEV__) console.warn('removeMessage: Невалидный ID сообщения');
         return;
       }
 
@@ -155,143 +205,212 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
         messages: state.messages.filter(msg => msg.id !== id)
       }));
       
-      // console.log('removeMessage: Сообщение удалено', id);
+
     } catch (error) {
-      console.error('removeMessage: Ошибка удаления сообщения', error);
+      if (__DEV__) console.error('removeMessage: Ошибка удаления сообщения', error);
     }
   },
   
   addReaction: (messageId: string, reaction: string) => {
     try {
-      if (!messageId || typeof messageId !== 'string') {
-        console.warn('addReaction: Невалидный ID сообщения');
+      if (!messageId || typeof messageId !== 'string' || !reaction || typeof reaction !== 'string') {
+        if (__DEV__) console.warn('addReaction: Невалидные параметры реакции');
         return;
       }
 
-      if (!reaction || typeof reaction !== 'string') {
-        console.warn('addReaction: Невалидная реакция');
-        return;
-      }
-
-      set((state) => ({
-        messages: state.messages.map(msg => {
+      set((state) => {
+        const newMessages = state.messages.map(msg => {
           if (msg.id === messageId) {
-            const reactions = msg.reactions || [];
-            
-            // Проверяем, есть ли уже такая реакция
-            const hasReaction = reactions.includes(reaction);
-            
-            if (hasReaction) {
-              // Если реакция уже есть, убираем её (toggle)
-              const newReactions = reactions.filter(r => r !== reaction);
-              return { ...msg, reactions: newReactions };
-            } else {
-              // Если реакции нет, убираем ВСЕ старые реакции и добавляем новую
-              // Один пользователь = одна реакция на сообщение
-              return { ...msg, reactions: [reaction] };
+            // Если уже есть такая реакция - убираем её (toggle)
+            if (msg.reactions && msg.reactions.includes(reaction)) {
+              return { ...msg, reactions: msg.reactions.filter(r => r !== reaction) };
             }
+            // Иначе заменяем все реакции на новую (только одна реакция)
+            return { ...msg, reactions: [reaction] };
           }
           return msg;
-        })
-      }));
+        });
+        
+        return { messages: newMessages };
+      });
       
-      console.log('addReaction: Реакция переключена', messageId, reaction);
+      
     } catch (error) {
-      console.error('addReaction: Ошибка добавления реакции', error);
+      if (__DEV__) console.error('addReaction: Ошибка добавления реакции', error);
     }
   },
 
   removeReaction: (messageId: string, reaction: string) => {
     try {
-      if (!messageId || typeof messageId !== 'string') {
-        console.warn('removeReaction: Невалидный ID сообщения');
-        return;
-      }
-
-      if (!reaction || typeof reaction !== 'string') {
-        console.warn('removeReaction: Невалидная реакция');
-        return;
-      }
-
-      set((state) => ({
-        messages: state.messages.map(msg => {
-          if (msg.id === messageId) {
-            const reactions = msg.reactions || [];
-            const newReactions = reactions.filter(r => r !== reaction);
-            return { ...msg, reactions: newReactions };
-          }
-          return msg;
-        })
-      }));
-      
-      // console.log('removeReaction: Реакция удалена', messageId, reaction);
-    } catch (error) {
-      console.error('removeReaction: Ошибка удаления реакции', error);
-    }
-  },
-  
-  toggleMessageSelection: (messageId: string) => {
-    try {
-      if (!messageId || typeof messageId !== 'string') {
-        console.warn('toggleMessageSelection: Невалидный ID сообщения');
+      if (!messageId || typeof messageId !== 'string' || !reaction || typeof reaction !== 'string') {
+        if (__DEV__) console.warn('removeReaction: Невалидные параметры реакции');
         return;
       }
 
       set((state) => {
-        const isSelected = state.selectedMessages.includes(messageId);
-        const newSelectedMessages = isSelected
-          ? state.selectedMessages.filter(id => id !== messageId)
-          : [...state.selectedMessages, messageId];
+        const newMessages = state.messages.map(msg => 
+          msg.id === messageId ? { ...msg, reactions: (msg.reactions || []).filter((r: string) => r !== reaction) } : msg
+        );
         
-        return { selectedMessages: newSelectedMessages };
+        return { messages: newMessages };
       });
       
-      console.log('toggleMessageSelection: Выбор переключен', messageId);
+      
     } catch (error) {
-      console.error('toggleMessageSelection: Ошибка переключения выбора', error);
+      if (__DEV__) console.error('removeReaction: Ошибка удаления реакции', error);
     }
   },
 
-  clearMessageSelection: () => {
+  addReply: (parentId: string, text: string) => {
     try {
-      set({ selectedMessages: [] });
-      console.log('clearMessageSelection: Выбор очищен');
+      const parent = get().getMessageById(parentId);
+      if (!parent) {
+        if (__DEV__) console.warn('addReply: Родительское сообщение не найдено', parentId);
+        return;
+      }
+      const newMessage: Message = {
+        id: Date.now().toString(),
+        text: text.trim(),
+        sender: 'me',
+        timestamp: Date.now(),
+        status: 'sending',
+        replyTo: parent,
+      };
+      set((state) => ({ messages: [...state.messages, newMessage] }));
+      // эмулируем статусы как в addMessage
+      setTimeout(() => {
+        set((state) => ({
+          messages: state.messages.map((m) => (m.id === newMessage.id ? { ...m, status: 'sent' } : m)),
+        }));
+        setTimeout(() => {
+          set((state) => ({
+            messages: state.messages.map((m) => (m.id === newMessage.id ? { ...m, status: 'delivered' } : m)),
+          }));
+          setTimeout(() => {
+            set((state) => ({
+              messages: state.messages.map((m) => (m.id === newMessage.id ? { ...m, status: 'read' } : m)),
+            }));
+          }, 1000);
+        }, 500);
+      }, 1000);
     } catch (error) {
-      console.error('clearMessageSelection: Ошибка очистки выбора', error);
+      if (__DEV__) console.error('addReply: Ошибка создания ответа', error);
     }
   },
 
-  selectAllMessages: () => {
+  setReplyDraft: (message: Message | null) => {
     try {
-      const state = get();
-      const allMessageIds = state.messages.map(msg => msg.id);
-      set({ selectedMessages: allMessageIds });
-      console.log('selectAllMessages: Выбраны все сообщения');
+      set({ replyDraft: message });
     } catch (error) {
-      console.error('selectAllMessages: Ошибка выбора всех сообщений', error);
+      if (__DEV__) console.error('setReplyDraft: Ошибка установки черновика ответа', error);
+    }
+  },
+  
+  enterSelection: (id: string) => {
+    try {
+      if (!id || typeof id !== 'string') {
+if (__DEV__) console.warn('enterSelection: Невалидный ID для входа в выбор');
+        return;
+      }
+      set((state) => {
+        const newSelectedIds = new Set(state.selectedIds);
+        newSelectedIds.add(id);
+        return { selectedIds: newSelectedIds };
+      });
+    } catch (error) {
+      if (__DEV__) console.error('enterSelection: Ошибка входа в выбор', error);
+    }
+  },
+
+  toggleSelection: (id: string) => {
+    try {
+      if (!id || typeof id !== 'string') {
+if (__DEV__) console.warn('toggleSelection: Невалидный ID для переключения выбора');
+        return;
+      }
+      set((state) => {
+        const newSelectedIds = new Set(state.selectedIds);
+        if (newSelectedIds.has(id)) {
+          newSelectedIds.delete(id);
+        } else {
+          newSelectedIds.add(id);
+        }
+        return { selectedIds: newSelectedIds };
+      });
+    } catch (error) {
+      if (__DEV__) console.error('toggleSelection: Ошибка переключения выбора', error);
+    }
+  },
+
+  clearSelection: () => {
+    try {
+      set({ selectedIds: new Set() });
+
+    } catch (error) {
+      if (__DEV__) console.error('clearSelection: Ошибка очистки выбора', error);
+    }
+  },
+
+  pruneSelection: () => {
+    try {
+      set(s => {
+        const ids = new Set(s.messages.map(m => m.id));
+        const next = new Set<string>();
+        s.selectedIds.forEach(id => { 
+          if (ids.has(id)) next.add(id); 
+        });
+        return { selectedIds: next };
+      });
+    } catch (error) {
+      if (__DEV__) console.error('pruneSelection: Ошибка очистки несуществующих ID', error);
+    }
+  },
+
+  isSelected: (id: string) => {
+    try {
+      if (!id || typeof id !== 'string') {
+if (__DEV__) console.warn('isSelected: Невалидный ID для проверки выбора');
+        return false;
+      }
+      return get().selectedIds.has(id);
+    } catch (error) {
+      if (__DEV__) console.error('isSelected: Ошибка проверки выбора', error);
+      return false;
+    }
+  },
+
+  getSelectedCount: () => {
+    try {
+      return get().selectedIds.size;
+    } catch (error) {
+      if (__DEV__) console.error('getSelectedCount: Ошибка подсчета выбранных сообщений', error);
+      return 0;
     }
   },
 
   removeSelectedMessages: () => {
     try {
       const state = get();
-      const newMessages = state.messages.filter(msg => !state.selectedMessages.includes(msg.id));
+      const newMessages = state.messages.filter(msg => !state.selectedIds.has(msg.id));
       set({ 
         messages: newMessages,
-        selectedMessages: [] // Очищаем выбор после удаления
+        selectedIds: new Set() // Очищаем выбор после удаления
       });
-      console.log('removeSelectedMessages: Удалены выбранные сообщения');
+      
+      // Очищаем несуществующие ID из выбора
+      get().pruneSelection();
+
     } catch (error) {
-      console.error('removeSelectedMessages: Ошибка удаления выбранных сообщений', error);
+      if (__DEV__) console.error('removeSelectedMessages: Ошибка удаления выбранных сообщений', error);
     }
   },
 
   reset: () => {
     try {
-      set({ messages: initialMessages, selectedMessages: [] });
-      console.log('reset: Store сброшен');
+      set({ messages: initialMessages, selectedIds: new Set() });
+  
     } catch (error) {
-      console.error('reset: Ошибка сброса store', error);
+      if (__DEV__) console.error('reset: Ошибка сброса store', error);
     }
   },
 
@@ -299,14 +418,14 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
   getMessageById: (id: string) => {
     try {
       if (!id || typeof id !== 'string') {
-        console.warn('getMessageById: Невалидный ID');
+if (__DEV__) console.warn('getMessageById: Невалидный ID');
         return undefined;
       }
 
       const state = get();
       return state.messages.find(msg => msg.id === id);
     } catch (error) {
-      console.error('getMessageById: Ошибка получения сообщения', error);
+      if (__DEV__) console.error('getMessageById: Ошибка получения сообщения', error);
       return undefined;
     }
   },
@@ -314,39 +433,29 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
   getMessagesBySender: (sender: "me" | "other") => {
     try {
       if (!sender || (sender !== "me" && sender !== "other")) {
-        console.warn('getMessagesBySender: Невалидный отправитель');
+if (__DEV__) console.warn('getMessagesBySender: Невалидный отправитель');
         return [];
       }
 
       const state = get();
       return state.messages.filter(msg => msg.sender === sender);
     } catch (error) {
-      console.error('getMessagesBySender: Ошибка получения сообщений', error);
-      return [];
-    }
-  },
-
-  getMessagesWithReactions: () => {
-    try {
-      const state = get();
-      return state.messages.filter(msg => msg.reactions && msg.reactions.length > 0);
-    } catch (error) {
-      console.error('getMessagesWithReactions: Ошибка получения сообщений с реакциями', error);
+      if (__DEV__) console.error('getMessagesBySender: Ошибка получения сообщений', error);
       return [];
     }
   },
 
   getMessagesByStatus: (status: Message["status"]) => {
     try {
-      if (status && !["sending", "sent", "delivered", "error"].includes(status)) {
-        console.warn('getMessagesByStatus: Невалидный статус');
+      if (status && !["sending", "sent", "delivered", "read"].includes(status)) {
+if (__DEV__) console.warn('getMessagesByStatus: Невалидный статус');
         return [];
       }
 
       const state = get();
       return state.messages.filter(msg => msg.status === status);
     } catch (error) {
-      console.error('getMessagesByStatus: Ошибка получения сообщений по статусу', error);
+      if (__DEV__) console.error('getMessagesByStatus: Ошибка получения сообщений по статусу', error);
       return [];
     }
   },
@@ -356,7 +465,7 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
       const state = get();
       return state.messages.length;
     } catch (error) {
-      console.error('getMessageCount: Ошибка подсчета сообщений', error);
+      if (__DEV__) console.error('getMessageCount: Ошибка подсчета сообщений', error);
       return 0;
     }
   },
@@ -366,7 +475,7 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
       const state = get();
       return state.messages[state.messages.length - 1];
     } catch (error) {
-      console.error('getLatestMessage: Ошибка получения последнего сообщения', error);
+      if (__DEV__) console.error('getLatestMessage: Ошибка получения последнего сообщения', error);
       return undefined;
     }
   },
@@ -381,7 +490,6 @@ export const useMessageSelectors = () => {
     const memoizedSelectors = React.useMemo(() => ({
       getMessageById: (id: string) => store.getMessageById(id),
       getMessagesBySender: (sender: "me" | "other") => store.getMessagesBySender(sender),
-      getMessagesWithReactions: () => store.getMessagesWithReactions(),
       getMessagesByStatus: (status: Message["status"]) => store.getMessagesByStatus(status),
       getMessageCount: () => store.getMessageCount(),
       getLatestMessage: () => store.getLatestMessage(),
@@ -389,11 +497,10 @@ export const useMessageSelectors = () => {
     
     return memoizedSelectors;
   } catch (error) {
-    console.error('useMessageSelectors: Ошибка создания селекторов', error);
+    if (__DEV__) console.error('useMessageSelectors: Ошибка создания селекторов', error);
     return {
       getMessageById: () => undefined,
       getMessagesBySender: () => [],
-      getMessagesWithReactions: () => [],
       getMessagesByStatus: () => [],
       getMessageCount: () => 0,
       getLatestMessage: () => undefined,
