@@ -37,6 +37,18 @@ const MessageWithReactions: React.FC<MessageWithReactionsProps> = ({
   const status = isMyMessage ? (message.status ?? 'sent') : undefined;
   const time = formatTime(message.timestamp);
 
+  // Определяем ширину пузыря на основе длины текста
+  const getBubbleStyle = () => {
+    const textLength = message.text.length;
+    if (textLength <= 20) {
+      return { alignSelf: 'flex-start' as const }; // Короткие - компактные
+    } else if (textLength <= 50) {
+      return { alignSelf: 'flex-start' as const, maxWidth: '70%' as const }; // Средние - ограниченная ширина
+    } else {
+      return {}; // Длинные - занимают всю ширину
+    }
+  };
+
   // Обработчик реакций
   const handleReactionPress = (reaction: string) => {
     removeReaction(message.id, reaction);
@@ -73,6 +85,7 @@ const MessageWithReactions: React.FC<MessageWithReactionsProps> = ({
           style={[
             styles.bubble,
             isMyMessage ? styles.myBubble : styles.theirBubble,
+            getBubbleStyle(), // Динамическая ширина
           ]}
         >
           <Text style={styles.messageText}>
@@ -138,17 +151,17 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
   },
   messageContent: {
-    maxWidth: '80%',
+    maxWidth: '85%',
   },
   selectionOverlay: {
     backgroundColor: 'rgba(255, 255, 255, 0.08)',
     borderRadius: 12,
   },
   bubble: {
-    maxWidth: '75%',
+    maxWidth: '100%',
     minWidth: 50,
     paddingHorizontal: 12,
-    paddingVertical: 6, // Уменьшаем вертикальные отступы
+    paddingVertical: 6,
     borderRadius: 16,
     position: 'relative',
   },
@@ -162,8 +175,8 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 15,
     lineHeight: 20,
-    paddingRight: 50, // Больше отступ от даты
-    paddingTop: 2, // Меньше отступ сверху
+    paddingRight: 45, // Больше отступ от даты
+    paddingTop: 2,
     flexShrink: 1,
   },
   metaRow: {
