@@ -1,6 +1,8 @@
 # AnonChat Mobile
 
-Анонимный чат-клиент для Android с современным UI и продвинутой системой качества кода.
+[![QA Status](https://github.com/Vioks18/anonchat-mobile/workflows/QA%20Checks/badge.svg)](https://github.com/Vioks18/anonchat-mobile/actions/workflows/qa.yml)
+
+Анонимный чат-клиент для Android с современным UI и продвинутой системой качества кода. (CI test - $(date))
 
 ## 🚀 Особенности
 
@@ -72,6 +74,15 @@ npm run qa:baseline:update  # Обновить baseline
 ```
 
 **⚠️ Важно:** Автофиксы применяются только через `qa:fix:apply` и всегда в отдельной ветке с лимитами безопасности.
+
+### Self-test ассистента
+
+```bash
+npm run qa:selftest    # Генерит фикстуры/мутации/снепшот и валидирует, что правила реально срабатывают
+npm run qa:fixtures    # Прогон только по фикстурам
+npm run qa:mutate      # Мутационное тестирование на копиях в qa/tmp
+npm run qa:snap        # Обновить эталонный JSON-отчёт
+```
 
 ### Pre-commit защита
 - Автоматический запуск QA при коммите
