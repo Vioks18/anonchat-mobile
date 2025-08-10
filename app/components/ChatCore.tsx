@@ -42,76 +42,7 @@ import ChatListWithReactions from './ChatListWithReactions';
 // Extracted components
 import useKeyboardGlue from '../hooks/chat/useKeyboardGlue';
 import { ChatMenus, HeaderBar, InputBar } from './chat';
-
-// Темы
-const THEMES = {
-  dark: {
-    name: "Темная",
-    accent: "#6c5ce7",
-    bg: "#181825",
-    headerBg: "#23234d",
-    bubbleMe: "#6c5ce7",
-    bubbleOther: "#23234d",
-    text: "#fff",
-    inputBg: "#23234d",
-    border: "#282850",
-  },
-  ocean: {
-    name: "Океан",
-    accent: "#00b894",
-    bg: "#0a1929",
-    headerBg: "#1a3a5f",
-    bubbleMe: "#00b894",
-    bubbleOther: "#1a3a5f",
-    text: "#fff",
-    inputBg: "#1a3a5f",
-    border: "#2d5a8a",
-  },
-  sunset: {
-    name: "Закат",
-    accent: "#e17055",
-    bg: "#2d1b1b",
-    headerBg: "#4a2c2c",
-    bubbleMe: "#e17055",
-    bubbleOther: "#4a2c2c",
-    text: "#fff",
-    inputBg: "#4a2c2c",
-    border: "#6b3e3e",
-  },
-  forest: {
-    name: "Лес",
-    accent: "#00b894",
-    bg: "#0f1a0f",
-    headerBg: "#1a3a1a",
-    bubbleMe: "#00b894",
-    bubbleOther: "#1a3a1a",
-    text: "#fff",
-    inputBg: "#1a3a1a",
-    border: "#2d5a2d",
-  },
-  purple: {
-    name: "Фиолетовая",
-    accent: "#a29bfe",
-    bg: "#2d1b69",
-    headerBg: "#4a2c8a",
-    bubbleMe: "#a29bfe",
-    bubbleOther: "#4a2c8a",
-    text: "#fff",
-    inputBg: "#4a2c8a",
-    border: "#6b3eb3",
-  },
-  neon: {
-    name: "Неон",
-    accent: "#00d2d3",
-    bg: "#0a0a0a",
-    headerBg: "#1a1a1a",
-    bubbleMe: "#00d2d3",
-    bubbleOther: "#1a1a1a",
-    text: "#fff",
-    inputBg: "#1a1a1a",
-    border: "#2d2d2d",
-  }
-};
+import { THEMES } from '../constants/themes';
 
 interface ChatCoreProps {
   // Минимальные пропсы для изоляции
