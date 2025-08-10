@@ -42,10 +42,21 @@ const MessageWithReactions: React.FC<MessageWithReactionsProps> = ({
     const textLength = message.text.length;
     if (textLength <= 20) {
       return { alignSelf: 'flex-start' as const }; // Короткие - компактные
-    } else if (textLength <= 50) {
-      return { alignSelf: 'flex-start' as const, maxWidth: '70%' as const }; // Средние - ограниченная ширина
     } else {
-      return {}; // Длинные - занимают всю ширину
+      return {}; // Средние и длинные - занимают всю ширину
+    }
+  };
+
+  // Определяем отступ для текста
+  const getTextStyle = () => {
+    const textLength = message.text.length;
+    if (textLength <= 20) {
+      return { paddingRight: 50 }; // Короткие - отступ от даты
+    } else {
+      return { 
+        paddingBottom: 20, // Отступ снизу для меты
+        paddingTop: 6 // Опускаем длинные сообщения ниже
+      }; 
     }
   };
 
@@ -88,7 +99,7 @@ const MessageWithReactions: React.FC<MessageWithReactionsProps> = ({
             getBubbleStyle(), // Динамическая ширина
           ]}
         >
-          <Text style={styles.messageText}>
+          <Text style={[styles.messageText, getTextStyle()]}>
             {message.text}
           </Text>
           
@@ -175,14 +186,13 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 15,
     lineHeight: 20,
-    paddingRight: 45, // Больше отступ от даты
-    paddingTop: 2,
+    paddingTop: 2, // Возвращаем обратно
     flexShrink: 1,
   },
   metaRow: {
     position: 'absolute',
     right: 8,
-    bottom: 4, // Поднимаем дату выше - уменьшаем высоту пузыря
+    bottom: 6, // Выравниваем с текстом
     flexDirection: 'row',
     alignItems: 'center',
   },

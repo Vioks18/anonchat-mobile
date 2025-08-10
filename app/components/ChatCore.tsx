@@ -155,6 +155,9 @@ const ChatCoreInner: React.FC<ChatCoreProps> = ({ onSendMessage, onError, isBotE
   // Используем систему мониторинга ошибок
   const { addError, getStats, isStable } = useErrorMonitor();
   
+  // Ref для TextInput
+  const textInputRef = useRef<TextInput>(null);
+  
   // Состояние для отслеживания критических ошибок
   const [hasCriticalError, setHasCriticalError] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string>('');
@@ -171,6 +174,21 @@ const ChatCoreInner: React.FC<ChatCoreProps> = ({ onSendMessage, onError, isBotE
   const [selectedMessagesCount, setSelectedMessagesCount] = useState(0);
   const [selectedMessages, setSelectedMessages] = useState<Set<string>>(new Set());
   
+  // Состояние для input
+  const [inputText, setInputText] = useState('');
+  const [inputFocused, setInputFocused] = useState(false);
+  
+  // Автоматический скролл к концу текста при изменении
+  useEffect(() => {
+    if (textInputRef.current && inputText.length > 0) {
+      setTimeout(() => {
+        textInputRef.current?.setNativeProps({
+          selection: { start: inputText.length, end: inputText.length }
+        });
+      }, 100);
+    }
+  }, [inputText]);
+
   // Синхронизация с store
   useEffect(() => {
     const unsubscribe = useMessageStore.subscribe((state) => {
@@ -266,9 +284,7 @@ const ChatCoreInner: React.FC<ChatCoreProps> = ({ onSendMessage, onError, isBotE
   const [isSearching, setIsSearching] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   
-  const [inputText, setInputText] = useState("");
   const [keyboardHeight, setKeyboardHeight] = useState(0);
-  const [inputFocused, setInputFocused] = useState(false);
   const flatListRef = useRef<FlatList>(null); // Пустой ref для совместимости
   
   // Простая анимация клавиатуры без сложных вычислений
@@ -678,6 +694,7 @@ const ChatCoreInner: React.FC<ChatCoreProps> = ({ onSendMessage, onError, isBotE
           }
         ]}>
           <TextInput
+            ref={textInputRef}
             style={[
               styles.textInput,
               { 
@@ -693,13 +710,13 @@ const ChatCoreInner: React.FC<ChatCoreProps> = ({ onSendMessage, onError, isBotE
             onSubmitEditing={handleSendMessage}
             returnKeyType="send"
             multiline={true}
-            maxLength={1000}
             blurOnSubmit={false}
             keyboardType="default"
             autoCorrect={true}
             autoCapitalize="sentences"
             onFocus={() => setInputFocused(true)}
             onBlur={() => setInputFocused(false)}
+            textAlignVertical="top" // Выравнивание текста сверху
           />
           <TouchableOpacity
             style={[
@@ -910,6 +927,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#444",
     fontFamily: "Poppins-Regular",
+    maxHeight: 120, // Ограничиваем высоту чтобы не доходила до верхней панели
   },
   sendButton: {
     width: 44,

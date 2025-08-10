@@ -54,6 +54,43 @@ const generateId = (): string => {
   }
 };
 
+// Разбиение длинных сообщений на части
+const splitLongMessage = (text: string, maxLength: number = 1000): string[] => {
+  try {
+    if (text.length <= maxLength) {
+      return [text];
+    }
+    
+    const parts: string[] = [];
+    let currentPart = '';
+    
+    // Разбиваем по словам, чтобы не резать слова пополам
+    const words = text.split(' ');
+    
+    for (const word of words) {
+      // Если добавление слова превысит лимит, начинаем новую часть
+      if ((currentPart + ' ' + word).trim().length > maxLength) {
+        if (currentPart.trim()) {
+          parts.push(currentPart.trim());
+        }
+        currentPart = word;
+      } else {
+        currentPart += (currentPart ? ' ' : '') + word;
+      }
+    }
+    
+    // Добавляем последнюю часть
+    if (currentPart.trim()) {
+      parts.push(currentPart.trim());
+    }
+    
+    return parts;
+  } catch (error) {
+    if (__DEV__) console.error('splitLongMessage: Ошибка разбиения', error);
+    return [text];
+  }
+};
+
 export const useMessageStore = create<MessageStore>((set, get) => ({
   messages: initialMessages,
   replyDraft: null,
@@ -65,43 +102,48 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
         return;
       }
       
-      const newMessage: Message = {
-        id: Date.now().toString(),
-        text: text, // Убираем trim() чтобы сохранить оригинальный текст
-        sender: "me",
-        timestamp: Date.now(),
-        status: "sending",
-      };
+      // Разбиваем длинные сообщения на части
+      const messageParts = splitLongMessage(text, 1000);
       
-      set((state) => ({
-        messages: [...state.messages, newMessage]
-      }));
-      
-      // Имитация отправки
-      setTimeout(() => {
+      // Добавляем каждую часть как отдельное сообщение
+      messageParts.forEach((part, index) => {
+        const newMessage: Message = {
+          id: generateId(),
+          text: part,
+          sender: "me",
+          timestamp: Date.now() + index * 100, // Небольшая задержка между частями
+          status: "sending",
+        };
+        
         set((state) => ({
-          messages: state.messages.map((msg) =>
-            msg.id === newMessage.id ? { ...msg, status: "sent" } : msg
-          )
+          messages: [...state.messages, newMessage]
         }));
         
+        // Имитация отправки для каждой части
         setTimeout(() => {
           set((state) => ({
             messages: state.messages.map((msg) =>
-              msg.id === newMessage.id ? { ...msg, status: "delivered" } : msg
+              msg.id === newMessage.id ? { ...msg, status: "sent" } : msg
             )
           }));
           
           setTimeout(() => {
             set((state) => ({
               messages: state.messages.map((msg) =>
-                msg.id === newMessage.id ? { ...msg, status: "read" } : msg
+                msg.id === newMessage.id ? { ...msg, status: "delivered" } : msg
               )
             }));
-          }, 1000);
-        }, 500);
-      }, 1000);
-      
+            
+            setTimeout(() => {
+              set((state) => ({
+                messages: state.messages.map((msg) =>
+                  msg.id === newMessage.id ? { ...msg, status: "read" } : msg
+                )
+              }));
+            }, 1000);
+          }, 500);
+        }, 1000 + index * 200); // Задержка между частями
+      });
 
     } catch (error) {
       if (__DEV__) console.error('useMessageStore: Ошибка добавления сообщения', error);

@@ -84,7 +84,6 @@ const MessageInputInner: React.FC<MessageInputProps> = React.memo(({
           onSubmitEditing={handleSubmitEditing}
           returnKeyType="send"
           multiline={true}
-          maxLength={1000}
           blurOnSubmit={false}
           keyboardType="default"
           autoCorrect={true}
