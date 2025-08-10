@@ -52,10 +52,12 @@ const MessageWithReactions: React.FC<MessageWithReactionsProps> = ({
     const textLength = message.text.length;
     if (textLength <= 20) {
       return { paddingRight: 50 }; // Короткие - отступ от даты
+    } else if (textLength <= 100) {
+      return { paddingRight: 50 }; // Средние - тоже отступ от даты, но не опущены
     } else {
       return { 
         paddingBottom: 20, // Отступ снизу для меты
-        paddingTop: 6 // Опускаем длинные сообщения ниже
+        paddingTop: 6 // Опускаем только длинные сообщения
       }; 
     }
   };
@@ -186,8 +188,9 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 15,
     lineHeight: 20,
-    paddingTop: 2, // Возвращаем обратно
+    paddingTop: 2,
     flexShrink: 1,
+    minWidth: 0, // Исправляем warning bubble.text.minWidth0
   },
   metaRow: {
     position: 'absolute',
