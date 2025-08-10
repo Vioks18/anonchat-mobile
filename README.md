@@ -55,15 +55,23 @@ npm run qa:debug
 - **strict** (по умолчанию) - исключает experimental правила
 - **soft** - полная проверка всех правил
 
-### Команды QA
+### Как гонять QA
+
 ```bash
-npm run qa              # Обычная проверка (strict)
-npm run qa:strict       # Строгий режим
-npm run qa:soft         # Мягкий режим (все правила)
-npm run qa:debug        # С детальным выводом
-npm run qa:fix          # Автоисправление P0 проблем
+# Основные проверки
+npm run qa:ui           # Только UI/лейаут проверки
+npm run qa:perf         # Только производительность
+npm run qa:strict       # Полная проверка (рекомендуется)
+
+# Автофиксы (безопасно)
+npm run qa:fix:safe     # DRY-RUN патчей (ничего не применяет)
+npm run qa:fix:apply    # Применяет патчи в новой ветке и гоняет qa:strict
+
+# Управление baseline
 npm run qa:baseline:update  # Обновить baseline
 ```
+
+**⚠️ Важно:** Автофиксы применяются только через `qa:fix:apply` и всегда в отдельной ветке с лимитами безопасности.
 
 ### Pre-commit защита
 - Автоматический запуск QA при коммите

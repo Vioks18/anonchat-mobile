@@ -11,8 +11,35 @@ const path = require('path');
 const ROOT = process.cwd();
 const ARGS = process.argv.slice(2);
 const AUTO_FIX = ARGS.includes('--autofix');
+const AUTO_FIX_SAFE = ARGS.includes('--autofix-safe');
 const DEBUG = ARGS.includes('--debug');
 const QA_MODE = process.env.QA_MODE || 'strict'; // 'soft' or 'strict'
+
+// Safe autofix configuration
+const SAFE_AUTOFIX_CONFIG = {
+  maxChangesPerFile: 3,
+  maxFilesPerRun: 5,
+  stoplist: [
+    'ReactionBar.tsx',
+    'useReactionState.ts', 
+    'ChatListWithReactions.tsx',
+    'reactions/',
+    'gestures/'
+  ],
+  allowedRules: [
+    'perf.dev_logs',
+    'ui.text.shrink_ok', 
+    'ui.layout.meta_inside',
+    'perf.memo'
+  ],
+  allowedFiles: [
+    'MessageWithReactions.tsx',
+    'ChatMessage.tsx',
+    'useMessageStore.ts',
+    'useUIWatchDog.ts',
+    'useBotProvider.ts'
+  ]
+};
 
 const readFileSafe = (p) => {
   try { return fs.readFileSync(p, 'utf8'); } catch { return null; }
@@ -161,6 +188,178 @@ const checkHeavyDeps = () => {
   }
   
   return unusedHeavy.length === 0;
+};
+
+// Safe autofix functions
+const isFileAllowed = (filePath) => {
+  const fileName = path.basename(filePath);
+  const fileDir = path.dirname(filePath);
+  
+  // Check stoplist
+  if (SAFE_AUTOFIX_CONFIG.stoplist.some(stop => 
+    fileName.includes(stop) || fileDir.includes(stop)
+  )) {
+    return false;
+  }
+  
+  // Check allowed files
+  return SAFE_AUTOFIX_CONFIG.allowedFiles.some(allowed => 
+    fileName.includes(allowed)
+  );
+};
+
+const isRuleAllowed = (ruleId) => {
+  return SAFE_AUTOFIX_CONFIG.allowedRules.includes(ruleId);
+};
+
+const generatePatch = (filePath, originalContent, newContent) => {
+  const fileName = path.basename(filePath);
+  const patchDir = path.join(ROOT, 'qa-patches');
+  fs.mkdirSync(patchDir, { recursive: true });
+  
+  const patchPath = path.join(patchDir, `${fileName}.patch`);
+  const patch = `--- ${filePath}
++++ ${filePath}
+${generateDiff(originalContent, newContent)}`;
+  
+  fs.writeFileSync(patchPath, patch);
+  return patchPath;
+};
+
+const generateDiff = (original, modified) => {
+  const originalLines = original.split('\n');
+  const modifiedLines = modified.split('\n');
+  let diff = '';
+  let lineNumber = 1;
+  
+  for (let i = 0; i < Math.max(originalLines.length, modifiedLines.length); i++) {
+    const originalLine = originalLines[i] || '';
+    const modifiedLine = modifiedLines[i] || '';
+    
+    if (originalLine !== modifiedLine) {
+      diff += `@@ -${lineNumber},1 +${lineNumber},1 @@\n`;
+      diff += `-${originalLine}\n`;
+      diff += `+${modifiedLine}\n`;
+    }
+    lineNumber++;
+  }
+  
+  return diff;
+};
+
+const safeAutofixers = {
+  'perf.dev_logs': (filePath) => {
+    if (!isFileAllowed(filePath)) return { applied: false, reason: 'file not allowed' };
+    
+    const content = getContent(filePath) || '';
+    const { content: newContent, changed } = wrapDevLogs(content);
+    
+    if (!changed) return { applied: false, reason: 'no changes needed' };
+    
+    return { 
+      applied: true, 
+      original: content, 
+      modified: newContent,
+      description: 'Wrapped console.log/warn in if (__DEV__)'
+    };
+  },
+  
+  'ui.text.shrink_ok': (filePath) => {
+    if (!isFileAllowed(filePath)) return { applied: false, reason: 'file not allowed' };
+    
+    const content = getContent(filePath) || '';
+    let modified = content;
+    let changes = 0;
+    
+    // Add minWidth: 0 to Text components
+    if (!/minWidth:\s*0/.test(content)) {
+      modified = modified.replace(
+        /(messageText:\s*{[^}]*)/g,
+        '$1,\n    minWidth: 0'
+      );
+      changes++;
+    }
+    
+    // Add flexShrink: 1 to message wrapper
+    if (!/flexShrink:\s*1/.test(content)) {
+      modified = modified.replace(
+        /(messageContent:\s*{[^}]*)/g,
+        '$1,\n    flexShrink: 1'
+      );
+      changes++;
+    }
+    
+    if (changes === 0) return { applied: false, reason: 'no changes needed' };
+    
+    return { 
+      applied: true, 
+      original: content, 
+      modified,
+      description: `Added minWidth: 0 and flexShrink: 1 (${changes} changes)`
+    };
+  },
+  
+  'ui.layout.meta_inside': (filePath) => {
+    if (!isFileAllowed(filePath)) return { applied: false, reason: 'file not allowed' };
+    
+    const content = getContent(filePath) || '';
+    let modified = content;
+    
+    // Check if file has time/ticks and needs paddingBottom
+    const hasTimeTicks = /timeText|statusIcon|ActivityIndicator/.test(content);
+    const currentPaddingBottom = content.match(/paddingBottom:\s*(\d+)/);
+    const currentPB = currentPaddingBottom ? parseInt(currentPaddingBottom[1]) : 0;
+    
+    if (!hasTimeTicks || currentPB >= 12) {
+      return { applied: false, reason: 'no time/ticks or paddingBottom already sufficient' };
+    }
+    
+    // Add paddingBottom: 14-16 to bubble
+    const newPaddingBottom = Math.max(14, currentPB + 2);
+    modified = modified.replace(
+      /(bubble:\s*{[^}]*)/g,
+      `$1,\n    paddingBottom: ${newPaddingBottom}`
+    );
+    
+    return { 
+      applied: true, 
+      original: content, 
+      modified,
+      description: `Added paddingBottom: ${newPaddingBottom} to bubble`
+    };
+  },
+  
+  'perf.memo': (filePath) => {
+    if (!isFileAllowed(filePath)) return { applied: false, reason: 'file not allowed' };
+    
+    const content = getContent(filePath) || '';
+    
+    // Check if already memoized
+    if (/React\.memo|memo\s*\(/.test(content)) {
+      return { applied: false, reason: 'already memoized' };
+    }
+    
+    // Check for stable key and no side effects
+    const hasStableKey = /key.*message\.id|key.*id/.test(content);
+    const hasSideEffects = /useEffect|useState|useCallback/.test(content);
+    
+    if (!hasStableKey || hasSideEffects) {
+      return { applied: false, reason: 'no stable key or has side effects - suggest manual review' };
+    }
+    
+    // Add React.memo wrapper
+    const modified = content.replace(
+      /export default (\w+);/,
+      'export default React.memo($1);'
+    );
+    
+    return { 
+      applied: true, 
+      original: content, 
+      modified,
+      description: 'Wrapped component in React.memo'
+    };
+  }
 };
 
 // Filter rules based on mode
@@ -418,6 +617,91 @@ for (const rule of filteredRules) {
   if (fn) fn(rule);
 }
 
+// Helper function to extract code snippets
+const extractSnippet = (content, contextLines = 3) => {
+  const lines = content.split('\n');
+  const changedLines = [];
+  
+  for (let i = 0; i < lines.length; i++) {
+    if (lines[i].includes('minWidth:') || lines[i].includes('flexShrink:') || 
+        lines[i].includes('paddingBottom:') || lines[i].includes('React.memo') ||
+        lines[i].includes('console.')) {
+      const start = Math.max(0, i - contextLines);
+      const end = Math.min(lines.length, i + contextLines + 1);
+      changedLines.push(...lines.slice(start, end));
+    }
+  }
+  
+  return changedLines.slice(0, 10).join('\n'); // Limit to 10 lines
+};
+
+// Generate autofix report
+const generateAutofixReport = (results, patches) => {
+  const report = [
+    '# QA Auto-Fix Report',
+    '',
+    `**Generated:** ${new Date().toISOString()}`,
+    `**Mode:** DRY-RUN`,
+    `**Patches:** ${patches.length}`,
+    `**Files processed:** ${results.filter(r => r.status === 'patched').length}`,
+    '',
+    '## 📋 Summary',
+    '',
+    '| File | Rule | Status | Description |',
+    '|------|------|--------|-------------|',
+    ...results.map(r => `| ${r.file} | ${r.rule} | ${r.status} | ${r.reason || r.description || '-'} |`),
+    '',
+    '## 🔧 Applied Fixes',
+    ''
+  ];
+  
+  const appliedFixes = results.filter(r => r.status === 'patched');
+  for (const fix of appliedFixes) {
+    report.push(`### ${fix.file} (${fix.rule})`);
+    report.push('');
+    report.push(`**Description:** ${fix.description}`);
+    report.push(`**Patch:** \`${fix.patch}\``);
+    report.push('');
+    report.push('**Before:**');
+    report.push('```typescript');
+    report.push(fix.before);
+    report.push('```');
+    report.push('');
+    report.push('**After:**');
+    report.push('```typescript');
+    report.push(fix.after);
+    report.push('```');
+    report.push('');
+  }
+  
+  if (appliedFixes.length === 0) {
+    report.push('No fixes applied.');
+  }
+  
+  report.push('');
+  report.push('## 📝 Suggestions');
+  report.push('');
+  
+  const suggestions = results.filter(r => r.status === 'skipped' && r.reason.includes('suggest'));
+  for (const suggestion of suggestions) {
+    report.push(`- **${suggestion.file}** (${suggestion.rule}): ${suggestion.reason}`);
+  }
+  
+  if (suggestions.length === 0) {
+    report.push('No suggestions.');
+  }
+  
+  report.push('');
+  report.push('## 🚀 Next Steps');
+  report.push('');
+  report.push('1. Review generated patches in `qa-patches/`');
+  report.push('2. Run `npm run qa:fix:apply` to apply patches in new branch');
+  report.push('3. Test changes and run `npm run qa:strict`');
+  report.push('4. Merge if all tests pass');
+  
+  writeFileSafe('QA-AUTO-FIX.md', report.join('\n'));
+};
+
 // Compare with baseline
 let newIssuesCount = 0;
 if (baseline) {
@@ -459,6 +743,85 @@ writeFileSafe(path.join(ROOT, 'QA-REPORT.md'), report + '\n');
 console.log(`QA scan complete (${QA_MODE} mode). Report written to QA-REPORT.md`);
 if (newIssuesCount > 0) {
   console.log(`⚠️  ${newIssuesCount} new issues found compared to baseline`);
+}
+
+// Safe autofix logic (after all functions are defined)
+if (AUTO_FIX_SAFE) {
+  console.log('🔧 Running safe autofix (DRY-RUN mode)...');
+  
+  const autofixResults = [];
+  const patches = [];
+  let filesProcessed = 0;
+  
+  // Process failed rules that can be autofixed
+  const failedRules = results.filter(r => !r.ok && isRuleAllowed(r.id));
+  
+  for (const result of failedRules) {
+    if (filesProcessed >= SAFE_AUTOFIX_CONFIG.maxFilesPerRun) {
+      autofixResults.push({
+        file: result.file,
+        rule: result.id,
+        status: 'skipped',
+        reason: 'max files limit reached'
+      });
+      continue;
+    }
+    
+    if (!isFileAllowed(result.file)) {
+      autofixResults.push({
+        file: result.file,
+        rule: result.id,
+        status: 'skipped',
+        reason: 'file in stoplist or not allowed'
+      });
+      continue;
+    }
+    
+    const autofixer = safeAutofixers[result.id];
+    if (!autofixer) {
+      autofixResults.push({
+        file: result.file,
+        rule: result.id,
+        status: 'skipped',
+        reason: 'no autofixer available'
+      });
+      continue;
+    }
+    
+    const fixResult = autofixer(result.file);
+    
+    if (fixResult.applied) {
+      // Generate patch
+      const patchPath = generatePatch(result.file, fixResult.original, fixResult.modified);
+      patches.push(patchPath);
+      
+      autofixResults.push({
+        file: result.file,
+        rule: result.id,
+        status: 'patched',
+        description: fixResult.description,
+        patch: patchPath,
+        before: extractSnippet(fixResult.original, 3),
+        after: extractSnippet(fixResult.modified, 3)
+      });
+      
+      filesProcessed++;
+    } else {
+      autofixResults.push({
+        file: result.file,
+        rule: result.id,
+        status: 'skipped',
+        reason: fixResult.reason
+      });
+    }
+  }
+  
+  // Generate QA-AUTO-FIX.md report
+  generateAutofixReport(autofixResults, patches);
+  
+  console.log(`✅ Safe autofix complete: ${patches.length} patches generated`);
+  console.log(`📄 Report: QA-AUTO-FIX.md`);
+  console.log(`📁 Patches: qa-patches/`);
 }
 
 

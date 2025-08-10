@@ -1,7 +1,7 @@
 # QA Report
 
 **Mode:** strict
-**New issues:** 5
+**New issues:** 0
 
 ## ✅ Passed
 - store.status_read (P0) — app/hooks/useMessageStore.ts: read in statuses
@@ -24,6 +24,7 @@
 - bubble.noWidth100 (P1) — app/components/MessageWithReactions.tsx: OK
 - bubble.paddingRight.meta (P1) — app/components/MessageWithReactions.tsx: paddingRight >= 28
 - scroll.gate (P1) — app/components/ChatListWithReactions.tsx: Found
+- reactionbar.guard (P0) — app/components/reactions/ReactionBar.tsx: Found
 - reactionbar.pointerEvents (P1) — app/components/reactions/ReactionBar.tsx: Found
 - anchor.touchXY (P1) — app/hooks/useReactionState.ts: touchXY support present
 - status.read (P0) — app/hooks/useMessageStore.ts: OK
@@ -31,12 +32,9 @@
 - secrets.regex (P0) — **/*.{ts,tsx,js,jsx}: no secrets found
 
 ## ⚠️ Warnings
-- deps.heavy_inactive (P2) — package.json: heavy unused deps found **NEW**
-- perf.stable_handlers (P1) — app/hooks/useReactions.ts: handlers not memoized **NEW**
-- deps.unused (P2) — package.json: unused: @react-navigation/bottom-tabs, @react-navigation/elements, @react-navigation/native, expo, expo-auth-session... **NEW**
+- deps.heavy_inactive (P2) — package.json: heavy unused deps found
+- deps.unused (P2) — package.json: unused: @react-navigation/bottom-tabs, @react-navigation/elements, @react-navigation/native, expo, expo-auth-session...
 
 ## ❌ P0 Issues
-- reactionbar.anchor_guard (P0) — app/components/reactions/ReactionBar.tsx: Missing: if (!visible || !anchor) return null; **NEW**
-- reactionbar.guard (P0) — app/components/reactions/ReactionBar.tsx: Missing: if (!visible || !anchor) return null; **NEW**
 
-Summary: Passed=25, Warnings=3, P0=2
+Summary: Passed=26, Warnings=2, P0=0
