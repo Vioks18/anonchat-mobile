@@ -398,7 +398,10 @@ const ChatCoreInner: React.FC<ChatCoreProps> = ({ onSendMessage, onError, isBotE
               </TouchableOpacity>
               <TouchableOpacity 
                 style={styles.actionButton}
-                onPress={() => setShowDeleteMenu(true)}
+                onPress={() => {
+                  console.log('🗑️ Открываю меню удаления');
+                  setShowDeleteMenu(true);
+                }}
                 activeOpacity={0.7}
               >
                 <Ionicons name="trash" size={18} color="#fff" />
@@ -463,7 +466,10 @@ const ChatCoreInner: React.FC<ChatCoreProps> = ({ onSendMessage, onError, isBotE
       {/* <DevHUD status={watchDogStatus} /> */}
       
       {/* Delete Menu */}
-      {showDeleteMenu && (
+      {showDeleteMenu && (() => {
+        console.log('🗑️ Рендерю меню удаления');
+        return true;
+      })() && (
         <View style={styles.deleteMenuOverlay}>
           <TouchableOpacity 
             style={styles.deleteMenuOverlayBackground}
@@ -856,7 +862,8 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    zIndex: 1000,
+    zIndex: 9999,
+    elevation: 9999,
   },
   deleteMenuOverlayBackground: {
     flex: 1,
