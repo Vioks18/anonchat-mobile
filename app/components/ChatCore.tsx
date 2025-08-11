@@ -398,7 +398,7 @@ const ChatCoreInner: React.FC<ChatCoreProps> = ({ onSendMessage, onError, isBotE
               </TouchableOpacity>
               <TouchableOpacity 
                 style={styles.actionButton}
-                onPress={handleDeleteSelected}
+                onPress={() => setShowDeleteMenu(true)}
                 activeOpacity={0.7}
               >
                 <Ionicons name="trash" size={18} color="#fff" />
@@ -459,10 +459,38 @@ const ChatCoreInner: React.FC<ChatCoreProps> = ({ onSendMessage, onError, isBotE
         {/* Реакции теперь обрабатываются в ChatListWithReactions */}
       </View>
       
-      {/* DevHUD для отображения статуса WatchDog (временно отключен) */}
+            {/* DevHUD для отображения статуса WatchDog (временно отключен) */}
       {/* <DevHUD status={watchDogStatus} /> */}
       
-
+      {/* Simple Delete Menu */}
+      {showDeleteMenu && (
+        <View style={styles.simpleDeleteMenu}>
+          <TouchableOpacity 
+            style={styles.deleteOption}
+            onPress={() => {
+              handleDeleteForMe();
+              setShowDeleteMenu(false);
+            }}
+          >
+            <Text style={styles.deleteOptionText}>Удалить у себя</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={styles.deleteOption}
+            onPress={() => {
+              handleDeleteForAll();
+              setShowDeleteMenu(false);
+            }}
+          >
+            <Text style={styles.deleteOptionText}>Удалить у всех</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={styles.deleteOption}
+            onPress={() => setShowDeleteMenu(false)}
+          >
+            <Text style={styles.deleteOptionText}>Отмена</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </SafeAreaView>
   );
 };
@@ -822,6 +850,27 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: "#fff",
     fontWeight: "600",
+  },
+  simpleDeleteMenu: {
+    position: 'absolute',
+    bottom: 120,
+    left: 20,
+    right: 20,
+    backgroundColor: "#23234d",
+    borderRadius: 12,
+    padding: 10,
+    zIndex: 1000,
+    elevation: 10,
+  },
+  deleteOption: {
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: "#444",
+  },
+  deleteOptionText: {
+    color: "#fff",
+    fontSize: 16,
+    textAlign: "center",
   },
   deleteMenuOverlay: {
     position: 'absolute',
