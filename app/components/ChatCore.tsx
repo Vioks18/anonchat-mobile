@@ -398,13 +398,17 @@ const ChatCoreInner: React.FC<ChatCoreProps> = ({ onSendMessage, onError, isBotE
               </TouchableOpacity>
               <TouchableOpacity 
                 style={styles.actionButton}
-                onPress={() => {
-                  console.log('🗑️ Открываю меню удаления');
-                  setShowDeleteMenu(true);
-                }}
+                onPress={handleDeleteForMe}
                 activeOpacity={0.7}
               >
-                <Ionicons name="trash" size={18} color="#fff" />
+                <Ionicons name="trash-outline" size={18} color="#fff" />
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={styles.actionButton}
+                onPress={handleDeleteForAll}
+                activeOpacity={0.7}
+              >
+                <Ionicons name="trash" size={18} color="#ff6b6b" />
               </TouchableOpacity>
             </View>
           </View>
@@ -465,37 +469,7 @@ const ChatCoreInner: React.FC<ChatCoreProps> = ({ onSendMessage, onError, isBotE
       {/* DevHUD для отображения статуса WatchDog (временно отключен) */}
       {/* <DevHUD status={watchDogStatus} /> */}
       
-      {/* Delete Menu */}
-      {showDeleteMenu && (() => {
-        console.log('🗑️ Рендерю меню удаления');
-        return true;
-      })() && (
-        <View style={styles.deleteMenuOverlay}>
-          <TouchableOpacity 
-            style={styles.deleteMenuOverlayBackground}
-            onPress={() => setShowDeleteMenu(false)}
-            activeOpacity={1}
-          />
-          <View style={styles.deleteMenuContent}>
-            <TouchableOpacity 
-              style={styles.deleteMenuOption}
-              onPress={handleDeleteForMe}
-              activeOpacity={0.7}
-            >
-              <Ionicons name="trash-outline" size={20} color="#fff" />
-              <Text style={styles.deleteMenuText}>Удалить у себя</Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-              style={styles.deleteMenuOption}
-              onPress={handleDeleteForAll}
-              activeOpacity={0.7}
-            >
-              <Ionicons name="trash" size={20} color="#ff6b6b" />
-              <Text style={styles.deleteMenuText}>Удалить у всех</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      )}
+
     </SafeAreaView>
   );
 };
