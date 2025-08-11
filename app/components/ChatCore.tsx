@@ -398,7 +398,11 @@ const ChatCoreInner: React.FC<ChatCoreProps> = ({ onSendMessage, onError, isBotE
               </TouchableOpacity>
               <TouchableOpacity 
                 style={styles.actionButton}
-                onPress={() => setShowDeleteMenu(true)}
+                onPress={() => {
+                  console.log('🗑️ Кнопка delete нажата, showDeleteMenu=', showDeleteMenu);
+                  setShowDeleteMenu(true);
+                  console.log('🗑️ Установил showDeleteMenu=true');
+                }}
                 activeOpacity={0.7}
               >
                 <Ionicons name="trash" size={18} color="#fff" />
