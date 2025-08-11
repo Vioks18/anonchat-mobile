@@ -194,6 +194,7 @@ const ChatCoreInner: React.FC<ChatCoreProps> = ({ onSendMessage, onError, isBotE
   const handleDeleteForMe = useCallback(() => {
     const selectedIds = Array.from(selectedMessages);
     deleteForMe(selectedIds);
+    setShowDeleteMenu(false);
     // Selection is cleared automatically by deleteForMe
   }, [selectedMessages, deleteForMe]);
 
@@ -207,6 +208,7 @@ const ChatCoreInner: React.FC<ChatCoreProps> = ({ onSendMessage, onError, isBotE
     if (myMessages.length > 0) {
       try {
         await requestDeleteForAll(myMessages);
+        setShowDeleteMenu(false);
         // Selection is cleared automatically by requestDeleteForAll
       } catch (error) {
         if (__DEV__) console.error('handleDeleteForAll: Ошибка удаления сообщений', error);
@@ -222,6 +224,7 @@ const ChatCoreInner: React.FC<ChatCoreProps> = ({ onSendMessage, onError, isBotE
   // Состояния для тем с защитой
   const [currentTheme, setCurrentTheme] = useState("dark");
   const [showThemeSelector, setShowThemeSelector] = useState(false);
+  const [showDeleteMenu, setShowDeleteMenu] = useState(false);
   
   // Состояния для меню
   const [showMenu, setShowMenu] = useState(false);
@@ -395,17 +398,10 @@ const ChatCoreInner: React.FC<ChatCoreProps> = ({ onSendMessage, onError, isBotE
               </TouchableOpacity>
               <TouchableOpacity 
                 style={styles.actionButton}
-                onPress={handleDeleteForMe}
+                onPress={() => setShowDeleteMenu(true)}
                 activeOpacity={0.7}
               >
-                <Ionicons name="trash-outline" size={18} color="#fff" />
-              </TouchableOpacity>
-              <TouchableOpacity 
-                style={styles.actionButton}
-                onPress={handleDeleteForAll}
-                activeOpacity={0.7}
-              >
-                <Ionicons name="trash" size={18} color="#ff6b6b" />
+                <Ionicons name="trash" size={18} color="#fff" />
               </TouchableOpacity>
             </View>
           </View>
@@ -465,6 +461,35 @@ const ChatCoreInner: React.FC<ChatCoreProps> = ({ onSendMessage, onError, isBotE
       
       {/* DevHUD для отображения статуса WatchDog (временно отключен) */}
       {/* <DevHUD status={watchDogStatus} /> */}
+      
+      {/* Delete Menu */}
+      {showDeleteMenu && (
+        <View style={styles.deleteMenuOverlay}>
+          <TouchableOpacity 
+            style={styles.deleteMenuOverlayBackground}
+            onPress={() => setShowDeleteMenu(false)}
+            activeOpacity={1}
+          />
+          <View style={styles.deleteMenuContent}>
+            <TouchableOpacity 
+              style={styles.deleteMenuOption}
+              onPress={handleDeleteForMe}
+              activeOpacity={0.7}
+            >
+              <Ionicons name="trash-outline" size={20} color="#fff" />
+              <Text style={styles.deleteMenuText}>Удалить у себя</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={styles.deleteMenuOption}
+              onPress={handleDeleteForAll}
+              activeOpacity={0.7}
+            >
+              <Ionicons name="trash" size={20} color="#ff6b6b" />
+              <Text style={styles.deleteMenuText}>Удалить у всех</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
     </SafeAreaView>
   );
 };
@@ -824,5 +849,42 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: "#fff",
     fontWeight: "600",
+  },
+  deleteMenuOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 1000,
+  },
+  deleteMenuOverlayBackground: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  deleteMenuContent: {
+    position: 'absolute',
+    bottom: 100,
+    left: 20,
+    right: 20,
+    backgroundColor: "#23234d",
+    borderRadius: 12,
+    padding: 8,
+    shadowColor: "#000",
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 8,
+  },
+  deleteMenuOption: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  deleteMenuText: {
+    color: "#fff",
+    fontSize: 16,
+    marginLeft: 12,
   },
 }); 
