@@ -398,17 +398,10 @@ const ChatCoreInner: React.FC<ChatCoreProps> = ({ onSendMessage, onError, isBotE
               </TouchableOpacity>
               <TouchableOpacity 
                 style={styles.actionButton}
-                onPress={handleDeleteForMe}
+                onPress={handleDeleteSelected}
                 activeOpacity={0.7}
               >
-                <Ionicons name="trash-outline" size={18} color="#fff" />
-              </TouchableOpacity>
-              <TouchableOpacity 
-                style={styles.actionButton}
-                onPress={handleDeleteForAll}
-                activeOpacity={0.7}
-              >
-                <Ionicons name="trash" size={18} color="#ff6b6b" />
+                <Ionicons name="trash" size={18} color="#fff" />
               </TouchableOpacity>
             </View>
           </View>
