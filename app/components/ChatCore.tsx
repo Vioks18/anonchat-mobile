@@ -42,76 +42,7 @@ import ChatListWithReactions from './ChatListWithReactions';
 // Extracted components
 import useKeyboardGlue from '../hooks/chat/useKeyboardGlue';
 import { ChatMenus, HeaderBar, InputBar } from './chat';
-
-// Темы
-const THEMES = {
-  dark: {
-    name: "Темная",
-    accent: "#6c5ce7",
-    bg: "#181825",
-    headerBg: "#23234d",
-    bubbleMe: "#6c5ce7",
-    bubbleOther: "#23234d",
-    text: "#fff",
-    inputBg: "#23234d",
-    border: "#282850",
-  },
-  ocean: {
-    name: "Океан",
-    accent: "#00b894",
-    bg: "#0a1929",
-    headerBg: "#1a3a5f",
-    bubbleMe: "#00b894",
-    bubbleOther: "#1a3a5f",
-    text: "#fff",
-    inputBg: "#1a3a5f",
-    border: "#2d5a8a",
-  },
-  sunset: {
-    name: "Закат",
-    accent: "#e17055",
-    bg: "#2d1b1b",
-    headerBg: "#4a2c2c",
-    bubbleMe: "#e17055",
-    bubbleOther: "#4a2c2c",
-    text: "#fff",
-    inputBg: "#4a2c2c",
-    border: "#6b3e3e",
-  },
-  forest: {
-    name: "Лес",
-    accent: "#00b894",
-    bg: "#0f1a0f",
-    headerBg: "#1a3a1a",
-    bubbleMe: "#00b894",
-    bubbleOther: "#1a3a1a",
-    text: "#fff",
-    inputBg: "#1a3a1a",
-    border: "#2d5a2d",
-  },
-  purple: {
-    name: "Фиолетовая",
-    accent: "#a29bfe",
-    bg: "#2d1b69",
-    headerBg: "#4a2c8a",
-    bubbleMe: "#a29bfe",
-    bubbleOther: "#4a2c8a",
-    text: "#fff",
-    inputBg: "#4a2c8a",
-    border: "#6b3eb3",
-  },
-  neon: {
-    name: "Неон",
-    accent: "#00d2d3",
-    bg: "#0a0a0a",
-    headerBg: "#1a1a1a",
-    bubbleMe: "#00d2d3",
-    bubbleOther: "#1a1a1a",
-    text: "#fff",
-    inputBg: "#1a1a1a",
-    border: "#2d2d2d",
-  }
-};
+import { THEMES } from '../constants/themes';
 
 interface ChatCoreProps {
   // Минимальные пропсы для изоляции
@@ -164,11 +95,13 @@ const ChatCoreInner: React.FC<ChatCoreProps> = ({ onSendMessage, onError, isBotE
   const [errorMessage, setErrorMessage] = useState<string>('');
   
   // Подключаем Zustand store для сообщений с защитой
-  const messages = useMessageStore((s) => s?.messages || []);
+  const messages = useMessageStore((s) => (s?.messages || []).filter(msg => !msg.deletedFor?.["me"]));
   const addMessage = useMessageStore((s) => s?.addMessage || (() => {}));
   const removeMessage = useMessageStore((s) => s?.removeMessage || (() => {}));
   const setReplyDraft = useMessageStore((s) => s?.setReplyDraft || (() => {}));
   const getMessageById = useMessageStore((s) => s?.getMessageById || (() => undefined));
+  const deleteForMe = useMessageStore((s) => s?.deleteForMe || (() => {}));
+  const requestDeleteForAll = useMessageStore((s) => s?.requestDeleteForAll || (() => Promise.resolve()));
   
   // Получаем выбранное сообщение для действий
   const [selectedMessageId, setSelectedMessageId] = useState<string | null>(null);
@@ -258,27 +191,40 @@ const ChatCoreInner: React.FC<ChatCoreProps> = ({ onSendMessage, onError, isBotE
     }
   }, [selectedMessages, getMessageById]);
 
-  const handleDeleteSelected = useCallback(() => {
-    // Удаляем только свои сообщения
+  const handleDeleteForMe = useCallback(() => {
+    const selectedIds = Array.from(selectedMessages);
+    deleteForMe(selectedIds);
+    setShowDeleteMenu(false);
+    // Selection is cleared automatically by deleteForMe
+  }, [selectedMessages, deleteForMe]);
+
+  const handleDeleteForAll = useCallback(async () => {
+    // Only allow delete for all on my messages
     const myMessages = Array.from(selectedMessages).filter(id => {
       const message = getMessageById(id);
       return message?.sender === 'me';
     });
     
-    myMessages.forEach(id => {
-      removeMessage(id);
-    });
-    
-    // Очищаем выбор после удаления
-    const clearSelection = useMessageStore.getState().clearSelection;
-    clearSelection();
-    setSelectedMessages(new Set());
-    setSelectedMessagesCount(0);
-  }, [selectedMessages, getMessageById, removeMessage]);
+    if (myMessages.length > 0) {
+      try {
+        await requestDeleteForAll(myMessages);
+        setShowDeleteMenu(false);
+        // Selection is cleared automatically by requestDeleteForAll
+      } catch (error) {
+        if (__DEV__) console.error('handleDeleteForAll: Ошибка удаления сообщений', error);
+      }
+    }
+  }, [selectedMessages, getMessageById, requestDeleteForAll]);
+
+  // Legacy handler for backward compatibility
+  const handleDeleteSelected = useCallback(() => {
+    handleDeleteForMe();
+  }, [handleDeleteForMe]);
   
   // Состояния для тем с защитой
   const [currentTheme, setCurrentTheme] = useState("dark");
   const [showThemeSelector, setShowThemeSelector] = useState(false);
+  const [showDeleteMenu, setShowDeleteMenu] = useState(false);
   
   // Состояния для меню
   const [showMenu, setShowMenu] = useState(false);
@@ -452,7 +398,11 @@ const ChatCoreInner: React.FC<ChatCoreProps> = ({ onSendMessage, onError, isBotE
               </TouchableOpacity>
               <TouchableOpacity 
                 style={styles.actionButton}
-                onPress={handleDeleteSelected}
+                onPress={() => {
+                  console.log('🗑️ Кнопка delete нажата, showDeleteMenu=', showDeleteMenu);
+                  setShowDeleteMenu(true);
+                  console.log('🗑️ Установил showDeleteMenu=true');
+                }}
                 activeOpacity={0.7}
               >
                 <Ionicons name="trash" size={18} color="#fff" />
@@ -513,8 +463,38 @@ const ChatCoreInner: React.FC<ChatCoreProps> = ({ onSendMessage, onError, isBotE
         {/* Реакции теперь обрабатываются в ChatListWithReactions */}
       </View>
       
-      {/* DevHUD для отображения статуса WatchDog (временно отключен) */}
+            {/* DevHUD для отображения статуса WatchDog (временно отключен) */}
       {/* <DevHUD status={watchDogStatus} /> */}
+      
+      {/* Simple Delete Menu */}
+      {showDeleteMenu && (
+        <View style={styles.simpleDeleteMenu}>
+          <TouchableOpacity 
+            style={styles.deleteOption}
+            onPress={() => {
+              handleDeleteForMe();
+              setShowDeleteMenu(false);
+            }}
+          >
+            <Text style={styles.deleteOptionText}>Удалить у себя</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={styles.deleteOption}
+            onPress={() => {
+              handleDeleteForAll();
+              setShowDeleteMenu(false);
+            }}
+          >
+            <Text style={styles.deleteOptionText}>Удалить у всех</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={styles.deleteOption}
+            onPress={() => setShowDeleteMenu(false)}
+          >
+            <Text style={styles.deleteOptionText}>Отмена</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </SafeAreaView>
   );
 };
@@ -874,5 +854,64 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: "#fff",
     fontWeight: "600",
+  },
+  simpleDeleteMenu: {
+    position: 'absolute',
+    bottom: 120,
+    left: 20,
+    right: 20,
+    backgroundColor: "#23234d",
+    borderRadius: 12,
+    padding: 10,
+    zIndex: 1000,
+    elevation: 10,
+  },
+  deleteOption: {
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: "#444",
+  },
+  deleteOptionText: {
+    color: "#fff",
+    fontSize: 16,
+    textAlign: "center",
+  },
+  deleteMenuOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 9999,
+    elevation: 9999,
+  },
+  deleteMenuOverlayBackground: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  deleteMenuContent: {
+    position: 'absolute',
+    bottom: 100,
+    left: 20,
+    right: 20,
+    backgroundColor: "#23234d",
+    borderRadius: 12,
+    padding: 8,
+    shadowColor: "#000",
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 8,
+  },
+  deleteMenuOption: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  deleteMenuText: {
+    color: "#fff",
+    fontSize: 16,
+    marginLeft: 12,
   },
 }); 

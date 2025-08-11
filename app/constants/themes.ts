@@ -1,3 +1,6 @@
+// Extracted verbatim from app/components/ChatCore.tsx on 2025-01-16 (lines 47-113)
+
+// Темы
 export const THEMES = {
   dark: {
     name: "Темная",
@@ -65,10 +68,4 @@ export const THEMES = {
     inputBg: "#1a1a1a",
     border: "#2d2d2d",
   }
-};
-
-export const ACCENT = "#6c5ce7";
-export const BG_DARK = "#181825";
-
-// Default export для Expo Router
-export default THEMES; 
+}; 

@@ -22,6 +22,9 @@ interface MessageStore {
   isSelected: (id: string) => boolean;
   getSelectedCount: () => number;
   removeSelectedMessages: () => void;
+  deleteForMe: (ids: string[], userId?: string) => void;
+  deleteForAll: (ids: string[]) => void;
+  requestDeleteForAll: (ids: string[]) => Promise<void>;
   reset: () => void;
   // Селекторы для оптимизации
   getMessageById: (id: string) => Message | undefined;
@@ -402,6 +405,71 @@ if (__DEV__) console.warn('isSelected: Невалидный ID для прове
 
     } catch (error) {
       if (__DEV__) console.error('removeSelectedMessages: Ошибка удаления выбранных сообщений', error);
+    }
+  },
+
+  deleteForMe: (ids: string[], userId: string = "me") => {
+    try {
+      if (!Array.isArray(ids) || ids.length === 0) {
+        if (__DEV__) console.warn('deleteForMe: Невалидный массив ID');
+        return;
+      }
+
+      set((state) => ({
+        messages: state.messages.map(msg => {
+          if (ids.includes(msg.id)) {
+            const deletedFor = msg.deletedFor ? { ...msg.deletedFor } : {};
+            deletedFor[userId] = true;
+            return { ...msg, deletedFor };
+          }
+          return msg;
+        }),
+        selectedIds: new Set() // Clear selection after deletion
+      }));
+
+    } catch (error) {
+      if (__DEV__) console.error('deleteForMe: Ошибка удаления сообщений для меня', error);
+    }
+  },
+
+  deleteForAll: (ids: string[]) => {
+    try {
+      if (!Array.isArray(ids) || ids.length === 0) {
+        if (__DEV__) console.warn('deleteForAll: Невалидный массив ID');
+        return;
+      }
+
+      set((state) => ({
+        messages: state.messages.map(msg => {
+          if (ids.includes(msg.id)) {
+            return { 
+              ...msg, 
+              deletedForAll: true,
+              reactions: undefined // Remove reactions for deleted messages
+            };
+          }
+          return msg;
+        }),
+        selectedIds: new Set() // Clear selection after deletion
+      }));
+
+    } catch (error) {
+      if (__DEV__) console.error('deleteForAll: Ошибка удаления сообщений для всех', error);
+    }
+  },
+
+  requestDeleteForAll: async (ids: string[]) => {
+    try {
+      // TODO: later call server API here
+      // await api.deleteMessages(ids);
+      
+      // For now, call deleteForAll immediately
+      get().deleteForAll(ids);
+      
+      if (__DEV__) console.log('requestDeleteForAll: Сообщения удалены локально, позже добавить server call');
+    } catch (error) {
+      if (__DEV__) console.error('requestDeleteForAll: Ошибка запроса удаления на сервер', error);
+      throw error;
     }
   },
 
