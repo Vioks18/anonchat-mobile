@@ -163,6 +163,32 @@ const checkHeavyDeps = () => {
   return unusedHeavy.length === 0;
 };
 
+// Функция для подсчета строк в файле
+const countLines = (filePath) => {
+  try {
+    const content = fs.readFileSync(filePath, 'utf8');
+    return content.split('\n').length;
+  } catch (error) {
+    return 0;
+  }
+};
+
+// Функция для проверки размера файла
+const checkFileSize = (filePath, maxLines, allowlist) => {
+  const relativePath = path.relative(ROOT, filePath);
+  
+  // Проверяем, есть ли файл в allowlist
+  if (allowlist && allowlist.includes(relativePath)) {
+    return { ok: true, loc: countLines(filePath), message: 'file in allowlist' };
+  }
+  
+  const loc = countLines(filePath);
+  const ok = loc <= maxLines;
+  const message = ok ? `LOC: ${loc} <= ${maxLines}` : `File exceeds max lines (${loc} > ${maxLines}): ${relativePath}`;
+  
+  return { ok, loc, message };
+};
+
 // Filter rules based on mode
 const filterRules = (rules) => {
   if (QA_MODE === 'strict') {
@@ -173,8 +199,8 @@ const filterRules = (rules) => {
         return false;
       }
       
-      // Skip rules for files in allowlist
-      if (rule.allowlist && rule.allowlist.length > 0) {
+      // Skip rules for files in allowlist (only if rule has files field)
+      if (rule.allowlist && rule.allowlist.length > 0 && rule.files) {
         const shouldSkip = rule.files.some(file => 
           rule.allowlist.some(allowed => file.includes(allowed))
         );
@@ -235,6 +261,41 @@ const evaluators = {
     }
   },
   custom: (rule) => {
+    // Обработка правил без поля files (например, bigfile.max_lines)
+    if (!rule.files) {
+      let ok = true;
+      let msg = 'OK';
+      switch (rule.id) {
+        case 'bigfile.max_lines': {
+          // Сканируем все файлы в app/ директории
+          const appFiles = listFilesRecursive(path.join(ROOT, 'app'))
+            .filter(p => /\.(t|j)sx?$/.test(p))
+            .filter(p => !p.includes('backup') && !p.includes('mocks') && !p.includes('node_modules') && 
+                        !p.includes('.expo') && !p.includes('android') && !p.includes('ios') && 
+                        !p.includes('dist') && !p.includes('build'));
+          
+          let allOk = true;
+          let issues = [];
+          
+          for (const filePath of appFiles) {
+            const result = checkFileSize(filePath, rule.max || 300, rule.allowlist);
+            if (!result.ok) {
+              allOk = false;
+              issues.push(result.message);
+            }
+          }
+          
+          ok = allOk;
+          msg = ok ? `all files <= ${rule.max || 300} lines` : `files too large: ${issues.slice(0, 3).join(', ')}${issues.length > 3 ? '...' : ''}`;
+          addResult(rule.id, rule.severity, 'app/**/*.{ts,tsx,js,jsx}', ok, msg);
+          return;
+        }
+        default:
+          return;
+      }
+    }
+    
+    // Обработка правил с полем files
     for (const f of rule.files) {
       const c = getContent(f) || '';
       let ok = true;

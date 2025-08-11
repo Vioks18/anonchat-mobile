@@ -38,6 +38,7 @@ const HeaderBar: React.FC<HeaderBarProps> = ({
   setShowMenu,
   currentThemeData,
 }) => {
+
   return (
     <View style={[styles.header, { backgroundColor: currentThemeData.headerBg }]}>
       {!isSearching ? (

@@ -92,7 +92,15 @@ const ChatListWithReactions: React.FC<ChatListWithReactionsProps> = ({
     // Уведомляем родительский компонент
     onSelectionChange?.(getSelectedCount());
     onSelectedMessagesChange?.(selectedIds);
-  }, [selectedIds, getSelectedCount, onSelectionChange, onSelectedMessagesChange]);
+    
+    // Устанавливаем selectedMessageId для одиночного выбора
+    if (getSelectedCount() === 1) {
+      const selectedId = Array.from(selectedIds)[0];
+      onMessageSelected?.(selectedId);
+    } else if (getSelectedCount() === 0) {
+      onMessageSelected?.(null);
+    }
+  }, [selectedIds, getSelectedCount, onSelectionChange, onSelectedMessagesChange, onMessageSelected]);
 
   useEffect(() => {
     // Если выбрано больше одного - закрываем реакции
@@ -102,9 +110,8 @@ const ChatListWithReactions: React.FC<ChatListWithReactionsProps> = ({
     // Если ничего не выбрано - закрываем реакции и сбрасываем выбор
     if (getSelectedCount() === 0) {
       close();
-      onMessageSelected?.(null);
     }
-  }, [getSelectedCount, close, onMessageSelected]);
+  }, [getSelectedCount, close]);
 
   // Управление реакциями при изменении выбора
   useEffect(() => {

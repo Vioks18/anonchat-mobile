@@ -101,8 +101,17 @@ const MessageWithReactions: React.FC<MessageWithReactionsProps> = ({
             getBubbleStyle(), // Динамическая ширина
           ]}
         >
+          {/* Показываем ответ, если есть */}
+          {message.replyTo && (
+            <View style={styles.replyContainer}>
+              <Text style={styles.replyText} numberOfLines={1}>
+                {message.replyTo.text}
+              </Text>
+            </View>
+          )}
+          
           <Text style={[styles.messageText, getTextStyle()]}>
-            {message.text}
+            {message.deletedForAll ? "Message deleted" : message.text}
           </Text>
           
           <View style={styles.metaRow}>
@@ -129,8 +138,8 @@ const MessageWithReactions: React.FC<MessageWithReactionsProps> = ({
           </View>
         </TouchableOpacity>
         
-        {/* Реакции */}
-        {message.reactions && message.reactions.length > 0 && (
+        {/* Реакции - скрываем для удаленных сообщений */}
+        {message.reactions && message.reactions.length > 0 && !message.deletedForAll && (
           <View style={[
             styles.reactionsContainer,
             isMyMessage ? styles.reactionsMe : styles.reactionsOther
@@ -228,6 +237,16 @@ const styles = StyleSheet.create({
   },
   reactionText: {
     fontSize: 14,
+  },
+  // Стили для ответов - простой текст
+  replyContainer: {
+    marginBottom: 6,
+  },
+  replyText: {
+    fontSize: 11,
+    color: 'rgba(255, 255, 255, 0.7)',
+    fontFamily: 'Poppins-Regular',
+    fontStyle: 'italic',
   },
 });
 

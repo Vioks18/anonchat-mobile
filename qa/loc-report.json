@@ -1,0 +1,306 @@
+{
+  "totalLoc": 8547,
+  "files": [
+    {
+      "path": "context\\ChatLogicProvider.tsx",
+      "loc": 407
+    },
+    {
+      "path": "components\\chat\\ChatCore.styles.ts",
+      "loc": 335
+    },
+    {
+      "path": "hooks\\useUIWatchDog.ts",
+      "loc": 271
+    },
+    {
+      "path": "components\\ChatCore.tsx",
+      "loc": 270
+    },
+    {
+      "path": "components\\MessageWithReactions.tsx",
+      "loc": 254
+    },
+    {
+      "path": "utils\\validation.ts",
+      "loc": 254
+    },
+    {
+      "path": "components\\chat\\ChatMenus.tsx",
+      "loc": 241
+    },
+    {
+      "path": "components\\ChatMenu.tsx",
+      "loc": 241
+    },
+    {
+      "path": "components\\ChatInput.tsx",
+      "loc": 226
+    },
+    {
+      "path": "components\\ChatState.tsx",
+      "loc": 225
+    },
+    {
+      "path": "utils\\errorBoundary.ts",
+      "loc": 206
+    },
+    {
+      "path": "components\\DevBotMessage.tsx",
+      "loc": 202
+    },
+    {
+      "path": "hooks\\useMessageStore.ts",
+      "loc": 202
+    },
+    {
+      "path": "components\\ChatListWithReactions.tsx",
+      "loc": 200
+    },
+    {
+      "path": "hooks\\chat\\useHeaderLogic.ts",
+      "loc": 189
+    },
+    {
+      "path": "components\\chat\\HeaderBar.tsx",
+      "loc": 186
+    },
+    {
+      "path": "components\\DevHUD.tsx",
+      "loc": 180
+    },
+    {
+      "path": "hooks\\useDevBotCommands.ts",
+      "loc": 178
+    },
+    {
+      "path": "components\\reactions\\ReactionBar.tsx",
+      "loc": 153
+    },
+    {
+      "path": "components\\ChatMessage.tsx",
+      "loc": 152
+    },
+    {
+      "path": "hooks\\useThemeSelector.ts",
+      "loc": 152
+    },
+    {
+      "path": "components\\ChatKeyboard.tsx",
+      "loc": 146
+    },
+    {
+      "path": "components\\ChatSearch.tsx",
+      "loc": 146
+    },
+    {
+      "path": "hooks\\useBotProvider.ts",
+      "loc": 144
+    },
+    {
+      "path": "components\\ChatTheme.tsx",
+      "loc": 143
+    },
+    {
+      "path": "components\\UIErrorBoundary.tsx",
+      "loc": 142
+    },
+    {
+      "path": "components\\ChatWithReactions.tsx",
+      "loc": 137
+    },
+    {
+      "path": "components\\chat\\SelectionToolbar.tsx",
+      "loc": 135
+    },
+    {
+      "path": "components\\chat\\InputBar.tsx",
+      "loc": 126
+    },
+    {
+      "path": "components\\header\\HeaderView.tsx",
+      "loc": 120
+    },
+    {
+      "path": "hooks\\useMessageSelection.ts",
+      "loc": 118
+    },
+    {
+      "path": "components\\MessageInput.tsx",
+      "loc": 114
+    },
+    {
+      "path": "hooks\\chat\\useKeyboardGlue.ts",
+      "loc": 112
+    },
+    {
+      "path": "utils\\crashShield.ts",
+      "loc": 112
+    },
+    {
+      "path": "components\\Header.tsx",
+      "loc": 107
+    },
+    {
+      "path": "hooks\\useMessageHandlers.ts",
+      "loc": 101
+    },
+    {
+      "path": "components\\ThemeSelectorView.tsx",
+      "loc": 98
+    },
+    {
+      "path": "utils\\layoutSentinel.ts",
+      "loc": 93
+    },
+    {
+      "path": "constants\\themes.ts",
+      "loc": 87
+    },
+    {
+      "path": "hooks\\useMessageSelectorFunctions.ts",
+      "loc": 83
+    },
+    {
+      "path": "components\\ReplyPreview.tsx",
+      "loc": 82
+    },
+    {
+      "path": "hooks\\useMessageDeletion.ts",
+      "loc": 80
+    },
+    {
+      "path": "hooks\\useReactionState.ts",
+      "loc": 79
+    },
+    {
+      "path": "components\\GestureHandler.tsx",
+      "loc": 73
+    },
+    {
+      "path": "components\\chat\\ChatCoreFallback.tsx",
+      "loc": 70
+    },
+    {
+      "path": "hooks\\useMessageSender.ts",
+      "loc": 69
+    },
+    {
+      "path": "utils\\gestureProbe.ts",
+      "loc": 69
+    },
+    {
+      "path": "components\\ThemeSelector.styles.ts",
+      "loc": 68
+    },
+    {
+      "path": "providers\\FakeSocketProvider.tsx",
+      "loc": 65
+    },
+    {
+      "path": "hooks\\useMessageReactions.ts",
+      "loc": 64
+    },
+    {
+      "path": "hooks\\useMessageReplies.ts",
+      "loc": 61
+    },
+    {
+      "path": "utils\\messageValidation.ts",
+      "loc": 61
+    },
+    {
+      "path": "constants\\themeUtils.ts",
+      "loc": 59
+    },
+    {
+      "path": "components\\ThemeSelector.tsx",
+      "loc": 57
+    },
+    {
+      "path": "hooks\\useChatLogic.ts",
+      "loc": 56
+    },
+    {
+      "path": "hooks\\useChatHandlerWrappers.ts",
+      "loc": 49
+    },
+    {
+      "path": "hooks\\useSelectedMessageAnimation.ts",
+      "loc": 47
+    },
+    {
+      "path": "hooks\\useChatEffects.ts",
+      "loc": 40
+    },
+    {
+      "path": "constants\\messageConstants.ts",
+      "loc": 39
+    },
+    {
+      "path": "screens\\ChatScreen.tsx",
+      "loc": 38
+    },
+    {
+      "path": "utils\\formatTimestamp.ts",
+      "loc": 38
+    },
+    {
+      "path": "+not-found.tsx",
+      "loc": 37
+    },
+    {
+      "path": "hooks\\useSafeExecute.ts",
+      "loc": 35
+    },
+    {
+      "path": "hooks\\useMessageSelectors.ts",
+      "loc": 33
+    },
+    {
+      "path": "hooks\\useChatUIState.ts",
+      "loc": 32
+    },
+    {
+      "path": "hooks\\useKeyboardHeight.ts",
+      "loc": 29
+    },
+    {
+      "path": "utils\\haptics.ts",
+      "loc": 29
+    },
+    {
+      "path": "_layout.tsx",
+      "loc": 23
+    },
+    {
+      "path": "components\\ChatCoreWithReactions.tsx",
+      "loc": 21
+    },
+    {
+      "path": "utils\\themeUtils.ts",
+      "loc": 16
+    },
+    {
+      "path": "types\\message.ts",
+      "loc": 15
+    },
+    {
+      "path": "utils\\flags.ts",
+      "loc": 10
+    },
+    {
+      "path": "components\\chat\\index.ts",
+      "loc": 7
+    },
+    {
+      "path": "index.tsx",
+      "loc": 6
+    },
+    {
+      "path": "components\\reactions\\index.ts",
+      "loc": 2
+    }
+  ],
+  "generatedAt": "2025-08-11T03:45:20.985Z"
+}

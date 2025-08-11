@@ -1,0 +1,318 @@
+{
+  "timestamp": "2025-08-11T02:16:27.628Z",
+  "analysis": {
+    "issues": [],
+    "suggestions": [
+      {
+        "file": "app/components/ChatCore.tsx",
+        "message": "🚀 Добавить removeClippedSubviews для оптимизации памяти",
+        "type": "suggestion",
+        "timestamp": "2025-08-11T02:16:27.592Z"
+      },
+      {
+        "file": "app/components/ChatCore.tsx",
+        "message": "🚀 Добавить maxToRenderPerBatch для контроля рендера",
+        "type": "suggestion",
+        "timestamp": "2025-08-11T02:16:27.593Z"
+      },
+      {
+        "file": "app/components/ChatCore.tsx",
+        "message": "🚀 Добавить windowSize для оптимизации скролла",
+        "type": "suggestion",
+        "timestamp": "2025-08-11T02:16:27.593Z"
+      },
+      {
+        "file": "app/components/ChatCore.tsx",
+        "message": "🔒 Добавить валидацию пользовательского ввода",
+        "type": "suggestion",
+        "timestamp": "2025-08-11T02:16:27.594Z"
+      },
+      {
+        "file": "app/components/ChatListWithReactions.tsx",
+        "message": "🛡️ Добавить обработку ошибок в useEffect",
+        "type": "suggestion",
+        "timestamp": "2025-08-11T02:16:27.597Z"
+      },
+      {
+        "file": "app/components/ChatListWithReactions.tsx",
+        "message": "🛡️ Добавить обработку ошибок",
+        "type": "suggestion",
+        "timestamp": "2025-08-11T02:16:27.597Z"
+      },
+      {
+        "file": "app/components/ChatMenu.tsx",
+        "message": "🔒 Добавить валидацию пользовательского ввода",
+        "type": "suggestion",
+        "timestamp": "2025-08-11T02:16:27.597Z"
+      },
+      {
+        "file": "app/components/DevBotMessage.tsx",
+        "message": "🛡️ Добавить обработку ошибок в useEffect",
+        "type": "suggestion",
+        "timestamp": "2025-08-11T02:16:27.601Z"
+      },
+      {
+        "file": "app/components/DevBotMessage.tsx",
+        "message": "🛡️ Добавить обработку ошибок",
+        "type": "suggestion",
+        "timestamp": "2025-08-11T02:16:27.601Z"
+      },
+      {
+        "file": "app/components/GestureHandler.tsx",
+        "message": "🛡️ Добавить обработку ошибок",
+        "type": "suggestion",
+        "timestamp": "2025-08-11T02:16:27.602Z"
+      },
+      {
+        "file": "app/components/MessageWithReactions.tsx",
+        "message": "🧠 Рассмотреть useMemo для сложных операций",
+        "type": "suggestion",
+        "timestamp": "2025-08-11T02:16:27.603Z"
+      },
+      {
+        "file": "app/components/MessageWithReactions.tsx",
+        "message": "🛡️ Добавить обработку ошибок в useEffect",
+        "type": "suggestion",
+        "timestamp": "2025-08-11T02:16:27.603Z"
+      },
+      {
+        "file": "app/components/MessageWithReactions.tsx",
+        "message": "🛡️ Добавить обработку ошибок",
+        "type": "suggestion",
+        "timestamp": "2025-08-11T02:16:27.603Z"
+      },
+      {
+        "file": "app/components/MessageWithReactions.tsx",
+        "message": "🧠 Рассмотреть useMemo для сложных операций",
+        "type": "suggestion",
+        "timestamp": "2025-08-11T02:16:27.603Z"
+      },
+      {
+        "file": "app/hooks/useChatEffects.ts",
+        "message": "🛡️ Добавить обработку ошибок в useEffect",
+        "type": "suggestion",
+        "timestamp": "2025-08-11T02:16:27.605Z"
+      },
+      {
+        "file": "app/hooks/useChatEffects.ts",
+        "message": "🛡️ Добавить обработку ошибок",
+        "type": "suggestion",
+        "timestamp": "2025-08-11T02:16:27.605Z"
+      },
+      {
+        "file": "app/hooks/useChatHandlerWrappers.ts",
+        "message": "🛡️ Добавить обработку ошибок",
+        "type": "suggestion",
+        "timestamp": "2025-08-11T02:16:27.606Z"
+      },
+      {
+        "file": "app/hooks/useKeyboardHeight.ts",
+        "message": "🛡️ Добавить обработку ошибок в useEffect",
+        "type": "suggestion",
+        "timestamp": "2025-08-11T02:16:27.608Z"
+      },
+      {
+        "file": "app/hooks/useKeyboardHeight.ts",
+        "message": "🛡️ Добавить обработку ошибок",
+        "type": "suggestion",
+        "timestamp": "2025-08-11T02:16:27.608Z"
+      },
+      {
+        "file": "app/hooks/useMessageDeletion.ts",
+        "message": "🧠 Рассмотреть useMemo для сложных операций",
+        "type": "suggestion",
+        "timestamp": "2025-08-11T02:16:27.608Z"
+      },
+      {
+        "file": "app/hooks/useMessageDeletion.ts",
+        "message": "🧠 Рассмотреть useMemo для сложных операций",
+        "type": "suggestion",
+        "timestamp": "2025-08-11T02:16:27.608Z"
+      },
+      {
+        "file": "app/hooks/useMessageHandlers.ts",
+        "message": "🧠 Рассмотреть useMemo для сложных операций",
+        "type": "suggestion",
+        "timestamp": "2025-08-11T02:16:27.608Z"
+      },
+      {
+        "file": "app/hooks/useMessageHandlers.ts",
+        "message": "🧠 Рассмотреть useMemo для сложных операций",
+        "type": "suggestion",
+        "timestamp": "2025-08-11T02:16:27.608Z"
+      },
+      {
+        "file": "app/hooks/useMessageReactions.ts",
+        "message": "🧠 Рассмотреть useMemo для сложных операций",
+        "type": "suggestion",
+        "timestamp": "2025-08-11T02:16:27.608Z"
+      },
+      {
+        "file": "app/hooks/useMessageReactions.ts",
+        "message": "🧠 Рассмотреть useMemo для сложных операций",
+        "type": "suggestion",
+        "timestamp": "2025-08-11T02:16:27.608Z"
+      },
+      {
+        "file": "app/hooks/useMessageReplies.ts",
+        "message": "🧠 Рассмотреть useMemo для сложных операций",
+        "type": "suggestion",
+        "timestamp": "2025-08-11T02:16:27.608Z"
+      },
+      {
+        "file": "app/hooks/useMessageReplies.ts",
+        "message": "🧠 Рассмотреть useMemo для сложных операций",
+        "type": "suggestion",
+        "timestamp": "2025-08-11T02:16:27.608Z"
+      },
+      {
+        "file": "app/hooks/useMessageSelection.ts",
+        "message": "🧠 Рассмотреть useMemo для сложных операций",
+        "type": "suggestion",
+        "timestamp": "2025-08-11T02:16:27.609Z"
+      },
+      {
+        "file": "app/hooks/useMessageSelection.ts",
+        "message": "🧠 Рассмотреть useMemo для сложных операций",
+        "type": "suggestion",
+        "timestamp": "2025-08-11T02:16:27.609Z"
+      },
+      {
+        "file": "app/hooks/useMessageSender.ts",
+        "message": "🛡️ Добавить обработку ошибок",
+        "type": "suggestion",
+        "timestamp": "2025-08-11T02:16:27.609Z"
+      },
+      {
+        "file": "app/hooks/useMessageStore.ts",
+        "message": "🧠 Рассмотреть useMemo для сложных операций",
+        "type": "suggestion",
+        "timestamp": "2025-08-11T02:16:27.609Z"
+      },
+      {
+        "file": "app/hooks/useMessageStore.ts",
+        "message": "🧠 Рассмотреть useMemo для сложных операций",
+        "type": "suggestion",
+        "timestamp": "2025-08-11T02:16:27.609Z"
+      },
+      {
+        "file": "app/hooks/useReactionState.ts",
+        "message": "🛡️ Добавить обработку ошибок",
+        "type": "suggestion",
+        "timestamp": "2025-08-11T02:16:27.609Z"
+      },
+      {
+        "file": "app/hooks/useSelectedMessageAnimation.ts",
+        "message": "🛡️ Добавить обработку ошибок в useEffect",
+        "type": "suggestion",
+        "timestamp": "2025-08-11T02:16:27.610Z"
+      },
+      {
+        "file": "app/hooks/useSelectedMessageAnimation.ts",
+        "message": "🛡️ Добавить обработку ошибок",
+        "type": "suggestion",
+        "timestamp": "2025-08-11T02:16:27.610Z"
+      },
+      {
+        "file": "app/screens/ChatScreen.tsx",
+        "message": "🚀 Добавить removeClippedSubviews для оптимизации памяти",
+        "type": "suggestion",
+        "timestamp": "2025-08-11T02:16:27.611Z"
+      },
+      {
+        "file": "app/screens/ChatScreen.tsx",
+        "message": "🚀 Добавить maxToRenderPerBatch для контроля рендера",
+        "type": "suggestion",
+        "timestamp": "2025-08-11T02:16:27.611Z"
+      },
+      {
+        "file": "app/screens/ChatScreen.tsx",
+        "message": "🚀 Добавить windowSize для оптимизации скролла",
+        "type": "suggestion",
+        "timestamp": "2025-08-11T02:16:27.611Z"
+      },
+      {
+        "file": "app/screens/ChatScreen.tsx",
+        "message": "🔒 Добавить валидацию пользовательского ввода",
+        "type": "suggestion",
+        "timestamp": "2025-08-11T02:16:27.611Z"
+      },
+      {
+        "file": "app/utils/errorBoundary.ts",
+        "message": "🧠 Рассмотреть useMemo для сложных операций",
+        "type": "suggestion",
+        "timestamp": "2025-08-11T02:16:27.612Z"
+      },
+      {
+        "file": "app/utils/errorBoundary.ts",
+        "message": "🔒 Убрать console.log для продакшена: console.log('ErrorMonitor: Перезапуск приложения...')",
+        "type": "suggestion",
+        "timestamp": "2025-08-11T02:16:27.612Z"
+      },
+      {
+        "file": "app/utils/errorBoundary.ts",
+        "message": "🔒 Убрать console.log для продакшена: console.log(logMessage)",
+        "type": "suggestion",
+        "timestamp": "2025-08-11T02:16:27.612Z"
+      },
+      {
+        "file": "app/utils/errorBoundary.ts",
+        "message": "🧠 Рассмотреть useMemo для сложных операций",
+        "type": "suggestion",
+        "timestamp": "2025-08-11T02:16:27.612Z"
+      },
+      {
+        "file": "app/utils/gestureProbe.ts",
+        "message": "🔒 Убрать console.log для продакшена: console.log('[GestureProbe] Report saved to:', reportPath)",
+        "type": "suggestion",
+        "timestamp": "2025-08-11T02:16:27.613Z"
+      },
+      {
+        "file": "app/utils/gestureProbe.ts",
+        "message": "🔒 Убрать console.log для продакшена: console.log('[GestureProbe] Report saved to globalThis.GESTURE_LOG')",
+        "type": "suggestion",
+        "timestamp": "2025-08-11T02:16:27.613Z"
+      },
+      {
+        "file": "app/utils/layoutSentinel.ts",
+        "message": "🧠 Рассмотреть useMemo для сложных операций",
+        "type": "suggestion",
+        "timestamp": "2025-08-11T02:16:27.613Z"
+      },
+      {
+        "file": "app/utils/layoutSentinel.ts",
+        "message": "🔒 Убрать console.log для продакшена: console.log('📊 LayoutSentinel Report:', report)",
+        "type": "suggestion",
+        "timestamp": "2025-08-11T02:16:27.613Z"
+      },
+      {
+        "file": "app/utils/layoutSentinel.ts",
+        "message": "🔒 Убрать console.log для продакшена: console.log('📊 LayoutSentinel Report:', report)",
+        "type": "suggestion",
+        "timestamp": "2025-08-11T02:16:27.613Z"
+      },
+      {
+        "file": "app/utils/layoutSentinel.ts",
+        "message": "🧠 Рассмотреть useMemo для сложных операций",
+        "type": "suggestion",
+        "timestamp": "2025-08-11T02:16:27.613Z"
+      },
+      {
+        "file": "app/utils/validation.ts",
+        "message": "🧠 Рассмотреть useMemo для сложных операций",
+        "type": "suggestion",
+        "timestamp": "2025-08-11T02:16:27.614Z"
+      },
+      {
+        "file": "app/utils/validation.ts",
+        "message": "🧠 Рассмотреть useMemo для сложных операций",
+        "type": "suggestion",
+        "timestamp": "2025-08-11T02:16:27.614Z"
+      }
+    ],
+    "architecture": {},
+    "performance": {},
+    "security": {},
+    "bestPractices": []
+  }
+}

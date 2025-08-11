@@ -1,4 +1,17 @@
-export const THEMES = {
+// Тип для темы
+interface Theme {
+  name: string;
+  accent: string;
+  bg: string;
+  headerBg: string;
+  bubbleMe: string;
+  bubbleOther: string;
+  text: string;
+  inputBg: string;
+  border: string;
+}
+
+export const THEMES: Record<string, Theme> = {
   dark: {
     name: "Темная",
     accent: "#6c5ce7",

@@ -1,5 +1,3 @@
 {
-  "allowed_files": [
-    "app/components/chat/SelectionToolbar.tsx"
-  ]
+  "allowed": []
 }

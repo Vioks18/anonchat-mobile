@@ -6,6 +6,8 @@ export interface Message {
   status: "sending" | "sent" | "delivered" | "read";
   reactions?: string[];
   replyTo?: Message;
+  deletedForAll?: boolean;
+  deletedFor?: Record<string, true>; // keys are local user IDs
 }
 
 // Default export для Expo Router

@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo } from 'react';
-import { Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Message } from '../types/message';
 import { formatTimestamp } from '../utils/formatTimestamp';
 
@@ -103,6 +103,15 @@ const ChatMessageInner: React.FC<ChatMessageProps> = React.memo(({
     >
       <View style={messageStyles.container}>
         <View style={messageStyles.bubble}>
+          {/* Показываем ответ, если есть */}
+          {item.replyTo && (
+            <View style={styles.replyContainer}>
+              <Text style={styles.replyText} numberOfLines={1}>
+                {item.replyTo.text}
+              </Text>
+            </View>
+          )}
+
           <Text style={themedStyles.bubbleText}>{item.text}</Text>
           <View style={styles.messageContent}>
             <Text style={themedStyles.timestamp}>
@@ -127,4 +136,17 @@ ChatMessageInner.displayName = 'ChatMessage';
 export default ChatMessageInner;
 
 // Также экспортируем как named export для обратной совместимости
-export const ChatMessage = ChatMessageInner; 
+export const ChatMessage = ChatMessageInner;
+
+// Стили для ответов - простой текст
+const styles = StyleSheet.create({
+  replyContainer: {
+    marginBottom: 6,
+  },
+  replyText: {
+    fontSize: 11,
+    color: 'rgba(255, 255, 255, 0.7)',
+    fontFamily: 'Poppins-Regular',
+    fontStyle: 'italic',
+  },
+}); 

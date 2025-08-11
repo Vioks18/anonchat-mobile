@@ -37,18 +37,21 @@ export function pickOverlayForBg(backgroundColor: string, theme: 'dark' | 'light
   const bgLuminance = luminance(backgroundColor);
   const isLightBg = bgLuminance > 0.5;
   
+  // Используем 'dark' как fallback, так как 'light' темы нет в THEMES
+  const themeKey = theme === 'light' ? 'dark' : theme;
+  
   if (isLightBg) {
     // Для светлого фона - темные тени
     return {
       shadowColor: 'rgba(0, 0, 0, 0.3)',
-      glowColor: withOpacity(THEMES[theme].accent, 0.4),
+      glowColor: withOpacity(THEMES[themeKey].accent, 0.4),
       overlayColor: 'rgba(0, 0, 0, 0.05)',
     };
   } else {
     // Для темного фона - светлые тени
     return {
       shadowColor: 'rgba(255, 255, 255, 0.2)',
-      glowColor: withOpacity(THEMES[theme].accent, 0.6),
+      glowColor: withOpacity(THEMES[themeKey].accent, 0.6),
       overlayColor: 'rgba(255, 255, 255, 0.05)',
     };
   }

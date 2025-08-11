@@ -1,0 +1,10 @@
+[33m14f8065[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mcursor/placeholder-task-3d97[m[33m, [m[1;31morigin/cursor/placeholder-task-3d97[m[33m)[m Update refactoring documentation with commit hash
+[33m47d9488[m refactor: extract SelectionToolbar from ChatCore.tsx
+[33m1273198[m[33m ([m[1;32mmain[m[33m)[m refactor: surgically extract ChatCore into smaller components - Extract InputBar, HeaderBar, ChatMenus into app/components/chat/ - Extract useKeyboardGlue hook into app/hooks/chat/ - Maintain identical behavior and no new UI/UX - Add barrel exports via index.ts - Keep ChatCore as thin orchestrator
+[33mf698d1e[m Merge pull request #1 from Vioks18/fix/qa-console-clean
+[33mfbd09a5[m[33m ([m[1;31morigin/fix/qa-console-clean[m[33m, [m[1;32mfix/qa-console-clean[m[33m)[m [QA] UI/Perf rules (phase 1) + new scripts + docs - Added 7 new rules: ui.layout.meta_inside, ui.text.shrink_ok, ui.pointer.safe, perf.memo, secrets.patterns, deps.heavy_inactive - Added qa:ui and qa:perf commands - Updated documentation with examples - Found 5 new issues, 2 P0, 3 warnings
+[33mdb36111[m fix: improve message alignment - medium messages on same level as date, add minWidth: 0
+[33mfd88f85[m feat: auto-split long messages + improved input UX - maxHeight limits, auto-scroll to end, proper text alignment
+[33m2cd0075[m feat: adaptive message bubble widths - short messages compact, medium limited width, long full width
+[33m2df626e[m fix: perfect message bubbles - compact height, proper text alignment, bright status icons
+[33m9cfcacd[m[33m ([m[1;32mrefactor/chatcore-modular[m[33m)[m feat: implement WhatsApp-style message selection with reactions and auto-clear

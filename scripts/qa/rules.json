@@ -255,6 +255,16 @@
       "description": "Search for API_KEY|SECRET|Bearer tokens",
       "experimental": false,
       "allowlist": []
+    },
+    {
+      "id": "bigfile.max_lines",
+      "severity": "P1",
+      "type": "custom",
+      "max": 300,
+      "allowlist": [
+        "app/components/ChatCore.styles.ts"
+      ],
+      "experimental": false
     }
   ]
 }

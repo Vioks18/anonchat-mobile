@@ -60,7 +60,7 @@ const ReactionBar: React.FC<ReactionBarProps> = ({
 
   const handleReaction = (reaction: string) => {
     if (__DEV__) {
-      if (__DEV__) console.log('🔥 ReactionBar: handleReaction', { reaction, selectedMessageId });
+      // if (__DEV__) console.log('🔥 ReactionBar: handleReaction', { reaction, selectedMessageId });
     }
     if (selectedMessageId) {
       addReaction(selectedMessageId, reaction);
@@ -76,7 +76,7 @@ const ReactionBar: React.FC<ReactionBarProps> = ({
 
   if (!visible || !anchor) {
     if (__DEV__) {
-      console.log('🔥 ReactionBar: not visible', { visible, anchor: !!anchor });
+      // console.log('🔥 ReactionBar: not visible', { visible, anchor: !!anchor });
     }
     return null;
   }

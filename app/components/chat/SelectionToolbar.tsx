@@ -28,18 +28,16 @@ const SelectionToolbar: React.FC<SelectionToolbarProps> = ({
   handleDeleteSelected,
   currentThemeData,
 }) => {
+  const clearSelection = useMessageStore((s) => s?.clearSelection || (() => {}));
   return (
     <View style={[styles.header, { backgroundColor: currentThemeData.headerBg }]}>
       <View style={styles.selectionHeader}>
         <TouchableOpacity 
           style={styles.backButton}
           onPress={() => {
-            // Очищаем выбор через store
-            const clearSelection = useMessageStore.getState().clearSelection;
+            // Очищаем выбор и закрываем меню реакций
             clearSelection();
             setSelectedMessageId(null);
-            setSelectedMessagesCount(0);
-            setSelectedMessages(new Set());
           }}
           activeOpacity={0.7}
         >
@@ -51,7 +49,10 @@ const SelectionToolbar: React.FC<SelectionToolbarProps> = ({
         {selectedMessagesCount === 1 && (
           <TouchableOpacity 
             style={styles.actionButton}
-            onPress={handleReply}
+            onPress={() => {
+              // if (__DEV__) console.log('SelectionToolbar: нажата кнопка ответа');
+              handleReply();
+            }}
             activeOpacity={0.7}
           >
             <Ionicons name="arrow-undo" size={18} color="#fff" />
@@ -76,7 +77,7 @@ const SelectionToolbar: React.FC<SelectionToolbarProps> = ({
           onPress={handleDeleteSelected}
           activeOpacity={0.7}
         >
-          <Ionicons name="trash" size={18} color="#fff" />
+          <Ionicons name="trash-outline" size={18} color="#fff" />
         </TouchableOpacity>
       </View>
     </View>

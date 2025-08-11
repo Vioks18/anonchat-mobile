@@ -1,10 +1,9 @@
 # QA Report
 
 **Mode:** strict
-**New issues:** 5
+**New issues:** 7
 
 ## ✅ Passed
-- store.status_read (P0) — app/hooks/useMessageStore.ts: read in statuses
 - perf.dev_logs (P0) — app/hooks/useUIWatchDog.ts: logs guarded
 - perf.dev_logs (P0) — app/hooks/useMessageStore.ts: logs guarded
 - perf.dev_logs (P0) — app/hooks/useBotProvider.ts: logs guarded
@@ -34,9 +33,11 @@
 - deps.heavy_inactive (P2) — package.json: heavy unused deps found **NEW**
 - perf.stable_handlers (P1) — app/hooks/useReactions.ts: handlers not memoized **NEW**
 - deps.unused (P2) — package.json: unused: @react-navigation/bottom-tabs, @react-navigation/elements, @react-navigation/native, expo, expo-auth-session... **NEW**
+- bigfile.max_lines (P1) — app/**/*.{ts,tsx,js,jsx}: files too large: File exceeds max lines (335 > 300): app\components\chat\ChatCore.styles.ts, File exceeds max lines (407 > 300): app\context\ChatLogicProvider.tsx **NEW**
 
 ## ❌ P0 Issues
 - reactionbar.anchor_guard (P0) — app/components/reactions/ReactionBar.tsx: Missing: if (!visible || !anchor) return null; **NEW**
+- store.status_read (P0) — app/hooks/useMessageStore.ts: read missing in statuses **NEW**
 - reactionbar.guard (P0) — app/components/reactions/ReactionBar.tsx: Missing: if (!visible || !anchor) return null; **NEW**
 
-Summary: Passed=25, Warnings=3, P0=2
+Summary: Passed=24, Warnings=4, P0=3
