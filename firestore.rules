@@ -1,33 +1,46 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
     // Разрешаем анонимным пользователям читать и писать в чаты
     match /chats/{chatId} {
-      allow read, write: if request.auth != null && 
+      allow read, write: if isSignedIn() && 
         request.auth.uid in resource.data.members;
       
       // Разрешаем создание чатов
-      allow create: if request.auth != null;
+      allow create: if isSignedIn();
       
       // Сообщения в чатах
       match /messages/{messageId} {
-        allow read, write: if request.auth != null && 
+        allow read, write: if isSignedIn() && 
           request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.members;
       }
     }
     
     // Пользователи могут читать и обновлять свои данные
     match /users/{userId} {
-      allow read, write: if request.auth != null && 
-        request.auth.uid == userId;
-      
-      // Разрешаем поиск пользователей по имени (только чтение)
-      allow read: if request.auth != null;
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() && request.auth.uid == userId;
+    }
+    
+    // Usernames - только создание, без обновления/удаления клиентами
+    match /usernames/{handle} {
+      allow read: if true; // Публичное чтение для проверки доступности
+      // Только создание; без обновления/удаления клиентами
+      allow create: if isSignedIn() && 
+        !exists(/databases/$(database)/documents/usernames/$(handle)) && 
+        request.resource.data.uid == request.auth.uid && 
+        request.resource.data.display is string && 
+        request.resource.data.createdAt == request.time;
+      allow update, delete: if false;
     }
     
     // UserChats - пользователи могут читать и писать свои чаты
     match /userChats/{userId}/items/{chatId} {
-      allow read, write: if request.auth != null && 
+      allow read, write: if isSignedIn() && 
         request.auth.uid == userId;
     }
     

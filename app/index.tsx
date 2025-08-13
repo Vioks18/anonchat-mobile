@@ -1,6 +1,6 @@
 import React from 'react';
-import ChatListScreen from './screens/ChatListScreen';
+import UsernameGate from './components/UsernameGate';
 
 export default function HomePage() {
-  return <ChatListScreen navigation={{} as any} />;
+  return <UsernameGate />;
 } 
