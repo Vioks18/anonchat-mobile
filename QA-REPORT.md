@@ -40,8 +40,8 @@
 
 ## ⚠️ Warnings
 - deps.heavy_inactive (P2) — package.json: heavy unused deps found **NEW**
-- deps.unused (P2) — package.json: unused: expo, expo-background-fetch, expo-blur, expo-camera, expo-constants... **NEW**
-- bigfile.max_lines (P1) — app/**/*.{ts,tsx,js,jsx}: files too large: File exceeds max lines (461 > 300): app\screens\ChatListScreen.tsx, File exceeds max lines (330 > 300): app\services\chatApi.ts **NEW**
+- deps.unused (P2) — package.json: unused: @react-native-async-storage/async-storage, @types/lodash, expo, expo-background-fetch, expo-blur... **NEW**
+- bigfile.max_lines (P1) — app/**/*.{ts,tsx,js,jsx}: files too large: File exceeds max lines (322 > 300): app\screens\auth\RegisterScreen.tsx, File exceeds max lines (575 > 300): app\screens\ChatListScreen.tsx, File exceeds max lines (368 > 300): app\screens\UsernameScreen.tsx... **NEW**
 
 ## ❌ P0 Issues
 

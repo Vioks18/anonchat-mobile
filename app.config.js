@@ -26,11 +26,29 @@ module.exports = {
       enableShrinkResourcesInReleaseBuilds: false,
       // Актуальные настройки для стабильности
       enableJetifier: true,
-      useAndroidX: true
+      useAndroidX: true,
+      intentFilters: [
+        {
+          action: "VIEW",
+          category: ["BROWSABLE", "DEFAULT"],
+          data: [
+            {
+              scheme: "https",
+              host: "anonchat-axora.web.app",
+              pathPrefix: "/auth/links"
+            },
+            {
+              scheme: "https",
+              host: "anonchat-axora.firebaseapp.com",
+              pathPrefix: "/auth/links"
+            }
+          ]
+        }
+      ]
     },
-    scheme: "anonchat-mobile",
+    scheme: "anonchat",
     linking: {
-      prefixes: ["anonchat-mobile://"]
+      prefixes: ["anonchat://", "https://anonchat-axora.web.app", "https://anonchat-axora.firebaseapp.com"]
     },
     web: {
       bundler: "metro",

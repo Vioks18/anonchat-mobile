@@ -18,10 +18,17 @@ const app = initializeApp(firebaseConfig);
 
 // Инициализация сервисов
 export const auth = getAuth(app);
+
+// Примечание: Firebase Auth будет использовать SecureStore для persistence
+// через настройки в emailLink.ts
+
 export const db = getFirestore(app);
 
 // Подключение к реальному Firebase серверу
 // Эмуляторы отключены - используем продакшн
+
+// TODO: App Check (Play Integrity) will be enabled later. For now, it is intentionally disabled for Dev Client.
+// App Check is disabled to avoid issues with Expo Dev Client and development environment.
 
 // Проверка конфигурации
 export const isFirebaseConfigured = () => {

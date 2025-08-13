@@ -1,0 +1,59 @@
+/*
+ * DEVELOPMENT FIRESTORE RULES
+ * 
+ * WARNING: These rules are for development only!
+ * App Check is intentionally DISABLED for Dev Client compatibility.
+ * 
+ * DO NOT use these rules in production.
+ * Production rules should include proper App Check validation.
+ */
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // User profiles - users can read any profile, update only their own
+    match /users/{uid} {
+      allow read: if isSignedIn();
+      allow create, update: if isSignedIn() && request.auth.uid == uid;
+    }
+    
+    // Username reservations - public read for availability checks, atomic creation
+    match /usernames/{handle} {
+      allow read: if true; // needed for availability checks in dev
+      allow create: if isSignedIn() && !exists(/databases/$(database)/documents/usernames/$(handle));
+      allow update, delete: if false; // immutable in dev
+    }
+    
+    // Chat data - users can access chats they're members of
+    match /chats/{chatId} {
+      allow read, write: if isSignedIn() && 
+        request.auth.uid in resource.data.members;
+      
+      // Allow chat creation
+      allow create: if isSignedIn();
+      
+      // Messages in chats
+      match /messages/{messageId} {
+        allow read, write: if isSignedIn() && 
+          request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.members;
+      }
+    }
+    
+    // User chats - users can manage their own chat lists
+    match /userChats/{userId}/items/{chatId} {
+      allow read, write: if isSignedIn() && 
+        request.auth.uid == userId;
+    }
+
+    // TEMP DEV ONLY - allow all other operations for development
+    // REMOVE THIS IN PRODUCTION
+    match /{document=**} {
+      allow read, write: if isSignedIn();
+    }
+  }
+}

@@ -28,7 +28,7 @@ interface ChatListScreenProps {
 }
 
 const ChatListScreen: React.FC<ChatListScreenProps> = ({ navigation }) => {
-  const { user, signInAnonymously } = useAuth();
+  const { user } = useAuth();
   const [chats, setChats] = useState<ChatListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -48,20 +48,7 @@ const ChatListScreen: React.FC<ChatListScreenProps> = ({ navigation }) => {
       );
       return;
     }
-
-    const initializeAuth = async () => {
-      try {
-        if (!user) {
-          await signInAnonymously();
-        }
-      } catch (error) {
-        if (__DEV__) console.error('Auth initialization failed:', error);
-        Alert.alert('Ошибка авторизации', 'Не удалось войти в систему');
-      }
-    };
-
-    initializeAuth();
-  }, [user, signInAnonymously]);
+  }, []);
 
   useEffect(() => {
     if (!user?.uid) return;

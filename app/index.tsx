@@ -1,6 +1,11 @@
 import React from 'react';
-import UsernameGate from './components/UsernameGate';
+import { ToastProvider } from '@/app/components/ui/Toast';
+import RootNavigator from './navigation';
 
 export default function HomePage() {
-  return <UsernameGate />;
+  return (
+    <ToastProvider>
+      <RootNavigator />
+    </ToastProvider>
+  );
 } 
