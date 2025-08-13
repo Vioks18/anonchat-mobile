@@ -1,13 +1,24 @@
 import React from 'react';
-import { View, ActivityIndicator, StyleSheet } from 'react-native';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { useAuth } from '../hooks/useAuth';
 import { useAuthUserProfile } from '../hooks/useAuthUserProfile';
-import UsernameScreen from '../screens/UsernameScreen';
 import ChatListScreen from '../screens/ChatListScreen';
+import UsernameScreen from '../screens/UsernameScreen';
 
 const UsernameGate: React.FC = () => {
   const { user } = useAuth();
   const profile = useAuthUserProfile();
+
+  // Debug info
+  if (__DEV__) {
+    console.log('UsernameGate Debug:', {
+      hasUser: !!user,
+      userUid: user?.uid,
+      profileLoading: profile.loading,
+      profileUsername: profile.username_lc,
+      authLoading: false // We'll add this from useAuth
+    });
+  }
 
   // Show loading while auth is initializing
   if (!user) {

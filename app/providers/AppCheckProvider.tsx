@@ -12,12 +12,8 @@ export const AppCheckProvider: React.FC<AppCheckProviderProps> = ({ children }) 
   useEffect(() => {
     const initAppCheck = async () => {
       try {
-        const appCheckInstance = await initializeAppCheckService();
+        await initializeAppCheckService();
         setIsInitialized(true);
-        
-        if (!appCheckInstance && __DEV__) {
-          setError('App Check не удалось инициализировать');
-        }
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Неизвестная ошибка App Check';
         setError(errorMessage);
@@ -37,11 +33,7 @@ export const AppCheckProvider: React.FC<AppCheckProviderProps> = ({ children }) 
     console.warn('App Check Error:', error);
   }
 
-  // В продакшене всегда показываем приложение, даже если App Check не работает
-  if (!isInitialized && __DEV__) {
-    return null; // Можно показать загрузочный экран
-  }
-
+  // Всегда показываем приложение, App Check не критичен
   return <>{children}</>;
 };
 

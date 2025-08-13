@@ -184,6 +184,41 @@ export const suggestRandomHandle = (uid: string): string => {
 };
 
 /**
+ * Finds user by username
+ * @param username - Username to search for (with or without @)
+ * @returns User data or null if not found
+ */
+export const findUserByUsername = async (username: string) => {
+  try {
+    const { id } = normalizeHandle(username);
+    
+    // Get username document
+    const usernameDoc = await getDoc(doc(db, 'usernames', id));
+    if (!usernameDoc.exists()) {
+      return null;
+    }
+    
+    const usernameData = usernameDoc.data() as UsernameData;
+    
+    // Get user document
+    const userDoc = await getDoc(doc(db, 'users', usernameData.uid));
+    if (!userDoc.exists()) {
+      return null;
+    }
+    
+    const userData = userDoc.data();
+    return {
+      uid: usernameData.uid,
+      username: userData.username,
+      displayName: userData.displayName || userData.username
+    };
+  } catch (error) {
+    if (__DEV__) console.error('Error finding user by username:', error);
+    return null;
+  }
+};
+
+/**
  * Gets user profile data
  * @param uid - User's Firebase UID
  * @returns User profile or null if not found

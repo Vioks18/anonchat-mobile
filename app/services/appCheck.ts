@@ -4,12 +4,9 @@
  * Защищает приложение от злоупотреблений API
  */
 export const initializeAppCheckService = async () => {
-  // App Check пока не поддерживается в React Native
-  // Отключаем для избежания ошибок
-  if (__DEV__) {
-    console.log('App Check: Отключен для React Native');
-  }
-  return null;
+  // App Check отключен для React Native
+  // Возвращаем Promise.resolve() для совместимости
+  return Promise.resolve();
 };
 
 /**

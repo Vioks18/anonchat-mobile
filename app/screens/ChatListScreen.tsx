@@ -13,13 +13,13 @@ import {
 } from 'react-native';
 import { useAuth } from '../hooks/useAuth';
 import {
-  checkUsernameAvailability,
   createOrGetDM,
   getUsernameByUid,
   listenChats,
   saveUsername
 } from '../services/chatApi';
 import { isFirebaseConfigured } from '../services/firebase';
+import { findUserByUsername } from '../services/usernames';
 import { ChatListItem } from '../types/chat';
 import { formatChatTime } from '../utils/time';
 
@@ -33,8 +33,10 @@ const ChatListScreen: React.FC<ChatListScreenProps> = ({ navigation }) => {
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showNameModal, setShowNameModal] = useState(false);
+  const [showSearchModal, setShowSearchModal] = useState(false);
   const [otherUid, setOtherUid] = useState('');
-  const [userName, setUserName] = useState('');
+  const [searchUsername, setSearchUsername] = useState('');
+  const [displayName, setDisplayName] = useState('');
   const [checkingName, setCheckingName] = useState(false);
   const [nameError, setNameError] = useState('');
 
@@ -69,25 +71,25 @@ const ChatListScreen: React.FC<ChatListScreenProps> = ({ navigation }) => {
       setLoading(false);
     });
 
-    // Загружаем имя пользователя
-    const loadUsername = async () => {
+    // Загружаем отображаемое имя пользователя
+    const loadDisplayName = async () => {
       try {
         const savedUsername = await getUsernameByUid(user.uid);
         if (savedUsername) {
-          setUserName(savedUsername);
+          setDisplayName(savedUsername);
         }
       } catch (error) {
-        if (__DEV__) console.error('Error loading username:', error);
+        if (__DEV__) console.error('Error loading display name:', error);
       }
     };
 
-    loadUsername();
+    loadDisplayName();
     return unsubscribe;
   }, [user?.uid]);
 
-  const handleSaveName = async () => {
-    if (!user?.uid || !userName.trim()) {
-      Alert.alert('Ошибка', 'Введите имя');
+  const handleSaveDisplayName = async () => {
+    if (!user?.uid || !displayName.trim()) {
+      Alert.alert('Ошибка', 'Введите отображаемое имя');
       return;
     }
 
@@ -95,19 +97,12 @@ const ChatListScreen: React.FC<ChatListScreenProps> = ({ navigation }) => {
       setCheckingName(true);
       setNameError('');
 
-      // Проверяем уникальность имени
-      const isAvailable = await checkUsernameAvailability(userName.trim());
-      if (!isAvailable) {
-        setNameError('Это имя уже занято');
-        return;
-      }
-
-      // Сохраняем уникальное имя
-      await saveUsername(user.uid, userName.trim());
+      // Сохраняем отображаемое имя (не уникальное)
+      await saveUsername(user.uid, displayName.trim());
       setShowNameModal(false);
-      Alert.alert('Успех', 'Имя успешно сохранено!');
+      Alert.alert('Успех', 'Отображаемое имя сохранено!');
     } catch (error) {
-      if (__DEV__) console.error('Error saving username:', error);
+      if (__DEV__) console.error('Error saving display name:', error);
       Alert.alert('Ошибка', 'Не удалось сохранить имя');
     } finally {
       setCheckingName(false);
@@ -115,23 +110,31 @@ const ChatListScreen: React.FC<ChatListScreenProps> = ({ navigation }) => {
   };
 
   const handleCreateChat = async () => {
-    if (!user?.uid || !otherUid.trim()) {
-      Alert.alert('Ошибка', 'Введите UID пользователя');
+    if (!user?.uid || !searchUsername.trim()) {
+      Alert.alert('Ошибка', 'Введите @username пользователя');
       return;
     }
 
     try {
       setLoading(true);
-      const chatId = await createOrGetDM(user.uid, otherUid.trim());
+      
+      // Ищем пользователя по @username
+      const foundUser = await findUserByUsername(searchUsername.trim());
+      if (!foundUser) {
+        Alert.alert('Ошибка', 'Пользователь с таким @username не найден');
+        return;
+      }
+
+      const chatId = await createOrGetDM(user.uid, foundUser.uid);
       setShowCreateModal(false);
-      setOtherUid('');
+      setSearchUsername('');
       
       // Переходим к чату
       router.push({
         pathname: '/chat',
         params: {
           chatId,
-          title: otherUid.trim()
+          title: foundUser.displayName || foundUser.username || foundUser.uid
         }
       });
     } catch (error) {
@@ -205,7 +208,7 @@ const ChatListScreen: React.FC<ChatListScreenProps> = ({ navigation }) => {
          <Text style={styles.headerTitle}>AnonChat</Text>
          <TouchableOpacity onPress={() => setShowNameModal(true)}>
            <Text style={styles.headerSubtitle}>
-             {userName ? `Имя: ${userName}` : (user ? 'Нажмите для ввода имени' : 'Загрузка...')}
+             {displayName ? `Имя: ${displayName}` : (user ? 'Нажмите для ввода имени' : 'Загрузка...')}
            </Text>
          </TouchableOpacity>
        </View>
@@ -250,14 +253,14 @@ const ChatListScreen: React.FC<ChatListScreenProps> = ({ navigation }) => {
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Создать чат</Text>
             <Text style={styles.modalSubtitle}>
-              Введите UID пользователя для создания DM
+              Введите @username пользователя для поиска
             </Text>
             
             <TextInput
               style={styles.modalInput}
-              placeholder="UID пользователя"
-              value={otherUid}
-              onChangeText={setOtherUid}
+              placeholder="@username пользователя"
+              value={searchUsername}
+              onChangeText={setSearchUsername}
               autoCapitalize="none"
               autoCorrect={false}
             />
@@ -267,7 +270,7 @@ const ChatListScreen: React.FC<ChatListScreenProps> = ({ navigation }) => {
                 style={[styles.modalButton, styles.cancelButton]}
                 onPress={() => {
                   setShowCreateModal(false);
-                  setOtherUid('');
+                  setSearchUsername('');
                 }}
               >
                 <Text style={styles.cancelButtonText}>Отмена</Text>
@@ -303,10 +306,10 @@ const ChatListScreen: React.FC<ChatListScreenProps> = ({ navigation }) => {
              
              <TextInput
                style={styles.modalInput}
-               placeholder="Ваше уникальное имя"
-               value={userName}
+               placeholder="Ваше отображаемое имя"
+               value={displayName}
                onChangeText={(text) => {
-                 setUserName(text);
+                 setDisplayName(text);
                  setNameError('');
                }}
                autoCapitalize="words"
@@ -322,7 +325,7 @@ const ChatListScreen: React.FC<ChatListScreenProps> = ({ navigation }) => {
                  style={[styles.modalButton, styles.cancelButton]}
                  onPress={() => {
                    setShowNameModal(false);
-                   setUserName('');
+                   setDisplayName('');
                  }}
                >
                  <Text style={styles.cancelButtonText}>Отмена</Text>
@@ -330,7 +333,7 @@ const ChatListScreen: React.FC<ChatListScreenProps> = ({ navigation }) => {
                
                <TouchableOpacity
                  style={[styles.modalButton, styles.createButton]}
-                 onPress={handleSaveName}
+                 onPress={handleSaveDisplayName}
                  disabled={checkingName}
                >
                  <Text style={styles.createButtonText}>

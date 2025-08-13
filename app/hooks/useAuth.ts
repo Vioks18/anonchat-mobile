@@ -1,11 +1,14 @@
-import { useState, useEffect } from 'react';
-import { signInAnonymously as firebaseSignInAnonymously, onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
+import { signInAnonymously as firebaseSignInAnonymously, User as FirebaseUser, onAuthStateChanged } from 'firebase/auth';
+import { useEffect, useState } from 'react';
 import { auth } from '../services/firebase';
 import { User } from '../types/chat';
 
 export const useAuth = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [hasAttemptedAutoSignIn, setHasAttemptedAutoSignIn] = useState(false);
+
+
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
@@ -21,15 +24,27 @@ export const useAuth = () => {
         };
         setUser(userData);
         if (__DEV__) console.log('🔐 User authenticated:', userData.uid);
+        setLoading(false);
+      } else if (!hasAttemptedAutoSignIn) {
+        // Пользователь не авторизован - автоматически входим анонимно (только один раз)
+        setHasAttemptedAutoSignIn(true);
+        if (__DEV__) console.log('🔐 No user found, signing in anonymously...');
+        try {
+          await signInAnonymously();
+        } catch (error) {
+          if (__DEV__) console.error('🔐 Auto sign-in failed:', error);
+          setUser(null);
+          setLoading(false);
+        }
       } else {
-        // Пользователь не авторизован
+        // Уже пытались войти, но не получилось
         setUser(null);
+        setLoading(false);
       }
-      setLoading(false);
     });
 
     return unsubscribe;
-  }, []);
+  }, [hasAttemptedAutoSignIn]);
 
   const signInAnonymously = async (): Promise<User> => {
     try {
