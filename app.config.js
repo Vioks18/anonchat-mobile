@@ -6,7 +6,7 @@ module.exports = {
     orientation: "portrait",
     icon: "./assets/images/icon.png",
     userInterfaceStyle: "automatic",
-    newArchEnabled: true,
+    newArchEnabled: true, // Включено для производительности
     ios: {
       supportsTablet: true
     },
@@ -15,10 +15,18 @@ module.exports = {
         foregroundImage: "./assets/images/adaptive-icon.png",
         backgroundColor: "#ffffff"
       },
-      package: "com.rckxs.anonchatmobile",
+      package: "com.axora.anonchat",
+      googleServicesFile: "./google-services.json",
       softwareKeyboardLayoutMode: "resize",
       navigationBarColor: "#181825",
-      statusBarColor: "#181825"
+      statusBarColor: "#181825",
+      // Настройки совместимости с Android 15
+      allowBackup: true,
+      enableProguardInReleaseBuilds: false,
+      enableShrinkResourcesInReleaseBuilds: false,
+      // Актуальные настройки для стабильности
+      enableJetifier: true,
+      useAndroidX: true
     },
     scheme: "anonchat-mobile",
     linking: {
@@ -63,6 +71,6 @@ module.exports = {
         projectId: "57ef08f9-ca5c-4c83-a43f-0120a1dc474b"
       }
     },
-    owner: "rckxs"
+                           owner: "rckxs"
   }
 }; 

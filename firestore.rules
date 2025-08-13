@@ -1,0 +1,39 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Разрешаем анонимным пользователям читать и писать в чаты
+    match /chats/{chatId} {
+      allow read, write: if request.auth != null && 
+        request.auth.uid in resource.data.members;
+      
+      // Разрешаем создание чатов
+      allow create: if request.auth != null;
+      
+      // Сообщения в чатах
+      match /messages/{messageId} {
+        allow read, write: if request.auth != null && 
+          request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.members;
+      }
+    }
+    
+    // Пользователи могут читать и обновлять свои данные
+    match /users/{userId} {
+      allow read, write: if request.auth != null && 
+        request.auth.uid == userId;
+      
+      // Разрешаем поиск пользователей по имени (только чтение)
+      allow read: if request.auth != null;
+    }
+    
+    // UserChats - пользователи могут читать и писать свои чаты
+    match /userChats/{userId}/items/{chatId} {
+      allow read, write: if request.auth != null && 
+        request.auth.uid == userId;
+    }
+    
+    // Запрещаем доступ к системным коллекциям
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

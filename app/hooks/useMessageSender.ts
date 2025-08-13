@@ -12,53 +12,34 @@ export const useMessageSender = (
   safeExecute?: (fn: () => void, errorMessage: string, severity?: ErrorSeverity) => void,
   setReplyDraft?: (message: any) => void
 ) => {
-  // Безопасная отправка сообщения
+  // Оптимизированная отправка сообщения
   const handleSendMessage = useCallback(() => {
+    const trimmedText = inputText.trim();
+    if (trimmedText === "") return;
+
+    // Быстрая проверка на команду DevBot
+    if (trimmedText.startsWith('/')) {
+      onSendMessage?.(trimmedText);
+      setInputText("");
+      return;
+    }
+
+    // Оптимизированная отправка без задержек
     if (!safeExecute) {
       // Fallback если safeExecute не передан
-      if (inputText.trim() === "") return;
-
-      // Проверяем, не является ли это командой DevBot
-      if (inputText.trim().startsWith('/')) {
-        // Команда DevBot - передаем внешней логике
-        onSendMessage?.(inputText.trim());
-        setInputText("");
-        return;
-      }
-
-      // Используем addMessage из store
-      addMessage(inputText.trim());
+      addMessage(trimmedText);
       setInputText("");
-      
-      // Уведомляем внешнюю логику
-      onSendMessage?.(inputText.trim());
+      onSendMessage?.(trimmedText);
       return;
     }
 
     safeExecute(() => {
-      if (inputText.trim() === "") return;
-
-      // Проверяем, не является ли это командой DevBot
-      if (inputText.trim().startsWith('/')) {
-        // Команда DevBot - передаем внешней логике
-        onSendMessage?.(inputText.trim());
-        setInputText("");
-        return;
-      }
-
-      // Используем addMessage из store
-      addMessage(inputText.trim());
+      // Быстрая отправка сообщения
+      addMessage(trimmedText);
       setInputText("");
+      onSendMessage?.(trimmedText);
       
-      // Уведомляем внешнюю логику
-      onSendMessage?.(inputText.trim());
-      
-      // Безопасный скролл вниз (при inverted={true} это scrollToOffset)
-      setTimeout(() => {
-        safeExecute(() => {
-          // flatListRef.current?.scrollToOffset({ offset: 0, animated: true }); // This line is removed
-        }, 'scrollToEnd', ErrorSeverity.LOW);
-      }, 100);
+      // Убираем задержку скролла - теперь это обрабатывается в ChatListWithReactions
     }, 'sendMessage', ErrorSeverity.MEDIUM);
   }, [inputText, onSendMessage, safeExecute, addMessage, setInputText]);
 

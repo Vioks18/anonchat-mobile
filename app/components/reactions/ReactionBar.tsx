@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Animated, Dimensions, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { THEMES } from '../../constants/themes';
@@ -23,6 +23,8 @@ const ReactionBar: React.FC<ReactionBarProps> = ({
   selectedMessageId,
   keyboardHeight = 0,
 }) => {
+  if (!visible || !anchor) return null;
+
   const insets = useSafeAreaInsets();
   const { addReaction } = useMessageStore();
   const [measuredWidth, setMeasuredWidth] = React.useState(0);
@@ -35,30 +37,32 @@ const ReactionBar: React.FC<ReactionBarProps> = ({
     const barW = measuredWidth || (AVAILABLE_REACTIONS.length * 44 + 16);
     const barH = 56;
     
-    // Позиционирование от точки тапа (если есть)
+    // Стабильное позиционирование от точки тапа
     const baseX = anchor.touchX ?? (anchor.x + anchor.w / 2);
     let left = Math.max(12, Math.min(baseX - barW / 2, W - barW - 12));
     
-    const safeTop = insets.top + 12;
-    const safeBottom = H - insets.bottom - keyboardHeight - 12;
-    
-    // Пытаемся разместить над сообщением
+    // Улучшенное позиционирование с учетом клавиатуры
     let top = (anchor.touchY ?? anchor.y) - barH - 12;
     
-    // Если не помещается сверху - размещаем снизу
-    if (top < safeTop) {
-      top = (anchor.touchY ?? (anchor.y + anchor.h)) + 12;
+    // Защита от выхода за верх экрана
+    if (top < insets.top + 20) {
+      top = insets.top + 20;
     }
     
-    // Если не помещается снизу - размещаем по центру экрана
-    if (top + barH > safeBottom) {
-      top = Math.max(safeTop, (safeBottom - barH) / 2);
+    // Защита от выхода за нижний край с учетом клавиатуры
+    const maxTop = H - barH - keyboardHeight - insets.bottom - 20;
+    if (top > maxTop) {
+      top = maxTop;
     }
     
-    return { x: left, y: top };
-  }, [anchor, measuredWidth, insets.top, insets.bottom, keyboardHeight]);
+    // Стабилизация - округляем до целых пикселей
+    return { 
+      x: Math.round(left), 
+      y: Math.round(top) 
+    };
+  }, [anchor?.touchX, anchor?.touchY, anchor?.x, anchor?.y, measuredWidth, keyboardHeight, insets]);
 
-  const handleReaction = (reaction: string) => {
+  const handleReaction = useCallback((reaction: string) => {
     if (__DEV__) {
       // if (__DEV__) console.log('🔥 ReactionBar: handleReaction', { reaction, selectedMessageId });
     }
@@ -72,14 +76,11 @@ const ReactionBar: React.FC<ReactionBarProps> = ({
     } else if (__DEV__) {
       if (__DEV__) console.warn('⚠️ ReactionBar: selectedMessageId is null!');
     }
-  };
+  }, [selectedMessageId, addReaction, onClose]);
 
-  if (!visible || !anchor) {
-    if (__DEV__) {
-      // console.log('🔥 ReactionBar: not visible', { visible, anchor: !!anchor });
-    }
-    return null;
-  }
+  const handleLayout = useCallback((e: any) => {
+    setMeasuredWidth(e.nativeEvent.layout.width);
+  }, []);
 
   // Адаптивные цвета для панели реакций
   const overlayColors = pickOverlayForBg(THEMES.dark.inputBg, 'dark');
@@ -130,7 +131,7 @@ const ReactionBar: React.FC<ReactionBarProps> = ({
       <View 
         style={styles.panel} 
         pointerEvents="auto"
-        onLayout={(e) => setMeasuredWidth(e.nativeEvent.layout.width)}
+        onLayout={handleLayout}
       >
         <View style={styles.emojiRow}>
           {AVAILABLE_REACTIONS.map((reaction) => (

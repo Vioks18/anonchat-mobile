@@ -30,14 +30,10 @@ const useKeyboardGlue = ({
   
   const { addError } = useErrorMonitor();
 
-  // Простая анимация клавиатуры без сложных вычислений
-  useEffect(() => {
-    Animated.timing(keyboardAnimation, {
-      toValue: keyboardHeight,
-      duration: 250,
-      useNativeDriver: false,
-    }).start();
-  }, [keyboardHeight, keyboardAnimation]);
+  // Убираем синхронизацию - пусть анимация работает независимо
+  // useEffect(() => {
+  //   keyboardAnimation.setValue(keyboardHeight);
+  // }, [keyboardHeight, keyboardAnimation]);
 
   // WatchDog для мониторинга UI с защитой
   const watchDogResult = useUIWatchDog({
@@ -68,20 +64,27 @@ const useKeyboardGlue = ({
     }
   }, [onError, addError]);
 
-  // Обработка клавиатуры для Android с защитой
+  // Простое синхронное решение для Android
   useEffect(() => {
     let keyboardDidShowListener: any;
     let keyboardDidHideListener: any;
 
     try {
+      // Основные события клавиатуры - СИНХРОННО
       keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', (e) => {
+        if (__DEV__) console.log('🎹 Keyboard Did Show:', e.endCoordinates.height);
         safeExecute(() => {
+          // Синхронное движение - без анимации
+          keyboardAnimation.setValue(e.endCoordinates.height);
           setKeyboardHeight(e.endCoordinates.height);
         }, 'keyboardDidShow', ErrorSeverity.LOW);
       });
 
       keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
+        if (__DEV__) console.log('🎹 Keyboard Did Hide');
         safeExecute(() => {
+          // Синхронное скрытие - без анимации
+          keyboardAnimation.setValue(0);
           setKeyboardHeight(0);
         }, 'keyboardDidHide', ErrorSeverity.LOW);
       });
@@ -97,7 +100,7 @@ const useKeyboardGlue = ({
         addError(error instanceof Error ? error : new Error(String(error)), 'ChatCore', ErrorSeverity.LOW);
       }
     };
-  }, [safeExecute, addError, setKeyboardHeight]);
+  }, [safeExecute, addError, keyboardAnimation]);
 
   return {
     keyboardHeight,

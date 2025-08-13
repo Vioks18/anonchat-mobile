@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import React, { useRef } from 'react';
+import React, { useCallback, useRef } from 'react';
 import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { THEMES } from '../constants/themes';
 import { useMessageStore } from '../hooks/useMessageStore';
@@ -63,9 +63,18 @@ const MessageWithReactions: React.FC<MessageWithReactionsProps> = ({
   };
 
   // Обработчик реакций
-  const handleReactionPress = (reaction: string) => {
+  const handleReactionPress = useCallback((reaction: string) => {
     removeReaction(message.id, reaction);
-  };
+  }, [removeReaction, message.id]);
+
+  // Стабильные обработчики для TouchableOpacity
+  const handlePress = useCallback(() => {
+    onPress?.(message.id);
+  }, [onPress, message.id]);
+
+  const handleLongPress = useCallback((e: any) => {
+    onLongPress?.(message.id, e);
+  }, [onLongPress, message.id]);
 
   React.useEffect(() => {
     if (rootRef.current) {
@@ -91,8 +100,8 @@ const MessageWithReactions: React.FC<MessageWithReactionsProps> = ({
       
       <View ref={rootRef} style={styles.messageContent}>
         <TouchableOpacity
-          onPress={() => onPress?.(message.id)}
-          onLongPress={(e) => onLongPress?.(message.id, e)}
+          onPress={handlePress}
+          onLongPress={handleLongPress}
           delayLongPress={600}
           hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
           style={[
@@ -138,24 +147,24 @@ const MessageWithReactions: React.FC<MessageWithReactionsProps> = ({
           </View>
         </TouchableOpacity>
         
-        {/* Реакции - скрываем для удаленных сообщений */}
-        {message.reactions && message.reactions.length > 0 && !message.deletedForAll && (
-          <View style={[
-            styles.reactionsContainer,
-            isMyMessage ? styles.reactionsMe : styles.reactionsOther
-          ]}>
-            {message.reactions.map((reaction, index) => (
-              <TouchableOpacity
-                key={index}
-                style={styles.reactionChip}
-                onPress={() => handleReactionPress(reaction)}
-                activeOpacity={0.7}
-              >
-                <Text style={styles.reactionText}>{reaction}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        )}
+                 {/* Реакции - скрываем для удаленных сообщений */}
+         {message.reactions && Array.isArray(message.reactions) && message.reactions.length > 0 && !message.deletedForAll && (
+           <View style={[
+             styles.reactionsContainer,
+             isMyMessage ? styles.reactionsMe : styles.reactionsOther
+           ]}>
+                          {message.reactions.map((reaction, index) => (
+                            <TouchableOpacity
+                              key={`${reaction}-${index}`}
+                              style={styles.reactionChip}
+                              onPress={() => handleReactionPress(reaction)}
+                              activeOpacity={0.7}
+                            >
+                              <Text style={styles.reactionText}>{reaction}</Text>
+                            </TouchableOpacity>
+                          ))}
+           </View>
+         )}
       </View>
     </View>
   );

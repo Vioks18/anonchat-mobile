@@ -290,6 +290,182 @@ const evaluators = {
           addResult(rule.id, rule.severity, 'app/**/*.{ts,tsx,js,jsx}', ok, msg);
           return;
         }
+        case 'react.arrow_function_jsx': {
+          // Ищем стрелочные функции в JSX props с детальным отчетом
+          const appFiles = listFilesRecursive(path.join(ROOT, 'app'))
+            .filter(p => /\.(t|j)sx?$/.test(p))
+            .filter(p => !p.includes('backup') && !p.includes('mocks') && !p.includes('node_modules'));
+          
+          let allOk = true;
+          let issues = [];
+          
+          for (const filePath of appFiles) {
+            const content = getContent(filePath) || '';
+            const lines = content.split('\n');
+            
+            // Более детальный поиск стрелочных функций
+            const arrowFunctionPattern = /on[A-Z][a-zA-Z]*=\{\([^)]*\)\s*=>/g;
+            let match;
+            const fileIssues = [];
+            
+            while ((match = arrowFunctionPattern.exec(content)) !== null) {
+              const lineNumber = content.substring(0, match.index).split('\n').length;
+              const line = lines[lineNumber - 1]?.trim() || '';
+              
+              // Проверяем, не является ли это useCallback
+              const beforeMatch = content.substring(0, match.index);
+              const hasUseCallback = /useCallback\s*\([^)]*\)\s*=>\s*\{[^}]*$/.test(beforeMatch);
+              
+              if (!hasUseCallback) {
+                fileIssues.push(`line ${lineNumber}: ${line.substring(0, 80)}...`);
+              }
+            }
+            
+            if (fileIssues.length > 0) {
+              allOk = false;
+              const relativePath = filePath.replace(ROOT, '').replace(/\\/g, '/');
+              issues.push(`${relativePath}: ${fileIssues.length} arrow functions in JSX`);
+              
+              // Добавляем детали в DEBUG режиме
+              if (DEBUG) {
+                console.log(`❌ ${relativePath}:`);
+                fileIssues.slice(0, 3).forEach(issue => console.log(`   ${issue}`));
+              }
+            }
+          }
+          
+          ok = allOk;
+          msg = ok ? 'no arrow functions in JSX' : `found: ${issues.slice(0, 3).join(', ')}${issues.length > 3 ? '...' : ''}`;
+          addResult(rule.id, rule.severity, '**/*.{ts,tsx}', ok, msg);
+          return;
+        }
+        case 'react.unstable_handler': {
+          // Ищем нестабильные обработчики без useCallback с детальным отчетом
+          const appFiles = listFilesRecursive(path.join(ROOT, 'app'))
+            .filter(p => /\.(t|j)sx?$/.test(p))
+            .filter(p => !p.includes('backup') && !p.includes('mocks') && !p.includes('node_modules'));
+          
+          let allOk = true;
+          let issues = [];
+          
+          for (const filePath of appFiles) {
+            const content = getContent(filePath) || '';
+            const lines = content.split('\n');
+            
+            // Более детальный поиск нестабильных обработчиков
+            const unstablePattern = /on[A-Z][a-zA-Z]*=\{\([^)]*\)\s*=>\s*\{[^}]*\}/g;
+            let match;
+            const fileIssues = [];
+            
+            while ((match = unstablePattern.exec(content)) !== null) {
+              const lineNumber = content.substring(0, match.index).split('\n').length;
+              const line = lines[lineNumber - 1]?.trim() || '';
+              
+              // Проверяем, не является ли это useCallback
+              const beforeMatch = content.substring(0, match.index);
+              const hasUseCallback = /useCallback\s*\([^)]*\)\s*=>\s*\{[^}]*$/.test(beforeMatch);
+              
+              if (!hasUseCallback) {
+                fileIssues.push(`line ${lineNumber}: ${line.substring(0, 80)}...`);
+              }
+            }
+            
+            if (fileIssues.length > 0) {
+              allOk = false;
+              const relativePath = filePath.replace(ROOT, '').replace(/\\/g, '/');
+              issues.push(`${relativePath}: ${fileIssues.length} unstable handlers`);
+              
+              // Добавляем детали в DEBUG режиме
+              if (DEBUG) {
+                console.log(`❌ ${relativePath}:`);
+                fileIssues.slice(0, 3).forEach(issue => console.log(`   ${issue}`));
+              }
+            }
+          }
+          
+          ok = allOk;
+          msg = ok ? 'all handlers stable' : `found: ${issues.slice(0, 3).join(', ')}${issues.length > 3 ? '...' : ''}`;
+          addResult(rule.id, rule.severity, '**/*.{ts,tsx}', ok, msg);
+          return;
+        }
+        case 'react.map_without_callback': {
+          // Ищем функции в map без useCallback
+          const appFiles = listFilesRecursive(path.join(ROOT, 'app'))
+            .filter(p => /\.(t|j)sx?$/.test(p))
+            .filter(p => !p.includes('backup') && !p.includes('mocks') && !p.includes('node_modules'));
+          
+          let allOk = true;
+          let issues = [];
+          
+          for (const filePath of appFiles) {
+            const content = getContent(filePath) || '';
+            const mapPattern = /\.map\([^)]*\)\s*=>\s*\{[^}]*onPress[^}]*\}/g;
+            const matches = content.match(mapPattern);
+            
+            if (matches && matches.length > 0) {
+              allOk = false;
+              const relativePath = filePath.replace(ROOT, '').replace(/\\/g, '/');
+              issues.push(`${relativePath}: ${matches.length} functions in map`);
+            }
+          }
+          
+          ok = allOk;
+          msg = ok ? 'no functions in map' : `found: ${issues.slice(0, 3).join(', ')}${issues.length > 3 ? '...' : ''}`;
+          addResult(rule.id, rule.severity, '**/*.{ts,tsx}', ok, msg);
+          return;
+        }
+        case 'react.nested_usecallback': {
+          // Ищем вложенные useCallback
+          const appFiles = listFilesRecursive(path.join(ROOT, 'app'))
+            .filter(p => /\.(t|j)sx?$/.test(p))
+            .filter(p => !p.includes('backup') && !p.includes('mocks') && !p.includes('node_modules'));
+          
+          let allOk = true;
+          let issues = [];
+          
+          for (const filePath of appFiles) {
+            const content = getContent(filePath) || '';
+            const nestedPattern = /useCallback\(\([^)]*\)\s*=>\s*\{[^}]*useCallback/g;
+            const matches = content.match(nestedPattern);
+            
+            if (matches && matches.length > 0) {
+              allOk = false;
+              const relativePath = filePath.replace(ROOT, '').replace(/\\/g, '/');
+              issues.push(`${relativePath}: ${matches.length} nested useCallback`);
+            }
+          }
+          
+          ok = allOk;
+          msg = ok ? 'no nested useCallback' : `found: ${issues.slice(0, 3).join(', ')}${issues.length > 3 ? '...' : ''}`;
+          addResult(rule.id, rule.severity, '**/*.{ts,tsx}', ok, msg);
+          return;
+        }
+        case 'react.flatlist_render': {
+          // Ищем FlatList renderItem без useCallback
+          const appFiles = listFilesRecursive(path.join(ROOT, 'app'))
+            .filter(p => /\.(t|j)sx?$/.test(p))
+            .filter(p => !p.includes('backup') && !p.includes('mocks') && !p.includes('node_modules'));
+          
+          let allOk = true;
+          let issues = [];
+          
+          for (const filePath of appFiles) {
+            const content = getContent(filePath) || '';
+            if (content.includes('FlatList') && content.includes('renderItem')) {
+              const hasUseCallback = /useCallback\s*\([^)]*\)\s*=>\s*\{[^}]*\}/.test(content);
+              if (!hasUseCallback) {
+                const relativePath = filePath.replace(ROOT, '').replace(/\\/g, '/');
+                issues.push(relativePath);
+                allOk = false;
+              }
+            }
+          }
+          
+          ok = allOk;
+          msg = ok ? 'all FlatList renderItem use useCallback' : `found: ${issues.slice(0, 3).join(', ')}${issues.length > 3 ? '...' : ''}`;
+          addResult(rule.id, rule.severity, '**/*.{ts,tsx}', ok, msg);
+          return;
+        }
         default:
           return;
       }

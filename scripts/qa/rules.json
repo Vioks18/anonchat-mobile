@@ -133,7 +133,7 @@
       "type": "custom",
       "files": [
         "app/components/ChatListWithReactions.tsx",
-        "app/hooks/useReactions.ts"
+        "app/hooks/useReactionState.ts"
       ],
       "description": "Handlers via useCallback",
       "experimental": false,
@@ -153,7 +153,7 @@
       "severity": "P2",
       "type": "custom",
       "files": ["package.json"],
-      "description": "List unused deps",
+      "description": "Unused dependencies: expo, expo-background-fetch, expo-blur, expo-camera, expo-constants, expo-dev-client, expo-dev-menu, expo-document-picker, expo-file-system, expo-font, expo-haptics, expo-image-picker, expo-linear-gradient, expo-linking, expo-media-library, expo-notifications, expo-router, expo-splash-screen, expo-status-bar, expo-system-ui, expo-web-browser",
       "experimental": false,
       "allowlist": []
     },
@@ -265,6 +265,51 @@
         "app/components/ChatCore.styles.ts"
       ],
       "experimental": false
+    },
+    {
+      "id": "react.arrow_function_jsx",
+      "severity": "P1",
+      "type": "custom",
+      "files": ["**/*.{ts,tsx}"],
+      "description": "Arrow functions in JSX props can cause 'Expected static flag was missing' error",
+      "experimental": false,
+      "allowlist": []
+    },
+    {
+      "id": "react.unstable_handler",
+      "severity": "P1",
+      "type": "custom",
+      "files": ["**/*.{ts,tsx}"],
+      "description": "Unstable event handlers without useCallback",
+      "experimental": false,
+      "allowlist": []
+    },
+    {
+      "id": "react.map_without_callback",
+      "severity": "P1",
+      "type": "custom",
+      "files": ["**/*.{ts,tsx}"],
+      "description": "Functions in map without useCallback",
+      "experimental": false,
+      "allowlist": []
+    },
+    {
+      "id": "react.nested_usecallback",
+      "severity": "P1",
+      "type": "custom",
+      "files": ["**/*.{ts,tsx}"],
+      "description": "useCallback inside useCallback can cause issues",
+      "experimental": false,
+      "allowlist": []
+    },
+    {
+      "id": "react.flatlist_render",
+      "severity": "P1",
+      "type": "custom",
+      "files": ["**/*.{ts,tsx}"],
+      "description": "FlatList renderItem should not use useCallback",
+      "experimental": false,
+      "allowlist": []
     }
   ]
 }

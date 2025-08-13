@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import { BackHandler, FlatList, View } from 'react-native';
+import { BackHandler, View } from 'react-native';
+import { KeyboardAwareFlatList } from 'react-native-keyboard-aware-scroll-view';
 import { Portal } from 'react-native-portalize';
 import { useMessageStore } from '../hooks/useMessageStore';
 import useReactionState from '../hooks/useReactionState';
@@ -25,7 +26,7 @@ const ChatListWithReactions: React.FC<ChatListWithReactionsProps> = ({
   const { selectedMessageId, anchor, visible, openAtMessage, close, setLastTouch, keyboardHeight } = useReactionState();
   const messageRefs = useRef(new Map<string, any>());
   const scrollingRef = useRef<boolean>(false);
-  
+
   // Используем store для выбора
   const selectedIds = useMessageStore(s => s.selectedIds);
   const enterSelection = useMessageStore(s => s.enterSelection);
@@ -33,15 +34,15 @@ const ChatListWithReactions: React.FC<ChatListWithReactionsProps> = ({
   const clearSelection = useMessageStore(s => s.clearSelection);
   const isMessageSelected = useMessageStore(s => s.isSelected);
   const getSelectedCount = useMessageStore(s => s.getSelectedCount);
-  
+
   const isSelectionMode = selectedIds.size > 0;
-  
+
   // Стабильное extraData для перерисовки
   const extraData = useMemo(
     () => `${messages.length}:${Array.from(selectedIds).sort().join('|')}`,
     [messages.length, selectedIds]
   );
-  
+
   // Версия сообщений для отслеживания новых сообщений
   const messagesVersion = useMemo(() => messages.map(m => m.id).join(','), [messages]);
 
@@ -53,15 +54,17 @@ const ChatListWithReactions: React.FC<ChatListWithReactionsProps> = ({
     }
   }, [messagesVersion]);
 
+
+
   // Long press: вход в режим выбора или toggle в режиме выбора
   const handleLongPress = useCallback((id: string, event?: any) => {
-    
+
     const currentCount = getSelectedCount();
-    
+
     if (currentCount === 0) {
       // Вход в режим выбора
       enterSelection(id);
-      
+
       // Открываем реакции только сейчас
       setLastTouch?.(event?.nativeEvent?.pageX, event?.nativeEvent?.pageY);
       const ref = messageRefs.current.get(id);
@@ -77,9 +80,9 @@ const ChatListWithReactions: React.FC<ChatListWithReactionsProps> = ({
 
   // Tap: в режиме выбора - toggle, иначе - ничего
   const handlePress = useCallback((id: string) => {
-    
+
     const currentCount = getSelectedCount();
-    
+
     if (currentCount > 0) {
       // В режиме выбора - toggle выделения
       toggleSelection(id);
@@ -92,15 +95,7 @@ const ChatListWithReactions: React.FC<ChatListWithReactionsProps> = ({
     // Уведомляем родительский компонент
     onSelectionChange?.(getSelectedCount());
     onSelectedMessagesChange?.(selectedIds);
-    
-    // Устанавливаем selectedMessageId для одиночного выбора
-    if (getSelectedCount() === 1) {
-      const selectedId = Array.from(selectedIds)[0];
-      onMessageSelected?.(selectedId);
-    } else if (getSelectedCount() === 0) {
-      onMessageSelected?.(null);
-    }
-  }, [selectedIds, getSelectedCount, onSelectionChange, onSelectedMessagesChange, onMessageSelected]);
+  }, [selectedIds, getSelectedCount, onSelectionChange, onSelectedMessagesChange]);
 
   useEffect(() => {
     // Если выбрано больше одного - закрываем реакции
@@ -110,8 +105,9 @@ const ChatListWithReactions: React.FC<ChatListWithReactionsProps> = ({
     // Если ничего не выбрано - закрываем реакции и сбрасываем выбор
     if (getSelectedCount() === 0) {
       close();
+      onMessageSelected?.(null);
     }
-  }, [getSelectedCount, close]);
+  }, [getSelectedCount, close, onMessageSelected]);
 
   // Управление реакциями при изменении выбора
   useEffect(() => {
@@ -135,7 +131,7 @@ const ChatListWithReactions: React.FC<ChatListWithReactionsProps> = ({
   }, [isSelectionMode, clearSelection]);
 
   const renderMessage = useCallback(({ item }: { item: Message }) => {
-    
+
     const isMyMessage = item.sender === 'me';
     const isSelected = isMessageSelected(item.id);
 
@@ -154,7 +150,7 @@ const ChatListWithReactions: React.FC<ChatListWithReactionsProps> = ({
   }, [handleLongPress, handlePress, isMessageSelected]);
 
   const handleScrollBeginDrag = useCallback(() => {
-    
+
     scrollingRef.current = true;
     // Закрываем только реакции, выбор не сбрасываем
     close();
@@ -162,7 +158,7 @@ const ChatListWithReactions: React.FC<ChatListWithReactionsProps> = ({
   }, [close, onScrollBeginDrag]);
 
   const handleScrollEndDrag = useCallback(() => {
-    
+
     setTimeout(() => {
       scrollingRef.current = false;
     }, 100);
@@ -170,10 +166,10 @@ const ChatListWithReactions: React.FC<ChatListWithReactionsProps> = ({
 
   return (
     <View style={{ flex: 1 }}>
-      <FlatList
-        data={messages}
+      <KeyboardAwareFlatList
+        data={[...messages].reverse()}
         renderItem={renderMessage}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item: Message) => item.id}
         extraData={extraData}
         inverted={true}
         removeClippedSubviews={true}
@@ -181,8 +177,12 @@ const ChatListWithReactions: React.FC<ChatListWithReactionsProps> = ({
         maxToRenderPerBatch={10}
         onScrollBeginDrag={handleScrollBeginDrag}
         onScrollEndDrag={handleScrollEndDrag}
+        keyboardShouldPersistTaps="handled"
+        enableOnAndroid={true}
+        enableAutomaticScroll={true}
+        extraScrollHeight={20}
       />
-      
+
       <Portal>
         <ReactionBar
           visible={!!(visible && getSelectedCount() === 1 && selectedMessageId && isMessageSelected(selectedMessageId))}

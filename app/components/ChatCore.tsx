@@ -29,6 +29,7 @@ import {
   View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { THEMES } from '../constants/themes';
 import { useMessageStore } from '../hooks/useMessageStore';
 
 import { useErrorMonitor } from '../utils/errorBoundary';
@@ -38,7 +39,6 @@ import ChatListWithReactions from './ChatListWithReactions';
 import useKeyboardGlue from '../hooks/chat/useKeyboardGlue';
 import { useChatEffects } from '../hooks/useChatEffects';
 import { useChatHandlerWrappers } from '../hooks/useChatHandlerWrappers';
-import { useChatLogic } from '../hooks/useChatLogic';
 import { useChatUIState } from '../hooks/useChatUIState';
 import { useMessageSender } from '../hooks/useMessageSender';
 import { useSafeExecute } from '../hooks/useSafeExecute';
@@ -104,6 +104,11 @@ const ChatCoreInner: React.FC<ChatCoreProps> = ({ onSendMessage, onError, isBotE
     setSelectedMessageId,
     selectedMessages
   );
+
+  // Стабильный обработчик для скролла
+  const handleScrollBeginDrag = React.useCallback(() => {
+    // Обработка начала скролла
+  }, []);
   
   // Используем извлеченные состояния UI
   const {
@@ -135,13 +140,15 @@ const ChatCoreInner: React.FC<ChatCoreProps> = ({ onSendMessage, onError, isBotE
     onError,
   });
 
-  // Используем извлеченную логику фильтрации и тем
-  const { currentThemeData, filteredMessages } = useChatLogic(
-    messages,
-    searchQuery,
-    currentTheme,
-    addError
-  );
+  // Получаем данные темы
+  const currentThemeData = THEMES[currentTheme] || THEMES.dark;
+  
+  // Фильтруем сообщения по поиску
+  const filteredMessagesBySearch = searchQuery 
+    ? messages.filter(msg => 
+        msg.text.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : messages;
 
   // Используем извлеченную утилиту безопасного выполнения
   const { safeExecute } = useSafeExecute(
@@ -225,12 +232,10 @@ const ChatCoreInner: React.FC<ChatCoreProps> = ({ onSendMessage, onError, isBotE
           setCurrentTheme={setCurrentTheme}
         />
 
-                 {/* Список сообщений - критически важный компонент */}
-         <ChatListWithReactions
-          messages={filteredMessages}
-          onScrollBeginDrag={() => {
-            // Обработка начала скролла
-          }}
+        {/* Список сообщений - критически важный компонент */}
+        <ChatListWithReactions
+          messages={filteredMessagesBySearch}
+          onScrollBeginDrag={handleScrollBeginDrag}
           onMessageSelected={setSelectedMessageId}
           onSelectionChange={setSelectedMessagesCount}
           onSelectedMessagesChange={setSelectedMessages}
@@ -250,6 +255,7 @@ const ChatCoreInner: React.FC<ChatCoreProps> = ({ onSendMessage, onError, isBotE
           setInputText={setInputText}
           handleSendMessage={handleSendMessage}
           keyboardHeight={keyboardHeight}
+          keyboardAnimation={keyboardAnimation}
           currentThemeData={currentThemeData}
           setInputFocused={setInputFocused}
         />

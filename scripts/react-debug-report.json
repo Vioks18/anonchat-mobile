@@ -1,0 +1,1256 @@
+[
+  {
+    "file": "app\\components\\chat\\ChatCoreFallback.tsx",
+    "issues": [
+      {
+        "type": "arrow_function_in_jsx",
+        "description": "Стрелочная функция в JSX prop",
+        "line": 21,
+        "code": "onPress={() => {",
+        "match": "onPress={() =>",
+        "severity": "HIGH"
+      },
+      {
+        "type": "unstable_handler",
+        "description": "Нестабильный обработчик в JSX",
+        "line": 21,
+        "code": "onPress={() => {",
+        "match": "onPress={() => {\r\n          // Попытка перезагрузки\r\n          if (__DEV__) console.log('ChatCore: Попытка перезагрузки...');\r\n        }",
+        "severity": "HIGH"
+      },
+      {
+        "type": "direct_function_call",
+        "description": "Прямой вызов функции в JSX",
+        "line": 21,
+        "code": "onPress={() => {",
+        "match": "onPress={() => {\r\n          // Попытка перезагрузки\r\n          if (",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 21,
+        "code": "onPress={() => {",
+        "match": "onPress={() => {\r\n          // Попытка перезагрузки\r\n          if (__DEV__) console.log('ChatCore: Попытка перезагрузки...');\r\n        }",
+        "severity": "HIGH"
+      }
+    ]
+  },
+  {
+    "file": "app\\components\\chat\\ChatMenus.tsx",
+    "issues": [
+      {
+        "type": "arrow_function_in_jsx",
+        "description": "Стрелочная функция в JSX prop",
+        "line": 41,
+        "code": "onPress={() => setShowMenu(false)}",
+        "match": "onPress={() =>",
+        "severity": "HIGH"
+      },
+      {
+        "type": "arrow_function_in_jsx",
+        "description": "Стрелочная функция в JSX prop",
+        "line": 46,
+        "code": "onPress={() => {}}",
+        "match": "onPress={() =>",
+        "severity": "HIGH"
+      },
+      {
+        "type": "arrow_function_in_jsx",
+        "description": "Стрелочная функция в JSX prop",
+        "line": 51,
+        "code": "onPress={() => {",
+        "match": "onPress={() =>",
+        "severity": "HIGH"
+      },
+      {
+        "type": "arrow_function_in_jsx",
+        "description": "Стрелочная функция в JSX prop",
+        "line": 62,
+        "code": "onPress={() => {",
+        "match": "onPress={() =>",
+        "severity": "HIGH"
+      },
+      {
+        "type": "arrow_function_in_jsx",
+        "description": "Стрелочная функция в JSX prop",
+        "line": 73,
+        "code": "onPress={() => {",
+        "match": "onPress={() =>",
+        "severity": "HIGH"
+      },
+      {
+        "type": "arrow_function_in_jsx",
+        "description": "Стрелочная функция в JSX prop",
+        "line": 93,
+        "code": "onPress={() => setShowThemeSelector(false)}",
+        "match": "onPress={() =>",
+        "severity": "HIGH"
+      },
+      {
+        "type": "arrow_function_in_jsx",
+        "description": "Стрелочная функция в JSX prop",
+        "line": 98,
+        "code": "onPress={() => {}}",
+        "match": "onPress={() =>",
+        "severity": "HIGH"
+      },
+      {
+        "type": "arrow_function_in_jsx",
+        "description": "Стрелочная функция в JSX prop",
+        "line": 109,
+        "code": "onPress={() => {",
+        "match": "onPress={() =>",
+        "severity": "HIGH"
+      },
+      {
+        "type": "unstable_handler",
+        "description": "Нестабильный обработчик в JSX",
+        "line": 46,
+        "code": "onPress={() => {}}",
+        "match": "onPress={() => {}",
+        "severity": "HIGH"
+      },
+      {
+        "type": "unstable_handler",
+        "description": "Нестабильный обработчик в JSX",
+        "line": 51,
+        "code": "onPress={() => {",
+        "match": "onPress={() => {\r\n                setIsSearching(true);\r\n                setShowMenu(false);\r\n              }",
+        "severity": "HIGH"
+      },
+      {
+        "type": "unstable_handler",
+        "description": "Нестабильный обработчик в JSX",
+        "line": 62,
+        "code": "onPress={() => {",
+        "match": "onPress={() => {\r\n                setShowMenu(false);\r\n                setShowThemeSelector(true);\r\n              }",
+        "severity": "HIGH"
+      },
+      {
+        "type": "unstable_handler",
+        "description": "Нестабильный обработчик в JSX",
+        "line": 73,
+        "code": "onPress={() => {",
+        "match": "onPress={() => {\r\n                onToggleBot?.();\r\n                setShowMenu(false);\r\n              }",
+        "severity": "HIGH"
+      },
+      {
+        "type": "unstable_handler",
+        "description": "Нестабильный обработчик в JSX",
+        "line": 98,
+        "code": "onPress={() => {}}",
+        "match": "onPress={() => {}",
+        "severity": "HIGH"
+      },
+      {
+        "type": "unstable_handler",
+        "description": "Нестабильный обработчик в JSX",
+        "line": 109,
+        "code": "onPress={() => {",
+        "match": "onPress={() => {\r\n                    setCurrentTheme(key);\r\n                    setShowThemeSelector(false);\r\n                  }",
+        "severity": "HIGH"
+      },
+      {
+        "type": "direct_function_call",
+        "description": "Прямой вызов функции в JSX",
+        "line": 41,
+        "code": "onPress={() => setShowMenu(false)}",
+        "match": "onPress={() => setShowMenu(",
+        "severity": "HIGH"
+      },
+      {
+        "type": "direct_function_call",
+        "description": "Прямой вызов функции в JSX",
+        "line": 46,
+        "code": "onPress={() => {}}",
+        "match": "onPress={() => {}}\r\n            activeOpacity={1}\r\n          >\r\n            <TouchableOpacity \r\n              style={styles.menuItem}\r\n              onPress={(",
+        "severity": "HIGH"
+      },
+      {
+        "type": "direct_function_call",
+        "description": "Прямой вызов функции в JSX",
+        "line": 62,
+        "code": "onPress={() => {",
+        "match": "onPress={() => {\r\n                setShowMenu(",
+        "severity": "HIGH"
+      },
+      {
+        "type": "direct_function_call",
+        "description": "Прямой вызов функции в JSX",
+        "line": 73,
+        "code": "onPress={() => {",
+        "match": "onPress={() => {\r\n                onToggleBot?.(",
+        "severity": "HIGH"
+      },
+      {
+        "type": "direct_function_call",
+        "description": "Прямой вызов функции в JSX",
+        "line": 93,
+        "code": "onPress={() => setShowThemeSelector(false)}",
+        "match": "onPress={() => setShowThemeSelector(",
+        "severity": "HIGH"
+      },
+      {
+        "type": "direct_function_call",
+        "description": "Прямой вызов функции в JSX",
+        "line": 98,
+        "code": "onPress={() => {}}",
+        "match": "onPress={() => {}}\r\n              activeOpacity={1}\r\n            >\r\n              <Text style={styles.themeModalTitle}>Выберите тему</Text>\r\n              {Object.entries(",
+        "severity": "HIGH"
+      },
+      {
+        "type": "direct_function_call",
+        "description": "Прямой вызов функции в JSX",
+        "line": 109,
+        "code": "onPress={() => {",
+        "match": "onPress={() => {\r\n                    setCurrentTheme(",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 41,
+        "code": "onPress={() => setShowMenu(false)}",
+        "match": "onPress={() => setShowMenu(false)}",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 46,
+        "code": "onPress={() => {}}",
+        "match": "onPress={() => {}",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 51,
+        "code": "onPress={() => {",
+        "match": "onPress={() => {\r\n                setIsSearching(true);\r\n                setShowMenu(false);\r\n              }",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 62,
+        "code": "onPress={() => {",
+        "match": "onPress={() => {\r\n                setShowMenu(false);\r\n                setShowThemeSelector(true);\r\n              }",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 73,
+        "code": "onPress={() => {",
+        "match": "onPress={() => {\r\n                onToggleBot?.();\r\n                setShowMenu(false);\r\n              }",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 93,
+        "code": "onPress={() => setShowThemeSelector(false)}",
+        "match": "onPress={() => setShowThemeSelector(false)}",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 98,
+        "code": "onPress={() => {}}",
+        "match": "onPress={() => {}",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 109,
+        "code": "onPress={() => {",
+        "match": "onPress={() => {\r\n                    setCurrentTheme(key);\r\n                    setShowThemeSelector(false);\r\n                  }",
+        "severity": "HIGH"
+      }
+    ]
+  },
+  {
+    "file": "app\\components\\chat\\HeaderBar.tsx",
+    "issues": [
+      {
+        "type": "arrow_function_in_jsx",
+        "description": "Стрелочная функция в JSX prop",
+        "line": 82,
+        "code": "onPress={() => setShowMenu(!showMenu)}",
+        "match": "onPress={() =>",
+        "severity": "HIGH"
+      },
+      {
+        "type": "arrow_function_in_jsx",
+        "description": "Стрелочная функция в JSX prop",
+        "line": 103,
+        "code": "onPress={() => {",
+        "match": "onPress={() =>",
+        "severity": "HIGH"
+      },
+      {
+        "type": "unstable_handler",
+        "description": "Нестабильный обработчик в JSX",
+        "line": 103,
+        "code": "onPress={() => {",
+        "match": "onPress={() => {\r\n              setIsSearching(false);\r\n              setSearchQuery(\"\");\r\n            }",
+        "severity": "HIGH"
+      },
+      {
+        "type": "direct_function_call",
+        "description": "Прямой вызов функции в JSX",
+        "line": 82,
+        "code": "onPress={() => setShowMenu(!showMenu)}",
+        "match": "onPress={() => setShowMenu(",
+        "severity": "HIGH"
+      },
+      {
+        "type": "direct_function_call",
+        "description": "Прямой вызов функции в JSX",
+        "line": 103,
+        "code": "onPress={() => {",
+        "match": "onPress={() => {\r\n              setIsSearching(",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 50,
+        "code": "onPress={handleReply}",
+        "match": "onPress={handleReply}",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 57,
+        "code": "onPress={handleCopy}",
+        "match": "onPress={handleCopy}",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 64,
+        "code": "onPress={handleForward}",
+        "match": "onPress={handleForward}",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 71,
+        "code": "onPress={handleDelete}",
+        "match": "onPress={handleDelete}",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 82,
+        "code": "onPress={() => setShowMenu(!showMenu)}",
+        "match": "onPress={() => setShowMenu(!showMenu)}",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 95,
+        "code": "onChangeText={setSearchQuery}",
+        "match": "onChangeText={setSearchQuery}",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 103,
+        "code": "onPress={() => {",
+        "match": "onPress={() => {\r\n              setIsSearching(false);\r\n              setSearchQuery(\"\");\r\n            }",
+        "severity": "HIGH"
+      }
+    ]
+  },
+  {
+    "file": "app\\components\\chat\\InputBar.tsx",
+    "issues": [
+      {
+        "type": "arrow_function_in_jsx",
+        "description": "Стрелочная функция в JSX prop",
+        "line": 60,
+        "code": "onFocus={() => setInputFocused(true)}",
+        "match": "onFocus={() =>",
+        "severity": "HIGH"
+      },
+      {
+        "type": "arrow_function_in_jsx",
+        "description": "Стрелочная функция в JSX prop",
+        "line": 61,
+        "code": "onBlur={() => setInputFocused(false)}",
+        "match": "onBlur={() =>",
+        "severity": "HIGH"
+      },
+      {
+        "type": "direct_function_call",
+        "description": "Прямой вызов функции в JSX",
+        "line": 60,
+        "code": "onFocus={() => setInputFocused(true)}",
+        "match": "onFocus={() => setInputFocused(",
+        "severity": "HIGH"
+      },
+      {
+        "type": "direct_function_call",
+        "description": "Прямой вызов функции в JSX",
+        "line": 61,
+        "code": "onBlur={() => setInputFocused(false)}",
+        "match": "onBlur={() => setInputFocused(",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 50,
+        "code": "onChangeText={setInputText}",
+        "match": "onChangeText={setInputText}",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 53,
+        "code": "onSubmitEditing={handleSendMessage}",
+        "match": "onSubmitEditing={handleSendMessage}",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 60,
+        "code": "onFocus={() => setInputFocused(true)}",
+        "match": "onFocus={() => setInputFocused(true)}",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 61,
+        "code": "onBlur={() => setInputFocused(false)}",
+        "match": "onBlur={() => setInputFocused(false)}",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 70,
+        "code": "onPress={handleSendMessage}",
+        "match": "onPress={handleSendMessage}",
+        "severity": "HIGH"
+      }
+    ]
+  },
+  {
+    "file": "app\\components\\chat\\SelectionToolbar.tsx",
+    "issues": [
+      {
+        "type": "arrow_function_in_jsx",
+        "description": "Стрелочная функция в JSX prop",
+        "line": 37,
+        "code": "onPress={() => {",
+        "match": "onPress={() =>",
+        "severity": "HIGH"
+      },
+      {
+        "type": "arrow_function_in_jsx",
+        "description": "Стрелочная функция в JSX prop",
+        "line": 52,
+        "code": "onPress={() => {",
+        "match": "onPress={() =>",
+        "severity": "HIGH"
+      },
+      {
+        "type": "unstable_handler",
+        "description": "Нестабильный обработчик в JSX",
+        "line": 37,
+        "code": "onPress={() => {",
+        "match": "onPress={() => {\r\n            // Очищаем выбор и закрываем меню реакций\r\n            clearSelection();\r\n            setSelectedMessageId(null);\r\n          }",
+        "severity": "HIGH"
+      },
+      {
+        "type": "unstable_handler",
+        "description": "Нестабильный обработчик в JSX",
+        "line": 52,
+        "code": "onPress={() => {",
+        "match": "onPress={() => {\r\n              // if (__DEV__) console.log('SelectionToolbar: нажата кнопка ответа');\r\n              handleReply();\r\n            }",
+        "severity": "HIGH"
+      },
+      {
+        "type": "direct_function_call",
+        "description": "Прямой вызов функции в JSX",
+        "line": 37,
+        "code": "onPress={() => {",
+        "match": "onPress={() => {\r\n            // Очищаем выбор и закрываем меню реакций\r\n            clearSelection(",
+        "severity": "HIGH"
+      },
+      {
+        "type": "direct_function_call",
+        "description": "Прямой вызов функции в JSX",
+        "line": 52,
+        "code": "onPress={() => {",
+        "match": "onPress={() => {\r\n              // if (",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 37,
+        "code": "onPress={() => {",
+        "match": "onPress={() => {\r\n            // Очищаем выбор и закрываем меню реакций\r\n            clearSelection();\r\n            setSelectedMessageId(null);\r\n          }",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 52,
+        "code": "onPress={() => {",
+        "match": "onPress={() => {\r\n              // if (__DEV__) console.log('SelectionToolbar: нажата кнопка ответа');\r\n              handleReply();\r\n            }",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 63,
+        "code": "onPress={handleCopySelected}",
+        "match": "onPress={handleCopySelected}",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 70,
+        "code": "onPress={handleForward}",
+        "match": "onPress={handleForward}",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 77,
+        "code": "onPress={handleDeleteSelected}",
+        "match": "onPress={handleDeleteSelected}",
+        "severity": "HIGH"
+      }
+    ]
+  },
+  {
+    "file": "app\\components\\ChatCore.tsx",
+    "issues": [
+      {
+        "type": "arrow_function_in_jsx",
+        "description": "Стрелочная функция в JSX prop",
+        "line": 233,
+        "code": "onScrollBeginDrag={() => {",
+        "match": "onScrollBeginDrag={() =>",
+        "severity": "HIGH"
+      },
+      {
+        "type": "unstable_handler",
+        "description": "Нестабильный обработчик в JSX",
+        "line": 233,
+        "code": "onScrollBeginDrag={() => {",
+        "match": "onScrollBeginDrag={() => {\r\n            // Обработка начала скролла\r\n          }",
+        "severity": "HIGH"
+      },
+      {
+        "type": "direct_function_call",
+        "description": "Прямой вызов функции в JSX",
+        "line": 233,
+        "code": "onScrollBeginDrag={() => {",
+        "match": "onScrollBeginDrag={() => {\r\n            // Обработка начала скролла\r\n          }}\r\n          onMessageSelected={setSelectedMessageId}\r\n          onSelectionChange={setSelectedMessagesCount}\r\n          onSelectedMessagesChange={setSelectedMessages}\r\n        />\r\n\r\n        {/* Превью ответа */}\r\n        <ReplyPreview\r\n          replyTo={replyDraft}\r\n          setReplyTo={setReplyDraft}\r\n          styles={styles}\r\n          themedStyles={currentThemeData}\r\n        />\r\n\r\n        {/* Строка ввода - критически важный компонент */}\r\n        <InputBar\r\n          inputText={inputText}\r\n          setInputText={setInputText}\r\n          handleSendMessage={handleSendMessage}\r\n          keyboardHeight={keyboardHeight}\r\n          currentThemeData={currentThemeData}\r\n          setInputFocused={setInputFocused}\r\n        />\r\n        \r\n        {/* Реакции теперь обрабатываются в ChatListWithReactions */}\r\n      </View>\r\n      \r\n      {/* DevHUD для отображения статуса WatchDog (",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 223,
+        "code": "onToggleBot={onToggleBot}",
+        "match": "onToggleBot={onToggleBot}",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 233,
+        "code": "onScrollBeginDrag={() => {",
+        "match": "onScrollBeginDrag={() => {\r\n            // Обработка начала скролла\r\n          }",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 236,
+        "code": "onMessageSelected={setSelectedMessageId}",
+        "match": "onMessageSelected={setSelectedMessageId}",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 237,
+        "code": "onSelectionChange={setSelectedMessagesCount}",
+        "match": "onSelectionChange={setSelectedMessagesCount}",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 238,
+        "code": "onSelectedMessagesChange={setSelectedMessages}",
+        "match": "onSelectedMessagesChange={setSelectedMessages}",
+        "severity": "HIGH"
+      }
+    ]
+  },
+  {
+    "file": "app\\components\\ChatInput.tsx",
+    "issues": [
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 162,
+        "code": "onChangeText={handleTextChange}",
+        "match": "onChangeText={handleTextChange}",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 165,
+        "code": "onSubmitEditing={handleSendMessage}",
+        "match": "onSubmitEditing={handleSendMessage}",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 172,
+        "code": "onFocus={handleFocus}",
+        "match": "onFocus={handleFocus}",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 173,
+        "code": "onBlur={handleBlur}",
+        "match": "onBlur={handleBlur}",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 178,
+        "code": "onPress={handleSendMessage}",
+        "match": "onPress={handleSendMessage}",
+        "severity": "HIGH"
+      }
+    ]
+  },
+  {
+    "file": "app\\components\\ChatListWithReactions.tsx",
+    "issues": [
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 147,
+        "code": "onLongPress={handleLongPress}",
+        "match": "onLongPress={handleLongPress}",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 148,
+        "code": "onPress={handlePress}",
+        "match": "onPress={handlePress}",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 182,
+        "code": "onScrollBeginDrag={handleScrollBeginDrag}",
+        "match": "onScrollBeginDrag={handleScrollBeginDrag}",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 183,
+        "code": "onScrollEndDrag={handleScrollEndDrag}",
+        "match": "onScrollEndDrag={handleScrollEndDrag}",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 190,
+        "code": "onClose={close}",
+        "match": "onClose={close}",
+        "severity": "HIGH"
+      }
+    ]
+  },
+  {
+    "file": "app\\components\\ChatMenu.tsx",
+    "issues": [
+      {
+        "type": "arrow_function_in_jsx",
+        "description": "Стрелочная функция в JSX prop",
+        "line": 114,
+        "code": "onPress={() => {}}",
+        "match": "onPress={() =>",
+        "severity": "HIGH"
+      },
+      {
+        "type": "unstable_handler",
+        "description": "Нестабильный обработчик в JSX",
+        "line": 114,
+        "code": "onPress={() => {}}",
+        "match": "onPress={() => {}",
+        "severity": "HIGH"
+      },
+      {
+        "type": "direct_function_call",
+        "description": "Прямой вызов функции в JSX",
+        "line": 114,
+        "code": "onPress={() => {}}",
+        "match": "onPress={() => {}}\r\n            activeOpacity={1}\r\n          >\r\n            <TouchableOpacity \r\n              style={styles.menuItem}\r\n              onPress={handleSearchToggle}\r\n              activeOpacity={0.7}\r\n            >\r\n              <Ionicons name=\"search\" size={20} color=\"#fff\" />\r\n              <Text style={styles.menuItemText}>Поиск сообщений</Text>\r\n            </TouchableOpacity>\r\n            \r\n            <TouchableOpacity \r\n              style={styles.menuItem}\r\n              onPress={handleThemeToggle}\r\n              activeOpacity={0.7}\r\n            >\r\n              <Ionicons name=\"color-palette-outline\" size={20} color=\"#fff\" />\r\n              <Text style={styles.menuItemText}>Темы</Text>\r\n            </TouchableOpacity>\r\n            \r\n            <TouchableOpacity \r\n              style={styles.menuItem}\r\n              onPress={handleBotToggle}\r\n              activeOpacity={0.7}\r\n            >\r\n              <Ionicons \r\n                name={isBotEnabled ? \"chatbubble\" : \"chatbubble-outline\"} \r\n                size={20} \r\n                color=\"#fff\" \r\n              />\r\n              <Text style={styles.menuItemText}>\r\n                {isBotEnabled ? \"Отключить бота\" : \"Включить бота\"}\r\n              </Text>\r\n            </TouchableOpacity>\r\n          </TouchableOpacity>\r\n        </TouchableOpacity>\r\n      )}\r\n    </>\r\n  );\r\n});\r\n\r\nChatMenuInner.displayName = 'ChatMenu';\r\n\r\nconst styles = StyleSheet.create(",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 77,
+        "code": "onPress={handleMenuToggle}",
+        "match": "onPress={handleMenuToggle}",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 88,
+        "code": "onChangeText={onSearchChange}",
+        "match": "onChangeText={onSearchChange}",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 96,
+        "code": "onPress={onSearchClose}",
+        "match": "onPress={onSearchClose}",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 109,
+        "code": "onPress={handleMenuToggle}",
+        "match": "onPress={handleMenuToggle}",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 114,
+        "code": "onPress={() => {}}",
+        "match": "onPress={() => {}",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 119,
+        "code": "onPress={handleSearchToggle}",
+        "match": "onPress={handleSearchToggle}",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 128,
+        "code": "onPress={handleThemeToggle}",
+        "match": "onPress={handleThemeToggle}",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 137,
+        "code": "onPress={handleBotToggle}",
+        "match": "onPress={handleBotToggle}",
+        "severity": "HIGH"
+      }
+    ]
+  },
+  {
+    "file": "app\\components\\ChatMessage.tsx",
+    "issues": [
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 100,
+        "code": "onPress={handlePressSafe}",
+        "match": "onPress={handlePressSafe}",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 101,
+        "code": "onLongPress={handleLongPressSafe}",
+        "match": "onLongPress={handleLongPressSafe}",
+        "severity": "HIGH"
+      }
+    ]
+  },
+  {
+    "file": "app\\components\\ChatSearch.tsx",
+    "issues": [
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 75,
+        "code": "onChangeText={handleSearchChange}",
+        "match": "onChangeText={handleSearchChange}",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 83,
+        "code": "onPress={handleSearchClose}",
+        "match": "onPress={handleSearchClose}",
+        "severity": "HIGH"
+      }
+    ]
+  },
+  {
+    "file": "app\\components\\ChatWithReactions.tsx",
+    "issues": [
+      {
+        "type": "arrow_function_in_jsx",
+        "description": "Стрелочная функция в JSX prop",
+        "line": 55,
+        "code": "onScrollBeginDrag={() => {",
+        "match": "onScrollBeginDrag={() =>",
+        "severity": "HIGH"
+      },
+      {
+        "type": "unstable_handler",
+        "description": "Нестабильный обработчик в JSX",
+        "line": 55,
+        "code": "onScrollBeginDrag={() => {",
+        "match": "onScrollBeginDrag={() => {\r\n            // Закрытие панели реакций при скролле\r\n          }",
+        "severity": "HIGH"
+      },
+      {
+        "type": "direct_function_call",
+        "description": "Прямой вызов функции в JSX",
+        "line": 55,
+        "code": "onScrollBeginDrag={() => {",
+        "match": "onScrollBeginDrag={() => {\r\n            // Закрытие панели реакций при скролле\r\n          }}\r\n        />\r\n      </View>\r\n      \r\n             {/* Строка ввода обрабатывается в ChatCore */}\r\n     </SafeAreaView>\r\n   );\r\n};\r\n\r\nconst styles = StyleSheet.create(",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 43,
+        "code": "onPress={onToggleBot}",
+        "match": "onPress={onToggleBot}",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 55,
+        "code": "onScrollBeginDrag={() => {",
+        "match": "onScrollBeginDrag={() => {\r\n            // Закрытие панели реакций при скролле\r\n          }",
+        "severity": "HIGH"
+      }
+    ]
+  },
+  {
+    "file": "app\\components\\header\\HeaderView.tsx",
+    "issues": [
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 52,
+        "code": "onPress={onMenuToggle}",
+        "match": "onPress={onMenuToggle}",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 64,
+        "code": "onChangeText={onSearchChange}",
+        "match": "onChangeText={onSearchChange}",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 72,
+        "code": "onPress={onSearchClose}",
+        "match": "onPress={onSearchClose}",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 83,
+        "code": "onPress={onDelete}",
+        "match": "onPress={onDelete}",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 90,
+        "code": "onPress={onCopy}",
+        "match": "onPress={onCopy}",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 97,
+        "code": "onPress={onReply}",
+        "match": "onPress={onReply}",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 104,
+        "code": "onPress={onCancelSelection}",
+        "match": "onPress={onCancelSelection}",
+        "severity": "HIGH"
+      }
+    ]
+  },
+  {
+    "file": "app\\components\\Header.tsx",
+    "issues": [
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 90,
+        "code": "onMenuToggle={handleMenuToggle}",
+        "match": "onMenuToggle={handleMenuToggle}",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 91,
+        "code": "onSearchClose={handleSearchClose}",
+        "match": "onSearchClose={handleSearchClose}",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 92,
+        "code": "onSearchChange={handleSearchChange}",
+        "match": "onSearchChange={handleSearchChange}",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 93,
+        "code": "onDelete={handleDelete}",
+        "match": "onDelete={handleDelete}",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 94,
+        "code": "onCopy={handleCopy}",
+        "match": "onCopy={handleCopy}",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 95,
+        "code": "onReply={handleReply}",
+        "match": "onReply={handleReply}",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 96,
+        "code": "onCancelSelection={handleCancelSelection}",
+        "match": "onCancelSelection={handleCancelSelection}",
+        "severity": "HIGH"
+      }
+    ]
+  },
+  {
+    "file": "app\\components\\MessageInput.tsx",
+    "issues": [
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 81,
+        "code": "onChangeText={handleTextChange}",
+        "match": "onChangeText={handleTextChange}",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 84,
+        "code": "onSubmitEditing={handleSubmitEditing}",
+        "match": "onSubmitEditing={handleSubmitEditing}",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 95,
+        "code": "onPress={handleSendMessage}",
+        "match": "onPress={handleSendMessage}",
+        "severity": "HIGH"
+      }
+    ]
+  },
+  {
+    "file": "app\\components\\MessageWithReactions.tsx",
+    "issues": [
+      {
+        "type": "function_in_map",
+        "description": "Функция в map без useCallback",
+        "line": 156,
+        "code": "{message.reactions.map((reaction, index) => {",
+        "match": ".map((reaction, index) => {\r\n                           const handleReactionPressForItem = useCallback(() => {\r\n                             handleReactionPress(reaction);\r\n                           }",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 103,
+        "code": "onPress={handlePress}",
+        "match": "onPress={handlePress}",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 104,
+        "code": "onLongPress={handleLongPress}",
+        "match": "onLongPress={handleLongPress}",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 165,
+        "code": "onPress={handleReactionPressForItem}",
+        "match": "onPress={handleReactionPressForItem}",
+        "severity": "HIGH"
+      }
+    ]
+  },
+  {
+    "file": "app\\components\\reactions\\ReactionBar.tsx",
+    "issues": [
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 132,
+        "code": "onLayout={handleLayout}",
+        "match": "onLayout={handleLayout}",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 144,
+        "code": "onPress={handleReactionForItem}",
+        "match": "onPress={handleReactionForItem}",
+        "severity": "HIGH"
+      }
+    ]
+  },
+  {
+    "file": "app\\components\\ReplyPreview.tsx",
+    "issues": [
+      {
+        "type": "arrow_function_in_jsx",
+        "description": "Стрелочная функция в JSX prop",
+        "line": 63,
+        "code": "onPress={() => { clearDraft?.(null); handleClose(); }}",
+        "match": "onPress={() =>",
+        "severity": "HIGH"
+      },
+      {
+        "type": "unstable_handler",
+        "description": "Нестабильный обработчик в JSX",
+        "line": 63,
+        "code": "onPress={() => { clearDraft?.(null); handleClose(); }}",
+        "match": "onPress={() => { clearDraft?.(null); handleClose(); }",
+        "severity": "HIGH"
+      },
+      {
+        "type": "direct_function_call",
+        "description": "Прямой вызов функции в JSX",
+        "line": 63,
+        "code": "onPress={() => { clearDraft?.(null); handleClose(); }}",
+        "match": "onPress={() => { clearDraft?.(",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 63,
+        "code": "onPress={() => { clearDraft?.(null); handleClose(); }}",
+        "match": "onPress={() => { clearDraft?.(null); handleClose(); }",
+        "severity": "HIGH"
+      }
+    ]
+  },
+  {
+    "file": "app\\components\\ThemeSelector.tsx",
+    "issues": [
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 40,
+        "code": "onSelectTheme={handleThemeSelect}",
+        "match": "onSelectTheme={handleThemeSelect}",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 41,
+        "code": "onClose={handleClose}",
+        "match": "onClose={handleClose}",
+        "severity": "HIGH"
+      }
+    ]
+  },
+  {
+    "file": "app\\components\\ThemeSelectorView.tsx",
+    "issues": [
+      {
+        "type": "arrow_function_in_jsx",
+        "description": "Стрелочная функция в JSX prop",
+        "line": 53,
+        "code": "onPress={() => onSelectTheme(key)}",
+        "match": "onPress={() =>",
+        "severity": "HIGH"
+      },
+      {
+        "type": "arrow_function_in_jsx",
+        "description": "Стрелочная функция в JSX prop",
+        "line": 84,
+        "code": "onPress={() => {}}",
+        "match": "onPress={() =>",
+        "severity": "HIGH"
+      },
+      {
+        "type": "unstable_handler",
+        "description": "Нестабильный обработчик в JSX",
+        "line": 84,
+        "code": "onPress={() => {}}",
+        "match": "onPress={() => {}",
+        "severity": "HIGH"
+      },
+      {
+        "type": "direct_function_call",
+        "description": "Прямой вызов функции в JSX",
+        "line": 53,
+        "code": "onPress={() => onSelectTheme(key)}",
+        "match": "onPress={() => onSelectTheme(",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 53,
+        "code": "onPress={() => onSelectTheme(key)}",
+        "match": "onPress={() => onSelectTheme(key)}",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 74,
+        "code": "onRequestClose={onClose}",
+        "match": "onRequestClose={onClose}",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 79,
+        "code": "onPress={onClose}",
+        "match": "onPress={onClose}",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 84,
+        "code": "onPress={() => {}}",
+        "match": "onPress={() => {}",
+        "severity": "HIGH"
+      }
+    ]
+  },
+  {
+    "file": "app\\components\\UIErrorBoundary.tsx",
+    "issues": [
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 69,
+        "code": "<TouchableOpacity style={styles.retryButton} onPress={this.handleRetry}>",
+        "match": "onPress={this.handleRetry}",
+        "severity": "HIGH"
+      }
+    ]
+  },
+  {
+    "file": "app\\screens\\ChatScreen.tsx",
+    "issues": [
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 28,
+        "code": "onToggleBot={toggleBot}",
+        "match": "onToggleBot={toggleBot}",
+        "severity": "HIGH"
+      },
+      {
+        "type": "handler_without_callback",
+        "description": "Обработчик без useCallback",
+        "line": 29,
+        "code": "onSendMessage={handleSendMessage}",
+        "match": "onSendMessage={handleSendMessage}",
+        "severity": "HIGH"
+      }
+    ]
+  }
+]

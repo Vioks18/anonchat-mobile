@@ -43,49 +43,14 @@ const HeaderBar: React.FC<HeaderBarProps> = ({
     <View style={[styles.header, { backgroundColor: currentThemeData.headerBg }]}>
       {!isSearching ? (
         <>
-          {selectedMessageId ? (
-            <View style={styles.headerActions}>
-              <TouchableOpacity 
-                style={styles.actionButton}
-                onPress={handleReply}
-                activeOpacity={0.7}
-              >
-                <Ionicons name="arrow-undo" size={18} color="#fff" />
-              </TouchableOpacity>
-              <TouchableOpacity 
-                style={styles.actionButton}
-                onPress={handleCopy}
-                activeOpacity={0.7}
-              >
-                <Ionicons name="copy" size={18} color="#fff" />
-              </TouchableOpacity>
-              <TouchableOpacity 
-                style={styles.actionButton}
-                onPress={handleForward}
-                activeOpacity={0.7}
-              >
-                <Ionicons name="arrow-forward" size={18} color="#fff" />
-              </TouchableOpacity>
-              <TouchableOpacity 
-                style={styles.actionButton}
-                onPress={handleDelete}
-                activeOpacity={0.7}
-              >
-                <Ionicons name="trash" size={18} color="#fff" />
-              </TouchableOpacity>
-            </View>
-          ) : (
-            <>
-              <Text style={styles.headerText}>Axora</Text>
-              <TouchableOpacity 
-                style={styles.menuButton}
-                onPress={() => setShowMenu(!showMenu)}
-                activeOpacity={0.7}
-              >
-                <Ionicons name="ellipsis-vertical" size={20} color="#fff" />
-              </TouchableOpacity>
-            </>
-          )}
+          <Text style={styles.headerText}>Axora</Text>
+          <TouchableOpacity 
+            style={styles.menuButton}
+            onPress={() => setShowMenu(!showMenu)}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="ellipsis-vertical" size={20} color="#fff" />
+          </TouchableOpacity>
         </>
       ) : (
         <View style={styles.searchContainer}>

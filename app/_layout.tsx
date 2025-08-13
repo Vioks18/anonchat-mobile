@@ -1,5 +1,6 @@
 import { useFonts } from "expo-font";
 import { Stack } from 'expo-router';
+import AppCheckProvider from './providers/AppCheckProvider';
 
 export default function Layout() {
   const [fontsLoaded] = useFonts({
@@ -13,10 +14,12 @@ export default function Layout() {
   }
 
   return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-      }}
-    />
+    <AppCheckProvider>
+      <Stack
+        screenOptions={{
+          headerShown: false,
+        }}
+      />
+    </AppCheckProvider>
   );
 }

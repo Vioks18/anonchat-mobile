@@ -2,10 +2,10 @@
 import { Ionicons } from '@expo/vector-icons';
 import React, { useRef } from 'react';
 import {
-    Animated,
-    StyleSheet,
-    TextInput,
-    TouchableOpacity,
+  Animated,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
 } from 'react-native';
 
 interface InputBarProps {
@@ -13,6 +13,7 @@ interface InputBarProps {
   setInputText: (text: string) => void;
   handleSendMessage: () => void;
   keyboardHeight: number;
+  keyboardAnimation?: any;
   currentThemeData: any;
   setInputFocused: (focused: boolean) => void;
 }
@@ -22,6 +23,7 @@ const InputBar: React.FC<InputBarProps> = ({
   setInputText,
   handleSendMessage,
   keyboardHeight,
+  keyboardAnimation,
   currentThemeData,
   setInputFocused,
 }) => {
@@ -31,9 +33,9 @@ const InputBar: React.FC<InputBarProps> = ({
     <Animated.View style={[
       styles.inputContainer, 
       { 
-        marginBottom: keyboardHeight, // Простое значение без интерполяции
         backgroundColor: currentThemeData.inputBg,
-        borderTopColor: currentThemeData.border
+        borderTopColor: currentThemeData.border,
+        marginBottom: keyboardHeight // Синхронное движение!
       }
     ]}>
       <TextInput
@@ -57,9 +59,21 @@ const InputBar: React.FC<InputBarProps> = ({
         keyboardType="default"
         autoCorrect={true}
         autoCapitalize="sentences"
-        onFocus={() => setInputFocused(true)}
-        onBlur={() => setInputFocused(false)}
+        onFocus={() => {
+          setInputFocused(true);
+          // При фокусе проверяем высоту клавиатуры
+          if (__DEV__) console.log('📱 Input focused, keyboard height:', keyboardHeight);
+        }}
+        onBlur={() => {
+          setInputFocused(false);
+          // При потере фокуса сбрасываем высоту
+          if (__DEV__) console.log('📱 Input blurred');
+        }}
         textAlignVertical="top" // Выравнивание текста сверху
+        maxLength={undefined} // Убираем ограничение длины
+        textContentType="none" // Улучшает производительность
+        autoComplete="off" // Отключаем автодополнение
+        spellCheck={false} // Отключаем проверку орфографии
       />
       <TouchableOpacity
         style={[

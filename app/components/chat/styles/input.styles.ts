@@ -1,0 +1,61 @@
+import { StyleSheet } from 'react-native';
+
+export const inputStyles = StyleSheet.create({
+  inputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 8,
+    paddingBottom: 8,
+    borderTopWidth: 1,
+    borderTopColor: "#282850",
+    backgroundColor: "rgba(34,30,60,0.98)",
+    shadowColor: "#6c5ce7",
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  textInput: {
+    flex: 1,
+    fontSize: 16,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    backgroundColor: "#23234d",
+    borderRadius: 16,
+    marginRight: 10,
+    color: "#fff",
+    borderWidth: 1,
+    borderColor: "#444",
+    fontFamily: "Poppins-Regular",
+    maxHeight: 120,
+  },
+  sendButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "#6c5ce7",
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#6c5ce7",
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  sendButtonDisabled: {
+    opacity: 0.7,
+  },
+  sendButtonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  errorMessage: {
+    padding: 8,
+    backgroundColor: 'rgba(255,0,0,0.1)',
+    borderRadius: 8,
+    marginVertical: 4,
+  },
+  errorText: {
+    color: '#ff6b6b',
+    fontSize: 12,
+  },
+});

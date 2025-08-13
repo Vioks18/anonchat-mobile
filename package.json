@@ -40,15 +40,17 @@
     "guard:install": "node scripts/guard/install-precommit.js",
     "guard:snapshot": "git add -A && git commit -m \"chore: snapshot before feature\" && git tag -f STABLE",
     "guard:test": "node scripts/sim/run.js --stress",
-    "prefeature": "node scripts/prefeature.js"
+    "prefeature": "node scripts/prefeature.js",
+    "fix:android": "node scripts/fix-android-build.js",
+    "android:fix": "node scripts/quick-android-fix.js",
+    "android:fix:ps": "powershell -ExecutionPolicy Bypass -File scripts/fix-android-windows.ps1"
   },
   "dependencies": {
     "@expo/vector-icons": "^14.1.0",
-    "@react-navigation/bottom-tabs": "^7.3.10",
-    "@react-navigation/elements": "^2.3.8",
+    "@react-native-async-storage/async-storage": "^1.24.0",
     "@react-navigation/native": "^7.1.6",
+    "@react-navigation/stack": "^7.4.7",
     "expo": "~53.0.20",
-    "expo-auth-session": "~6.2.1",
     "expo-background-fetch": "^13.1.6",
     "expo-blur": "~14.1.5",
     "expo-camera": "~16.1.11",
@@ -81,14 +83,16 @@
     "expo-task-manager": "^13.1.6",
     "expo-updates": "^0.28.17",
     "expo-web-browser": "~14.2.0",
+    "firebase": "^12.1.0",
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "react-native": "0.79.5",
     "react-native-gesture-handler": "~2.24.0",
     "react-native-haptic-feedback": "^2.3.3",
+    "react-native-keyboard-aware-scroll-view": "^0.9.5",
     "react-native-portalize": "^1.0.7",
     "react-native-reanimated": "~3.17.4",
-    "react-native-safe-area-context": "^5.6.0",
+    "react-native-safe-area-context": "5.4.0",
     "react-native-screens": "~4.11.1",
     "react-native-swipe-list-view": "^3.2.9",
     "react-native-web": "~0.20.0",
@@ -104,5 +108,17 @@
     "eslint-config-expo": "~9.2.0",
     "typescript": "~5.8.3"
   },
-  "private": true
+  "private": true,
+  "expo": {
+    "doctor": {
+      "reactNativeDirectoryCheck": {
+        "exclude": [
+          "react-native-keyboard-aware-scroll-view",
+          "react-native-swipe-list-view",
+          "firebase",
+          "react-native-portalize"
+        ]
+      }
+    }
+  }
 }

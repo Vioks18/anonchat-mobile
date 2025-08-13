@@ -1,6 +1,6 @@
 import React from 'react';
-import { ChatScreen } from './screens/ChatScreen';
+import ChatListScreen from './screens/ChatListScreen';
 
-export default function Index() {
-  return <ChatScreen />;
+export default function HomePage() {
+  return <ChatListScreen navigation={{} as any} />;
 } 

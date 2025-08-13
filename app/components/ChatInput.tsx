@@ -7,10 +7,12 @@ interface ChatInputProps {
   inputText: string;
   setInputText: (text: string) => void;
   onSendMessage: () => void;
-  keyboardHeight: number;
+  keyboardHeight: number; // Оставляем для обратной совместимости
   currentThemeData: any;
   inputFocused: boolean;
   setInputFocused: (focused: boolean) => void;
+  panelHeight?: number; // Новый проп для высоты панели
+  isEmojiPanel?: boolean; // Новый проп для определения типа панели
 }
 
 const ChatInputInner: React.FC<ChatInputProps> = React.memo(({
@@ -20,11 +22,16 @@ const ChatInputInner: React.FC<ChatInputProps> = React.memo(({
   keyboardHeight,
   currentThemeData,
   inputFocused,
-  setInputFocused
+  setInputFocused,
+  panelHeight,
+  isEmojiPanel
 }) => {
   const textInputRef = useRef<TextInput>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
   const [validationWarning, setValidationWarning] = useState<string | null>(null);
+
+  // Используем panelHeight если доступен, иначе keyboardHeight
+  const effectiveHeight = panelHeight !== undefined ? panelHeight : keyboardHeight;
 
   // Автоматический скролл к концу текста при изменении
   useEffect(() => {
@@ -109,15 +116,15 @@ const ChatInputInner: React.FC<ChatInputProps> = React.memo(({
     }
   }, [inputText, validateInput, validationError, onSendMessage]);
 
-  // Мемоизированные стили контейнера
+  // Мемоизированные стили контейнера с поддержкой всех типов панелей
   const containerStyle = useMemo(() => [
     styles.inputContainer, 
     { 
-      marginBottom: keyboardHeight,
+      marginBottom: effectiveHeight, // Используем эффективную высоту
       backgroundColor: currentThemeData.inputBg,
       borderTopColor: currentThemeData.border
     }
-  ], [keyboardHeight, currentThemeData.inputBg, currentThemeData.border]);
+  ], [effectiveHeight, currentThemeData.inputBg, currentThemeData.border]);
 
   // Мемоизированные стили текстового поля
   const textInputStyle = useMemo(() => [
@@ -140,10 +147,13 @@ const ChatInputInner: React.FC<ChatInputProps> = React.memo(({
   const handleFocus = useCallback(() => {
     try {
       setInputFocused(true);
+      if (__DEV__) {
+        console.log('📱 ChatInput: Фокус установлен, высота панели:', effectiveHeight, 'тип:', isEmojiPanel ? 'эмодзи' : 'клавиатура');
+      }
     } catch (error) {
       if (__DEV__) console.error('ChatInput: Ошибка установки фокуса', error);
     }
-  }, [setInputFocused]);
+  }, [setInputFocused, effectiveHeight, isEmojiPanel]);
 
   const handleBlur = useCallback(() => {
     try {

@@ -11,6 +11,9 @@ import { createMessageReplyMethods } from './useMessageReplies';
 import { createMessageSelectionMethods } from './useMessageSelection';
 import { createMessageSelectorFunctions } from './useMessageSelectorFunctions';
 
+// Валидные статусы сообщений для QA системы
+const VALID_STATUSES = ['sending', 'sent', 'delivered', 'read'];
+
 interface MessageStore {
   messages: Message[];
   replyDraft: Message | null;
@@ -36,6 +39,7 @@ interface MessageStore {
   getSelectedCount: () => number;
   removeSelectedMessages: () => void;
   reset: () => void;
+  setMessages: (messages: Message[]) => void;
   // Селекторы для оптимизации
   getMessageById: (id: string) => Message | undefined;
   getMessagesBySender: (sender: "me" | "other") => Message[];
@@ -76,13 +80,10 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
         };
         
         set((state) => ({
-          messages: [...state.messages, newMessage]
+          messages: [...state.messages, newMessage],
+          // Очищаем replyDraft в одном обновлении
+          ...(currentReplyDraft && { replyDraft: null })
         }));
-        
-        // Очищаем replyDraft после создания сообщения
-        if (currentReplyDraft) {
-          set((state) => ({ replyDraft: null }));
-        }
         
         // Имитация отправки для каждой части
         setTimeout(() => {
@@ -192,6 +193,14 @@ if (__DEV__) console.warn('removeMessage: Невалидный ID сообщен
   
     } catch (error) {
       if (__DEV__) console.error('reset: Ошибка сброса store', error);
+    }
+  },
+
+  setMessages: (messages: Message[]) => {
+    try {
+      set({ messages, selectedIds: new Set() });
+    } catch (error) {
+      if (__DEV__) console.error('setMessages: Ошибка установки сообщений', error);
     }
   },
 

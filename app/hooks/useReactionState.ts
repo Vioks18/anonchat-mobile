@@ -27,32 +27,46 @@ export const useReactionState = () => {
   const openAtMessage = useCallback((messageId: string, viewRef: any) => {
     if (!viewRef) return;
 
-    viewRef.measureInWindow((x: number, y: number, w: number, h: number) => {
-      const baseAnchor: ReactionAnchor = { x, y, w, h };
-      
-      if (lastTouchRef.current) {
-        setAnchor({
-          ...baseAnchor,
-          touchX: lastTouchRef.current.x,
-          touchY: lastTouchRef.current.y,
-        });
-      } else {
-        setAnchor(baseAnchor);
-      }
-      
+    // Добавляем проверку и стабилизацию
+    try {
+      viewRef.measureInWindow((x: number, y: number, w: number, h: number) => {
+        // Проверяем валидность координат
+        if (typeof x !== 'number' || typeof y !== 'number' || typeof w !== 'number' || typeof h !== 'number') {
+          console.warn('Invalid measureInWindow result:', { x, y, w, h });
+          return;
+        }
+
+        const baseAnchor: ReactionAnchor = { x, y, w, h };
+        
+        if (lastTouchRef.current) {
+          setAnchor({
+            ...baseAnchor,
+            touchX: lastTouchRef.current.x,
+            touchY: lastTouchRef.current.y,
+          });
+        } else {
+          setAnchor(baseAnchor);
+        }
+        
+        setSelectedMessageId(messageId);
+        setVisible(true);
+        
+        if (__DEV__) {
+          GestureProbe.log({
+            type: 'openReaction',
+            t: Date.now(),
+            msgId: messageId,
+            x: lastTouchRef.current?.x,
+            y: lastTouchRef.current?.y
+          });
+        }
+      });
+    } catch (error) {
+      console.warn('Error in openAtMessage:', error);
+      // Fallback - устанавливаем базовое состояние
       setSelectedMessageId(messageId);
       setVisible(true);
-      
-      if (__DEV__) {
-        GestureProbe.log({
-          type: 'openReaction',
-          t: Date.now(),
-          msgId: messageId,
-          x: lastTouchRef.current?.x,
-          y: lastTouchRef.current?.y
-        });
-      }
-    });
+    }
   }, []);
 
   const close = useCallback(() => {
@@ -72,6 +86,9 @@ export const useReactionState = () => {
     close,
     setLastTouch,
     keyboardHeight,
+    setSelectedMessageId,
+    setVisible,
+    setAnchor,
   };
 };
 

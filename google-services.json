@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "824675423947",
+    "project_id": "anonchat-axora",
+    "storage_bucket": "anonchat-axora.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:824675423947:android:ef8c35c58dd31e9552ed4e",
+        "android_client_info": {
+          "package_name": "com.axora.anonchat"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAm8KaeQBIl38VoGEOGv_PzFpGeC93wdEE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,14 +1,6 @@
 {
-  "totalLoc": 8547,
+  "totalLoc": 8610,
   "files": [
-    {
-      "path": "context\\ChatLogicProvider.tsx",
-      "loc": 407
-    },
-    {
-      "path": "components\\chat\\ChatCore.styles.ts",
-      "loc": 335
-    },
     {
       "path": "hooks\\useUIWatchDog.ts",
       "loc": 271
@@ -46,11 +38,11 @@
       "loc": 206
     },
     {
-      "path": "components\\DevBotMessage.tsx",
-      "loc": 202
+      "path": "hooks\\useMessageStore.ts",
+      "loc": 205
     },
     {
-      "path": "hooks\\useMessageStore.ts",
+      "path": "components\\DevBotMessage.tsx",
       "loc": 202
     },
     {
@@ -74,8 +66,8 @@
       "loc": 178
     },
     {
-      "path": "components\\reactions\\ReactionBar.tsx",
-      "loc": 153
+      "path": "context\\reducers\\chatReducer.ts",
+      "loc": 156
     },
     {
       "path": "components\\ChatMessage.tsx",
@@ -84,6 +76,10 @@
     {
       "path": "hooks\\useThemeSelector.ts",
       "loc": 152
+    },
+    {
+      "path": "components\\reactions\\ReactionBar.tsx",
+      "loc": 148
     },
     {
       "path": "components\\ChatKeyboard.tsx",
@@ -126,6 +122,10 @@
       "loc": 118
     },
     {
+      "path": "context\\hooks\\useChatActions.ts",
+      "loc": 116
+    },
+    {
       "path": "components\\MessageInput.tsx",
       "loc": 114
     },
@@ -158,6 +158,10 @@
       "loc": 87
     },
     {
+      "path": "context\\ChatLogicProvider.tsx",
+      "loc": 83
+    },
+    {
       "path": "hooks\\useMessageSelectorFunctions.ts",
       "loc": 83
     },
@@ -174,11 +178,19 @@
       "loc": 79
     },
     {
+      "path": "components\\chat\\styles\\theme.styles.ts",
+      "loc": 75
+    },
+    {
       "path": "components\\GestureHandler.tsx",
       "loc": 73
     },
     {
       "path": "components\\chat\\ChatCoreFallback.tsx",
+      "loc": 70
+    },
+    {
+      "path": "components\\chat\\styles\\header.styles.ts",
       "loc": 70
     },
     {
@@ -194,12 +206,20 @@
       "loc": 68
     },
     {
+      "path": "components\\chat\\styles\\messages.styles.ts",
+      "loc": 66
+    },
+    {
       "path": "providers\\FakeSocketProvider.tsx",
       "loc": 65
     },
     {
       "path": "hooks\\useMessageReactions.ts",
       "loc": 64
+    },
+    {
+      "path": "components\\chat\\styles\\input.styles.ts",
+      "loc": 62
     },
     {
       "path": "hooks\\useMessageReplies.ts",
@@ -230,8 +250,16 @@
       "loc": 47
     },
     {
+      "path": "context\\types\\chat.types.ts",
+      "loc": 42
+    },
+    {
       "path": "hooks\\useChatEffects.ts",
       "loc": 40
+    },
+    {
+      "path": "components\\chat\\styles\\menu.styles.ts",
+      "loc": 39
     },
     {
       "path": "constants\\messageConstants.ts",
@@ -248,6 +276,14 @@
     {
       "path": "+not-found.tsx",
       "loc": 37
+    },
+    {
+      "path": "components\\chat\\styles\\reply.styles.ts",
+      "loc": 37
+    },
+    {
+      "path": "context\\hooks\\useChatSelectors.ts",
+      "loc": 36
     },
     {
       "path": "hooks\\useSafeExecute.ts",
@@ -268,6 +304,10 @@
     {
       "path": "utils\\haptics.ts",
       "loc": 29
+    },
+    {
+      "path": "components\\chat\\ChatCore.styles.ts",
+      "loc": 25
     },
     {
       "path": "_layout.tsx",
@@ -302,5 +342,5 @@
       "loc": 2
     }
   ],
-  "generatedAt": "2025-08-11T03:45:20.985Z"
+  "generatedAt": "2025-08-12T03:08:43.642Z"
 }

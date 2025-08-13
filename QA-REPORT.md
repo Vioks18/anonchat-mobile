@@ -1,9 +1,11 @@
 # QA Report
 
 **Mode:** strict
-**New issues:** 7
+**New issues:** 3
 
 ## ✅ Passed
+- reactionbar.anchor_guard (P0) — app/components/reactions/ReactionBar.tsx: Found
+- store.status_read (P0) — app/hooks/useMessageStore.ts: read in statuses
 - perf.dev_logs (P0) — app/hooks/useUIWatchDog.ts: logs guarded
 - perf.dev_logs (P0) — app/hooks/useMessageStore.ts: logs guarded
 - perf.dev_logs (P0) — app/hooks/useBotProvider.ts: logs guarded
@@ -18,26 +20,29 @@
 - perf.memo_bubble (P1) — app/components/MessageWithReactions.tsx: memo present
 - perf.memo_bubble (P1) — app/components/ChatMessage.tsx: memo present
 - perf.stable_handlers (P1) — app/components/ChatListWithReactions.tsx: callbacks memoized
+- perf.stable_handlers (P1) — app/hooks/useReactionState.ts: callbacks memoized
 - bubble.meta.pointerEvents (P1) — app/components/MessageWithReactions.tsx: Found
 - bubble.text.minWidth0 (P1) — app/components/MessageWithReactions.tsx: Found
 - bubble.noWidth100 (P1) — app/components/MessageWithReactions.tsx: OK
 - bubble.paddingRight.meta (P1) — app/components/MessageWithReactions.tsx: paddingRight >= 28
 - scroll.gate (P1) — app/components/ChatListWithReactions.tsx: Found
+- reactionbar.guard (P0) — app/components/reactions/ReactionBar.tsx: Found
 - reactionbar.pointerEvents (P1) — app/components/reactions/ReactionBar.tsx: Found
 - anchor.touchXY (P1) — app/hooks/useReactionState.ts: touchXY support present
 - status.read (P0) — app/hooks/useMessageStore.ts: OK
 - .env.gitignore (P2) — .gitignore: Found
 - secrets.regex (P0) — **/*.{ts,tsx,js,jsx}: no secrets found
+- react.arrow_function_jsx (P1) — **/*.{ts,tsx}: OK
+- react.unstable_handler (P1) — **/*.{ts,tsx}: OK
+- react.map_without_callback (P1) — **/*.{ts,tsx}: OK
+- react.nested_usecallback (P1) — **/*.{ts,tsx}: OK
+- react.flatlist_render (P1) — **/*.{ts,tsx}: OK
 
 ## ⚠️ Warnings
 - deps.heavy_inactive (P2) — package.json: heavy unused deps found **NEW**
-- perf.stable_handlers (P1) — app/hooks/useReactions.ts: handlers not memoized **NEW**
-- deps.unused (P2) — package.json: unused: @react-navigation/bottom-tabs, @react-navigation/elements, @react-navigation/native, expo, expo-auth-session... **NEW**
-- bigfile.max_lines (P1) — app/**/*.{ts,tsx,js,jsx}: files too large: File exceeds max lines (335 > 300): app\components\chat\ChatCore.styles.ts, File exceeds max lines (407 > 300): app\context\ChatLogicProvider.tsx **NEW**
+- deps.unused (P2) — package.json: unused: expo, expo-background-fetch, expo-blur, expo-camera, expo-constants... **NEW**
+- bigfile.max_lines (P1) — app/**/*.{ts,tsx,js,jsx}: files too large: File exceeds max lines (461 > 300): app\screens\ChatListScreen.tsx, File exceeds max lines (330 > 300): app\services\chatApi.ts **NEW**
 
 ## ❌ P0 Issues
-- reactionbar.anchor_guard (P0) — app/components/reactions/ReactionBar.tsx: Missing: if (!visible || !anchor) return null; **NEW**
-- store.status_read (P0) — app/hooks/useMessageStore.ts: read missing in statuses **NEW**
-- reactionbar.guard (P0) — app/components/reactions/ReactionBar.tsx: Missing: if (!visible || !anchor) return null; **NEW**
 
-Summary: Passed=24, Warnings=4, P0=3
+Summary: Passed=33, Warnings=3, P0=0
