@@ -21,11 +21,30 @@ import {
 import ChatCard from '../components/chat/ChatCard';
 import { AI_CONFIG } from '../config/ai';
 import { useChats } from '../hooks/chat/useChats';
+import { useAppFocus } from '../hooks/useAppFocus';
 import { useAuth } from '../hooks/useAuth';
+import {
+  AVATAR_URL_TTL_MS,
+  BATCH_HIGHLIGHT_DEBOUNCE_MS,
+  LIST_BIG_DIFF_DISABLE_ANIM_THRESHOLD,
+  LIST_INCREMENT_EVERY_MS,
+  LIST_INCREMENT_STEP,
+  LIST_INITIAL_RENDER,
+  LIST_LAYOUT_ANIM_MS,
+  PREFETCH_FIRST_N,
+  RETRY_ON_APP_FOCUS,
+  RETRY_ON_PULL_REFRESH
+} from '../lib/avatar/config';
+import { prefetchMany } from '../lib/avatar/prefetch';
+import { resolveAvatarURL } from '../lib/avatar/resolve';
 import { RootStackParamList } from '../navigation';
 import { createOrGetDM } from '../services/chatApi';
 import { findUserByUsername } from '../services/usernames';
+import { useAvatarCache } from '../store/avatarCacheStore';
+import { usePreferencesStore } from '../store/preferencesStore';
+import { useUiPerfStore } from '../store/uiPerfStore';
 import { ChatListItem } from '../types/chat';
+import { afterInteractions, debounceMs } from '../utils/schedule';
 
 const ROW_HEIGHT = 76;
 
@@ -34,14 +53,20 @@ type ChatListNavigationProp = StackNavigationProp<RootStackParamList, 'ChatList'
 const ChatListScreen: React.FC = () => {
   const navigation = useNavigation<ChatListNavigationProp>();
   const { user } = useAuth();
+  const themeVersion = useUiPerfStore(s => s.themeVersion);
+  const reducedMotion = useUiPerfStore(s => s.reducedMotion);
   const [showSearch, setShowSearch] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [searchUsername, setSearchUsername] = useState('');
   const [creatingChat, setCreatingChat] = useState(false);
   const [minRefreshTime, setMinRefreshTime] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(LIST_INITIAL_RENDER);
   
   const flatListRef = useRef<FlatList>(null);
   const hasAnimatedRef = useRef(false);
+  const prevChatsRef = useRef<ChatListItem[]>([]);
+  const pendingUnreadRows = useRef(new Set<string>()).current;
+  const highlightRowsRef = useRef<Set<string>>(new Set());
 
   // Включаем LayoutAnimation для Android
   useEffect(() => {
@@ -65,8 +90,124 @@ const ChatListScreen: React.FC = () => {
     },
   });
 
+  // Retry triggers for avatar loading
+  const bumpRetryToken = useAvatarCache(s => s.bumpRetryToken);
+  
+  if (RETRY_ON_APP_FOCUS) {
+    useAppFocus(() => bumpRetryToken());
+  }
+
+  // Incremental mount logic
+  useEffect(() => {
+    if (!chats) return;
+    
+    // Reset visible count on new data
+    setVisibleCount(LIST_INITIAL_RENDER);
+    
+    // Schedule increments
+    const increment = () => {
+      setVisibleCount(prev => {
+        const next = Math.min(prev + LIST_INCREMENT_STEP, chats.length);
+        if (next < chats.length) {
+          setTimeout(increment, LIST_INCREMENT_EVERY_MS);
+        }
+        return next;
+      });
+    };
+    
+    if (chats.length > LIST_INITIAL_RENDER) {
+      setTimeout(increment, LIST_INCREMENT_EVERY_MS);
+    }
+  }, [chats?.length]);
+
+  // Batched unread highlight logic
+  const triggerHighlight = useCallback(
+    debounceMs(() => {
+      const rowsToHighlight = new Set(pendingUnreadRows);
+      pendingUnreadRows.clear();
+      highlightRowsRef.current = rowsToHighlight;
+      
+      // Force re-render of affected rows
+      if (rowsToHighlight.size > 0) {
+        // Small delay to ensure state update
+        setTimeout(() => {
+          highlightRowsRef.current.clear();
+        }, 100);
+      }
+    }, BATCH_HIGHLIGHT_DEBOUNCE_MS),
+    [pendingUnreadRows]
+  );
+
+  // Detect unread changes and queue highlights
+  useEffect(() => {
+    if (!chats) return;
+    
+    const prevChats = prevChatsRef.current;
+    chats.forEach((chat, index) => {
+      const prevChat = prevChats[index];
+      if (prevChat && prevChat.unreadCount === 0 && chat.unreadCount > 0) {
+        pendingUnreadRows.add(chat.chatId);
+      }
+    });
+    
+    if (pendingUnreadRows.size > 0) {
+      triggerHighlight();
+    }
+    
+    prevChatsRef.current = chats;
+  }, [chats, triggerHighlight]);
+
+  // Prewarm avatar cache with URL resolution and prefetch
+  const prime = useAvatarCache(s => s.primeMany);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      if (!chats || chats.length === 0) return;
+      const now = Date.now();
+      const cache = useAvatarCache.getState(); // sync MMKV
+      const urls: string[] = [];
+      
+      for (const c of chats.slice(0, 100)) {
+        const id = c.chatId;
+        const cached = cache.byId[id];
+        
+        if (cached?.resolvedUrl && cached.resolvedAt && (now - cached.resolvedAt) < AVATAR_URL_TTL_MS) {
+          urls.push(cached.resolvedUrl);
+          continue;
+        }
+        
+        const { url, source } = await resolveAvatarURL({
+          userId: id,
+          avatarURL: c.avatar ?? null,
+          email: null, // email not available in chat list
+        });
+        
+        if (cancelled) return;
+        if (url) urls.push(url);
+        
+        cache.upsert({
+          uid: id,
+          url: c.avatar ?? null,
+          resolvedUrl: url ?? null,
+          source: source,
+          initials: cache.byId[id]?.initials ?? c.title?.[0]?.toUpperCase() ?? '?',
+          color: cache.byId[id]?.color ?? '#4F46E5',
+          updatedAt: now,
+          resolvedAt: now,
+        });
+      }
+      
+      await prefetchMany(urls, PREFETCH_FIRST_N);
+    })();
+    
+    return () => { cancelled = true; };
+  }, [chats]);
+
   // Обработка нажатия на чат
   const handleChatPress = useCallback(async (item: ChatListItem) => {
+    // Сохраняем последний открытый чат
+    usePreferencesStore.getState().setLastOpenChatId(item.chatId);
+    
     // Отмечаем как прочитанный
     await markAsRead(item.chatId);
     
@@ -126,6 +267,11 @@ const ChatListScreen: React.FC = () => {
     
     await refreshChats();
     
+    // Bump retry token for avatar retries
+    if (RETRY_ON_PULL_REFRESH) {
+      bumpRetryToken();
+    }
+    
     // Минимальное время показа спиннера (300ms)
     const elapsed = Date.now() - startTime;
     if (elapsed < 300) {
@@ -133,11 +279,15 @@ const ChatListScreen: React.FC = () => {
     } else {
       setMinRefreshTime(false);
     }
-  }, [refreshChats]);
+  }, [refreshChats, bumpRetryToken]);
 
   // Рендер элемента списка
   const renderChatItem = useCallback(({ item }: { item: ChatListItem }) => (
-    <ChatCard item={item} onPress={handleChatPress} />
+    <ChatCard 
+      item={item} 
+      onPress={handleChatPress} 
+      shouldHighlight={highlightRowsRef.current.has(item.chatId)}
+    />
   ), [handleChatPress]);
 
   // Получение layout для оптимизации
@@ -160,15 +310,49 @@ const ChatListScreen: React.FC = () => {
     </View>
   ), []);
 
+  // Batched list updates with smart animation
+  useEffect(() => {
+    if (!chats) return;
+    
+    const prevChats = prevChatsRef.current;
+    const currentChats = chats;
+    
+    // Compute cheap diff size
+    const lengthDiff = Math.abs(currentChats.length - prevChats.length);
+    const idDiff = currentChats.slice(0, 10).filter((chat, i) => 
+      prevChats[i]?.chatId !== chat.chatId
+    ).length;
+    const totalDiff = lengthDiff + idDiff;
+    
+    if (totalDiff <= LIST_BIG_DIFF_DISABLE_ANIM_THRESHOLD && !reducedMotion) {
+      // Small diff: animate smoothly
+      LayoutAnimation.configureNext({
+        duration: LIST_LAYOUT_ANIM_MS,
+        create: { type: 'easeInEaseOut', property: 'opacity' },
+        update: { type: 'easeInEaseOut' },
+        delete: { type: 'easeInEaseOut', property: 'opacity' },
+      });
+    } else if (totalDiff > LIST_BIG_DIFF_DISABLE_ANIM_THRESHOLD) {
+      // Big diff: skip animation to prevent jank
+      afterInteractions(() => {
+        // State update happens in useChats, this is just for animation control
+      });
+    }
+    
+    prevChatsRef.current = currentChats;
+  }, [chats, reducedMotion]);
+
   // Отложенная анимация первого рендера
   useEffect(() => {
     if (!loading && !hasAnimatedRef.current) {
       InteractionManager.runAfterInteractions(() => {
         hasAnimatedRef.current = true;
-        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+        if (!reducedMotion) {
+          LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+        }
       });
     }
-  }, [loading]);
+  }, [loading, reducedMotion]);
 
   // Состояние загрузки
   if (loading) {
@@ -181,7 +365,10 @@ const ChatListScreen: React.FC = () => {
   }
 
   return (
-    <View style={styles.container}>
+    <View 
+      style={styles.container}
+      key={`chat-list-theme-${themeVersion}`}
+    >
       {/* Верхняя панель */}
       <View style={styles.header}>
         <View style={styles.headerLeft}>
@@ -242,7 +429,7 @@ const ChatListScreen: React.FC = () => {
       {/* Список чатов */}
       <FlatList
         ref={flatListRef}
-        data={chats}
+        data={chats?.slice(0, visibleCount)}
         renderItem={renderChatItem}
         keyExtractor={keyExtractor}
         getItemLayout={getItemLayout}

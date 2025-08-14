@@ -5,7 +5,6 @@ import ChatCoreWithReactions from '../components/ChatCoreWithReactions';
 import { ConfigBanner } from '../components/system/ConfigBanner';
 import { useAuth } from '../hooks/useAuth';
 import { useBotProvider } from '../hooks/useBotProvider';
-import { useDevBotCommands } from '../hooks/useDevBotCommands';
 import { useMessageStore } from '../hooks/useMessageStore';
 import { deleteForAll, deleteForMe, listenMessages, markChatRead, sendMessage } from '../services/chatApi';
 import { Message } from '../types/chat';
@@ -24,9 +23,9 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ route, navigation }) => {
   const { chatId, title } = route.params;
   const { user } = useAuth();
   
-  // Состояния для ботов
+  // Состояния для ботов (отключены для продакшена)
   const { isBotEnabled, toggleBot } = useBotProvider();
-  const { handleCommand, setFlatListRef } = useDevBotCommands();
+  // const { handleCommand, setFlatListRef } = useDevBotCommands(); // Отключено
   
   // Zustand store
   const addMessage = useMessageStore((s) => s?.addMessage || (() => {}));
@@ -39,17 +38,22 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ route, navigation }) => {
   const handleSendMessage = async (text: string) => {
     if (!user?.uid) return;
 
-    // Проверяем, не является ли это командой DevBot
-    if (text.startsWith('/')) {
-      const isCommand = handleCommand(text);
-      if (isCommand) {
-        return; // Команда обработана, не отправляем в чат
-      }
-    }
+    // DevBot команды отключены для продакшена
+    // if (text.startsWith('/')) {
+    //   const isCommand = handleCommand(text);
+    //   if (isCommand) {
+    //     return; // Команда обработана, не отправляем в чат
+    //   }
+    // }
     
     try {
-      // Отправляем сообщение в Firebase
-      await sendMessage(chatId, text, user.uid);
+      if (chatId === 'ai-assistant') {
+        // Для AI Assistant используем локальные сообщения
+        addMessage(text);
+      } else {
+        // Отправляем сообщение в Firebase для реальных чатов
+        await sendMessage(chatId, text, user.uid);
+      }
     } catch (error) {
       if (__DEV__) console.error('Error sending message:', error);
     }
@@ -60,12 +64,19 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ route, navigation }) => {
     React.useCallback(() => {
       if (!user?.uid) return;
 
-      // Отмечаем чат как прочитанный
-      markChatRead(chatId, user.uid).catch(error => {
-        if (__DEV__) console.error('Error marking chat as read:', error);
-      });
+      // Отмечаем чат как прочитанный (только для реальных чатов, не для AI Assistant)
+      if (chatId !== 'ai-assistant') {
+        markChatRead(chatId, user.uid).catch(error => {
+          if (__DEV__) console.error('Error marking chat as read:', error);
+        });
+      }
 
-      // Подписываемся на сообщения
+      // Подписываемся на сообщения (только для реальных чатов)
+      if (chatId === 'ai-assistant') {
+        // Для AI Assistant используем локальные сообщения
+        return;
+      }
+      
       const unsubscribe = listenMessages(chatId, user.uid, (firebaseMessages: Message[]) => {
         // Конвертируем сообщения в формат, совместимый с существующим UI
         const convertedMessages = firebaseMessages.map(msg => ({

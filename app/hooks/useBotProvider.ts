@@ -26,7 +26,7 @@ const botMessages = [
 ];
 
 export const useBotProvider = () => {
-  const [isBotEnabled, setIsBotEnabled] = useState(false);
+  const [isBotEnabled, setIsBotEnabled] = useState(false); // Отключено по умолчанию для продакшена
   const addBotMessage = useMessageStore((s) => s.addBotMessage);
   const intervalRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 

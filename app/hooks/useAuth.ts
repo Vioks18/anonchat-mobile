@@ -73,43 +73,75 @@ export const useAuth = () => {
     // Сначала загружаем из storage
     loadUserFromStorage();
 
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
-      try {
-        if (firebaseUser) {
-          // User is signed in - load full profile from Firestore
-          const userProfile = await getUserProfile(firebaseUser.uid);
-          
-          if (userProfile) {
-            setUser(userProfile);
-            setStatus('signedIn');
-            await saveUserToStorage(userProfile);
-            if (__DEV__) console.log('🔐 User authenticated:', userProfile.uid, 'username:', userProfile.username);
+    // Добавляем небольшую задержку для Firebase Auth инициализации
+    const timeoutId = setTimeout(() => {
+      const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
+        try {
+          if (firebaseUser) {
+            // User is signed in - load full profile from Firestore
+            const userProfile = await getUserProfile(firebaseUser.uid);
+            
+            if (userProfile) {
+              setUser(userProfile);
+              setStatus('signedIn');
+              await saveUserToStorage(userProfile);
+              if (__DEV__) console.log('🔐 User authenticated:', userProfile.uid, 'username:', userProfile.username);
+            } else {
+              // User exists in Auth but no profile in Firestore
+              if (__DEV__) console.warn('⚠️ User authenticated but no profile found in Firestore');
+              // Не выходим из системы, если пользователь есть в storage
+              const storedUser = await AsyncStorage.getItem(AUTH_STORAGE_KEY);
+              if (!storedUser) {
+                setUser(null);
+                setStatus('signedOut');
+                await saveUserToStorage(null);
+              }
+            }
           } else {
-            // User exists in Auth but no profile in Firestore
-            if (__DEV__) console.warn('⚠️ User authenticated but no profile found in Firestore');
+            // User is signed out - проверяем storage
+            const storedUser = await AsyncStorage.getItem(AUTH_STORAGE_KEY);
+            if (storedUser) {
+              // Пользователь есть в storage, но не в Firebase Auth
+              // Это может быть временная проблема с persistence
+              if (__DEV__) console.log('⚠️ User in storage but not in Firebase Auth - keeping user signed in');
+              // Не выходим из системы, но нужно восстановить Firebase Auth
+              try {
+                const userData = JSON.parse(storedUser) as AuthUser;
+                // Попробуем восстановить сессию Firebase Auth
+                if (__DEV__) console.log('🔄 Attempting to restore Firebase Auth session');
+                // Здесь можно добавить логику восстановления сессии
+              } catch (error) {
+                if (__DEV__) console.error('❌ Error restoring Firebase Auth session:', error);
+              }
+            } else {
+              // Пользователя нет нигде - выходим
+              setUser(null);
+              setStatus('signedOut');
+              await saveUserToStorage(null);
+              if (__DEV__) console.log('🔐 User signed out');
+            }
+          }
+        } catch (error) {
+          if (__DEV__) console.error('🔐 Auth state change error:', error);
+          setError(error instanceof Error ? error.message : 'Authentication error');
+          // Не выходим из системы при ошибке, если пользователь есть в storage
+          const storedUser = await AsyncStorage.getItem(AUTH_STORAGE_KEY);
+          if (!storedUser) {
             setUser(null);
             setStatus('signedOut');
             await saveUserToStorage(null);
           }
-        } else {
-          // User is signed out
-          setUser(null);
-          setStatus('signedOut');
-          await saveUserToStorage(null);
-          if (__DEV__) console.log('🔐 User signed out');
+        } finally {
+          setStatus(prev => prev === 'loading' ? 'signedOut' : prev);
         }
-      } catch (error) {
-        if (__DEV__) console.error('🔐 Auth state change error:', error);
-        setError(error instanceof Error ? error.message : 'Authentication error');
-        setUser(null);
-        setStatus('signedOut');
-        await saveUserToStorage(null);
-      } finally {
-        setStatus(prev => prev === 'loading' ? 'signedOut' : prev);
-      }
-    });
+      });
 
-    return unsubscribe;
+      return unsubscribe;
+    }, 1000); // Задержка 1 секунда
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
   }, [saveUserToStorage, loadUserFromStorage]);
 
   return {

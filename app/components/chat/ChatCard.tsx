@@ -1,28 +1,50 @@
+// Phase 5 — progressive avatar / batched unread / incremental mount
 import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useRef } from 'react';
 import {
-    Animated,
-    Platform,
-    Pressable,
-    StyleSheet,
-    Text,
-    View
+  Animated,
+  Pressable,
+  StyleSheet,
+  Text,
+  View
 } from 'react-native';
+import { UNREAD_HIGHLIGHT_COLOR_ALPHA, UNREAD_HIGHLIGHT_MS } from '../../lib/avatar/config';
 import { ChatListItem } from '../../types/chat';
 import { formatChatTime } from '../../utils/time';
+import { Avatar } from '../common/Avatar';
 
 interface ChatCardProps {
   item: ChatListItem;
   onPress: (item: ChatListItem) => void;
+  shouldHighlight?: boolean; // from ChatList batched highlight system
 }
 
 const ROW_HEIGHT = 76;
 
-const ChatCard: React.FC<ChatCardProps> = React.memo(({ item, onPress }) => {
+const ChatCard: React.FC<ChatCardProps> = React.memo(({ item, onPress, shouldHighlight = false }) => {
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const badgeScale = useRef(new Animated.Value(item.unreadCount > 0 ? 1 : 0)).current;
   const badgeOpacity = useRef(new Animated.Value(item.unreadCount > 0 ? 1 : 0)).current;
+  const highlightOpacity = useRef(new Animated.Value(0)).current;
   const prevUnreadCount = useRef(item.unreadCount);
+
+  // Unread highlight animation
+  useEffect(() => {
+    if (shouldHighlight) {
+      Animated.sequence([
+        Animated.timing(highlightOpacity, {
+          toValue: 1,
+          duration: UNREAD_HIGHLIGHT_MS / 2,
+          useNativeDriver: true,
+        }),
+        Animated.timing(highlightOpacity, {
+          toValue: 0,
+          duration: UNREAD_HIGHLIGHT_MS / 2,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
+  }, [shouldHighlight, highlightOpacity]);
 
   // Анимация badge при изменении unreadCount
   useEffect(() => {
@@ -97,50 +119,56 @@ const ChatCard: React.FC<ChatCardProps> = React.memo(({ item, onPress }) => {
       onPressOut={handlePressOut}
       style={({ pressed }) => [
         styles.container,
-        Platform.OS === 'ios' && pressed && styles.pressed
+        pressed && styles.pressed,
       ]}
-      android_ripple={{ 
-        color: 'rgba(108, 92, 231, 0.1)', 
-        borderless: false 
-      }}
     >
       <Animated.View style={[styles.content, { transform: [{ scale: scaleAnim }] }]}>
-        <View style={styles.avatar}>
-          {isAIAssistant ? (
-            <Ionicons name="sparkles" size={24} color="#6c5ce7" />
-          ) : (
-            <Text style={styles.avatarText}>
-              {getInitials(item.title)}
-            </Text>
-          )}
-        </View>
+        {/* Unread highlight overlay */}
+        <Animated.View 
+          style={[
+            styles.highlightOverlay,
+            { opacity: highlightOpacity }
+          ]} 
+        />
         
+        {isAIAssistant ? (
+          <View style={styles.avatar}>
+            <Ionicons name="sparkles" size={24} color="#6c5ce7" />
+          </View>
+        ) : (
+          <Avatar
+            id={item.chatId}
+            size={48}
+            name={item.title}
+            imageURL={item.avatar ?? null}
+          />
+        )}
+
         <View style={styles.chatInfo}>
-          <View style={styles.header}>
-            <Text style={styles.title} numberOfLines={1} ellipsizeMode="tail">
+          <View style={styles.headerRow}>
+            <Text style={styles.title} numberOfLines={1}>
               {item.title}
             </Text>
-            {item.lastMessageTs && (
-              <Text style={styles.time}>
-                {formatChatTime(item.lastMessageTs)}
-              </Text>
-            )}
+            <Text style={styles.time}>
+              {item.lastMessageTs ? formatChatTime(item.lastMessageTs) : ''}
+            </Text>
           </View>
           
-          <View style={styles.footer}>
-            <Text style={styles.lastMessage} numberOfLines={1} ellipsizeMode="tail">
+          <View style={styles.messageRow}>
+            <Text style={styles.lastMessage} numberOfLines={1}>
               {item.lastMessageText || 'Нет сообщений'}
             </Text>
+            
             <Animated.View 
               style={[
-                styles.unreadBadge,
+                styles.badge,
                 {
-                  opacity: badgeOpacity,
                   transform: [{ scale: badgeScale }],
+                  opacity: badgeOpacity,
                 }
               ]}
             >
-              <Text style={styles.unreadText}>
+              <Text style={styles.badgeText}>
                 {item.unreadCount > 99 ? '99+' : item.unreadCount}
               </Text>
             </Animated.View>
@@ -149,55 +177,46 @@ const ChatCard: React.FC<ChatCardProps> = React.memo(({ item, onPress }) => {
       </Animated.View>
     </Pressable>
   );
-}, (prevProps, nextProps) => {
-  // Кастомный компаратор для оптимизации
-  return (
-    prevProps.item.chatId === nextProps.item.chatId &&
-    prevProps.item.title === nextProps.item.title &&
-    prevProps.item.lastMessageText === nextProps.item.lastMessageText &&
-    prevProps.item.lastMessageTs === nextProps.item.lastMessageTs &&
-    prevProps.item.unreadCount === nextProps.item.unreadCount &&
-    prevProps.item.avatar === nextProps.item.avatar
-  );
 });
 
 const styles = StyleSheet.create({
   container: {
     height: ROW_HEIGHT,
     backgroundColor: '#1a1a2e',
-    borderBottomWidth: 1,
-    borderBottomColor: '#2a2a3e',
+  },
+  pressed: {
+    backgroundColor: '#2a2a3e',
   },
   content: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 14,
   },
-  pressed: {
-    opacity: 0.8,
+  highlightOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: `rgba(108, 92, 231, ${UNREAD_HIGHLIGHT_COLOR_ALPHA})`,
+    zIndex: 1,
   },
   avatar: {
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: '#6c5ce7',
+    backgroundColor: '#2a2a3e',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
-  },
-  avatarText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#fff',
-    fontFamily: 'Poppins-Bold',
   },
   chatInfo: {
     flex: 1,
     justifyContent: 'center',
   },
-  header: {
+  headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -205,18 +224,18 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: '600',
     color: '#fff',
-    fontFamily: 'Poppins-Bold',
     flex: 1,
     marginRight: 8,
+    fontFamily: 'Poppins-SemiBold',
   },
   time: {
     fontSize: 12,
     color: '#888',
     fontFamily: 'Poppins-Regular',
   },
-  footer: {
+  messageRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -224,12 +243,12 @@ const styles = StyleSheet.create({
   lastMessage: {
     fontSize: 14,
     color: '#ccc',
-    fontFamily: 'Poppins-Regular',
     flex: 1,
     marginRight: 8,
+    fontFamily: 'Poppins-Regular',
   },
-  unreadBadge: {
-    backgroundColor: '#ff6b6b',
+  badge: {
+    backgroundColor: '#6c5ce7',
     borderRadius: 10,
     minWidth: 20,
     height: 20,
@@ -237,11 +256,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 6,
   },
-  unreadText: {
+  badgeText: {
     fontSize: 12,
-    fontWeight: 'bold',
+    fontWeight: '600',
     color: '#fff',
-    fontFamily: 'Poppins-Bold',
+    fontFamily: 'Poppins-SemiBold',
   },
 });
 

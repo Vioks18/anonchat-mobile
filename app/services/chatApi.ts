@@ -1,29 +1,29 @@
 import {
-    addDoc,
-    arrayUnion,
-    collection,
-    doc,
-    DocumentData,
-    DocumentSnapshot,
-    getDoc,
-    getDocs,
-    onSnapshot,
-    orderBy,
-    query,
-    QuerySnapshot,
-    runTransaction,
-    serverTimestamp,
-    updateDoc,
-    where,
-    writeBatch
+  addDoc,
+  arrayUnion,
+  collection,
+  doc,
+  DocumentData,
+  DocumentSnapshot,
+  getDoc,
+  getDocs,
+  onSnapshot,
+  orderBy,
+  query,
+  QuerySnapshot,
+  runTransaction,
+  serverTimestamp,
+  updateDoc,
+  where,
+  writeBatch
 } from 'firebase/firestore';
 import {
-    Chat,
-    ChatListItem,
-    FirestoreChat,
-    FirestoreMessage,
-    FirestoreUnreadInfo,
-    Message
+  Chat,
+  ChatListItem,
+  FirestoreChat,
+  FirestoreMessage,
+  FirestoreUnreadInfo,
+  Message
 } from '../types/chat';
 import { timestampToNumber } from '../utils/time';
 import { db } from './firebase';
@@ -345,32 +345,46 @@ export const listenChats = (
   uid: string, 
   callback: (chats: ChatListItem[]) => void
 ): (() => void) => {
+  if (__DEV__) console.log('🔍 Starting to listen chats for user:', uid);
+  
   const userChatsRef = collection(db, 'userChats', uid, 'items');
   
   return onSnapshot(userChatsRef, async (snapshot: QuerySnapshot<DocumentData>) => {
+    if (__DEV__) console.log('📱 Received chats snapshot, changes:', snapshot.docChanges().length);
+    
     const chatItems: ChatListItem[] = [];
     
     for (const change of snapshot.docChanges()) {
       if (change.type === 'added' || change.type === 'modified') {
-        const unreadData = change.doc.data() as FirestoreUnreadInfo;
-        const chatId = change.doc.id;
-        
-        // Получаем данные чата
-        const chatDoc = await getDoc(doc(db, 'chats', chatId));
-        if (chatDoc.exists()) {
-          const chat = convertFirestoreChat(chatDoc, chatId);
+        try {
+          const unreadData = change.doc.data() as FirestoreUnreadInfo;
+          const chatId = change.doc.id;
           
-          // Определяем название чата (для DM это будет UID другого пользователя)
-          const otherMember = chat.members.find(member => member !== uid);
-          const title = otherMember || 'Unknown User';
+          if (__DEV__) console.log('📱 Processing chat:', chatId, 'unread:', unreadData.unreadCount);
           
-          chatItems.push({
-            chatId,
-            title,
-            lastMessageText: chat.lastMessage?.text,
-            lastMessageTs: chat.lastMessage?.ts,
-            unreadCount: unreadData.unreadCount
-          });
+          // Получаем данные чата
+          const chatDoc = await getDoc(doc(db, 'chats', chatId));
+          if (chatDoc.exists()) {
+            const chat = convertFirestoreChat(chatDoc, chatId);
+            
+            // Определяем название чата (для DM это будет UID другого пользователя)
+            const otherMember = chat.members.find(member => member !== uid);
+            const title = otherMember || 'Unknown User';
+            
+            chatItems.push({
+              chatId,
+              title,
+              lastMessageText: chat.lastMessage?.text,
+              lastMessageTs: chat.lastMessage?.ts,
+              unreadCount: unreadData.unreadCount
+            });
+            
+            if (__DEV__) console.log('✅ Added chat to list:', title);
+          } else {
+            if (__DEV__) console.warn('⚠️ Chat document not found:', chatId);
+          }
+        } catch (error) {
+          if (__DEV__) console.error('❌ Error processing chat change:', error);
         }
       }
     }
@@ -378,7 +392,13 @@ export const listenChats = (
     // Сортируем по времени последнего сообщения
     chatItems.sort((a, b) => (b.lastMessageTs || 0) - (a.lastMessageTs || 0));
     
+    if (__DEV__) console.log('📱 Final chat list:', chatItems.length, 'chats');
+    
     callback(chatItems);
+  }, (error) => {
+    if (__DEV__) console.error('❌ Error listening chats:', error);
+    // Вызываем callback с пустым массивом при ошибке
+    callback([]);
   });
 };
 

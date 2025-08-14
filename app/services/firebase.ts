@@ -1,6 +1,7 @@
-import { initializeApp } from 'firebase/app';
+import { getApp, getApps, initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { getFirestore, type Firestore } from 'firebase/firestore';
+import { getStorage } from 'firebase/storage';
 
 // Firebase конфигурация для проекта "Аксора"
 const firebaseConfig = {
@@ -13,16 +14,26 @@ const firebaseConfig = {
   measurementId: "G-3FTRLPH1R6"
 };
 
-// Инициализация Firebase
-const app = initializeApp(firebaseConfig);
+// App singleton (safe with Fast Refresh)
+export const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 
-// Инициализация сервисов
-export const auth = getAuth(app);
+// Auth singleton (safe with Fast Refresh)
+declare global {
+  // eslint-disable-next-line no-var
+  var FIREBASE_AUTH: any | undefined;
+}
 
-// Примечание: Firebase Auth будет использовать SecureStore для persistence
-// через настройки в emailLink.ts
+let _auth = global.FIREBASE_AUTH;
+// If no auth yet, initialize
+if (!_auth) {
+  _auth = getAuth(app);
+  global.FIREBASE_AUTH = _auth;
+}
+export const auth = _auth;
 
-export const db = getFirestore(app);
+// Firestore bound to the same app
+export const db: Firestore = getFirestore(app);
+export const storage = getStorage(app);
 
 // Подключение к реальному Firebase серверу
 // Эмуляторы отключены - используем продакшн
