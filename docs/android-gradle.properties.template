@@ -1,0 +1,23 @@
+# Android Gradle Properties Template
+# Apply this to android/gradle.properties AFTER prebuild
+
+# AndroidX
+android.useAndroidX=true
+
+# R8 optimization
+android.enableR8.fullMode=false
+
+# Gradle memory settings
+org.gradle.jvmargs=-Xmx4096m -Dfile.encoding=UTF-8
+
+# Enable Gradle build cache
+org.gradle.caching=true
+
+# Enable parallel builds
+org.gradle.parallel=true
+
+# Enable configuration cache
+org.gradle.configuration-cache=true
+
+# Note: Each property must be on a separate line
+# No quotes, no concatenation, no merged values
