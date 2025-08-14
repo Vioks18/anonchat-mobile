@@ -10,8 +10,10 @@ export default ({ config }) => ({
     icon: "./assets/images/icon.png",
     userInterfaceStyle: "automatic",
     newArchEnabled: true, // Включено для производительности
+    jsEngine: "hermes",
     ios: {
-      supportsTablet: true
+      supportsTablet: true,
+      bundleIdentifier: "com.axora.anonchat"
     },
     android: {
       adaptiveIcon: {
@@ -30,7 +32,11 @@ export default ({ config }) => ({
       // Актуальные настройки для стабильности
       enableJetifier: true,
       useAndroidX: true,
-
+      permissions: [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
+      ]
     },
     scheme: "anonchat",
     linking: {
@@ -79,7 +85,8 @@ export default ({ config }) => ({
       ]
     ],
     experiments: {
-      typedRoutes: true
+      typedRoutes: true,
+      tsconfigPaths: true
     },
     extra: {
       eas: {

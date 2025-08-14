@@ -43,7 +43,10 @@
     "prefeature": "node scripts/prefeature.js",
     "fix:android": "node scripts/fix-android-build.js",
     "android:fix": "node scripts/quick-android-fix.js",
-    "android:fix:ps": "powershell -ExecutionPolicy Bypass -File scripts/fix-android-windows.ps1"
+    "android:fix:ps": "powershell -ExecutionPolicy Bypass -File scripts/fix-android-windows.ps1",
+    "android:dev": "eas build -p android --profile dev-client",
+    "android:apk": "eas build -p android --profile preview",
+    "pre-eject-check": "node scripts/eject/guard.js"
   },
   "dependencies": {
     "@expo/vector-icons": "^14.1.0",

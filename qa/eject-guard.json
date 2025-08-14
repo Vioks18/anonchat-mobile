@@ -1,0 +1,24 @@
+{
+  "timestamp": "2025-08-14T17:18:57.849Z",
+  "checks": {
+    "babelConfig": {
+      "ok": true,
+      "message": "Reanimated plugin found"
+    },
+    "gradleProperties": {
+      "ok": true,
+      "message": "No stray gradle.properties in root"
+    },
+    "googleServices": {
+      "ok": true,
+      "message": "google-services.json found"
+    },
+    "appConfig": {
+      "ok": true,
+      "message": "All required app.config.js fields present"
+    }
+  },
+  "ok": true,
+  "errors": [],
+  "warnings": []
+}

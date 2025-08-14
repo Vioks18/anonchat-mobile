@@ -4,7 +4,7 @@
     "appVersionSource": "remote"
   },
   "build": {
-    "development": {
+    "dev-client": {
       "developmentClient": true,
       "distribution": "internal",
       "env": {
@@ -24,15 +24,15 @@
         "buildType": "apk"
       }
     },
-          "production": {
-        "autoIncrement": true,
-        "env": {
-          "EXPO_PUBLIC_ENVIRONMENT": "production"
-        },
-        "android": {
-          "buildType": "app-bundle"
-        }
+    "production": {
+      "autoIncrement": true,
+      "env": {
+        "EXPO_PUBLIC_ENVIRONMENT": "production"
+      },
+      "android": {
+        "buildType": "app-bundle"
       }
+    }
   },
   "submit": {
     "production": {}
