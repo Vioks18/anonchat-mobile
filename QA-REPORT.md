@@ -40,7 +40,7 @@
 
 ## ⚠️ Warnings
 - deps.heavy_inactive (P2) — package.json: heavy unused deps found **NEW**
-- deps.unused (P2) — package.json: unused: @types/lodash, expo, expo-background-fetch, expo-blur, expo-camera... **NEW**
+- deps.unused (P2) — package.json: unused: @types/lodash, dayjs, expo, expo-background-fetch, expo-blur... **NEW**
 - bigfile.max_lines (P1) — app/**/*.{ts,tsx,js,jsx}: files too large: File exceeds max lines (323 > 300): app\components\ChatCore.tsx, File exceeds max lines (519 > 300): app\screens\ChatListScreen.tsx, File exceeds max lines (521 > 300): app\screens\ProfileScreen.tsx... **NEW**
 
 ## ❌ P0 Issues
