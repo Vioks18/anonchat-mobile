@@ -7,39 +7,57 @@ import AuthButton from '../../components/auth/AuthButton';
 import AuthTextField from '../../components/auth/AuthTextField';
 import CustomAlert from '../../components/ui/CustomAlert';
 import { useToast } from '../../components/ui/Toast';
-import { signInWithEmail } from '../../services/auth';
-import { isStrongPassword, isValidEmail } from '../../utils/authValidation';
+import { signUpWithEmail } from '../../services/auth';
+import { isUsernameAvailable } from '../../services/authClient';
+import { isStrongPassword, isValidEmail, isValidUsername } from '../../utils/authValidation';
 
-export default function LoginScreen() {
+export default function SignUpScreen() {
   const navigation = useNavigation();
   const toast = useToast();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [username, setUsername] = useState('');
   const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const [errors, setErrors] = useState<{ email?: string; password?: string; username?: string }>({});
   const [showError, setShowError] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
-  const validateForm = () => {
+  const validateForm = async () => {
     const emailValidation = isValidEmail(email);
     const passwordValidation = isStrongPassword(password);
+    const usernameValidation = isValidUsername(username);
     
-    const newErrors: { email?: string; password?: string } = {};
+    const newErrors: { email?: string; password?: string; username?: string } = {};
     if (!emailValidation.isValid) newErrors.email = emailValidation.error;
     if (!passwordValidation.isValid) newErrors.password = passwordValidation.error;
+    if (!usernameValidation.isValid) newErrors.username = usernameValidation.error;
+    
+    // Check username availability if format is valid
+    if (usernameValidation.isValid) {
+      try {
+        const isAvailable = await isUsernameAvailable(username.toLowerCase());
+        if (!isAvailable) {
+          newErrors.username = 'Этот username уже занят';
+        }
+      } catch (error) {
+        newErrors.username = 'Ошибка проверки username';
+      }
+    }
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleLogin = async () => {
-    if (!validateForm()) return;
+  const handleSignUp = async () => {
+    if (!(await validateForm())) return;
     
     setLoading(true);
     try {
-      await signInWithEmail({ email, password });
-      toast.show({ message: 'Успешный вход! Переход к чатам...' });
-      // Navigation will be handled by route guard
+      await signUpWithEmail({ email, password, username });
+      toast.show({ message: 'Аккаунт успешно создан! Переход к чатам...' });
+      
+      // Навигация будет обработана автоматически через useAuth
+      
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : 'Попробуйте еще раз');
       setShowError(true);
@@ -51,8 +69,8 @@ export default function LoginScreen() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.content}>
-        <Text style={styles.title}>Войти</Text>
-        <Text style={styles.subtitle}>Добро пожаловать в AnonChat</Text>
+        <Text style={styles.title}>Создать аккаунт</Text>
+        <Text style={styles.subtitle}>Присоединиться к AnonChat</Text>
         
         <View style={styles.form}>
           <AuthTextField
@@ -68,14 +86,22 @@ export default function LoginScreen() {
             label="Password"
             value={password}
             onChangeText={setPassword}
-            placeholder="Введите ваш пароль"
+            placeholder="Введите пароль (минимум 6 символов)"
             secureTextEntry
             error={errors.password}
           />
           
+          <AuthTextField
+            label="Username"
+            value={username}
+            onChangeText={setUsername}
+            placeholder="username (без @)"
+            error={errors.username}
+          />
+          
           <AuthButton
-            title="Войти"
-            onPress={handleLogin}
+            title="Создать аккаунт"
+            onPress={handleSignUp}
             loading={loading}
           />
           
@@ -89,7 +115,7 @@ export default function LoginScreen() {
       
       <CustomAlert
         visible={showError}
-        title="Ошибка входа"
+        title="Ошибка регистрации"
         message={errorMessage}
         type="error"
         onConfirm={() => setShowError(false)}

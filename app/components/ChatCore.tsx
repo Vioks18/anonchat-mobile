@@ -26,6 +26,7 @@ import React, { useRef, useState } from 'react';
 import {
   FlatList,
   Text,
+  ToastAndroid,
   View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -36,12 +37,14 @@ import { useErrorMonitor } from '../utils/errorBoundary';
 import ChatListWithReactions from './ChatListWithReactions';
 
 // Extracted components
+import { AI_CONFIG } from '../config/ai';
 import useKeyboardGlue from '../hooks/chat/useKeyboardGlue';
 import { useChatEffects } from '../hooks/useChatEffects';
 import { useChatHandlerWrappers } from '../hooks/useChatHandlerWrappers';
 import { useChatUIState } from '../hooks/useChatUIState';
 import { useMessageSender } from '../hooks/useMessageSender';
 import { useSafeExecute } from '../hooks/useSafeExecute';
+import { generateReply } from '../services/ai/geminiClient';
 import { ChatCoreFallback, ChatMenus, HeaderBar, InputBar, SelectionToolbar } from './chat';
 import { styles } from './chat/ChatCore.styles';
 import ReplyPreview from './ReplyPreview';
@@ -52,13 +55,14 @@ interface ChatCoreProps {
   onError?: (error: Error) => void;
   isBotEnabled?: boolean;
   onToggleBot?: () => void;
+  chatId?: string;
 }
 
 
 
 
 
-const ChatCoreInner: React.FC<ChatCoreProps> = ({ onSendMessage, onError, isBotEnabled = false, onToggleBot }) => {
+const ChatCoreInner: React.FC<ChatCoreProps> = ({ onSendMessage, onError, isBotEnabled = false, onToggleBot, chatId }) => {
   // Используем систему мониторинга ошибок
   const { addError, getStats, isStable } = useErrorMonitor();
   
@@ -69,6 +73,7 @@ const ChatCoreInner: React.FC<ChatCoreProps> = ({ onSendMessage, onError, isBotE
   // Подключаем Zustand store для сообщений с защитой
   const messages = useMessageStore((s) => s?.messages || []);
   const addMessage = useMessageStore((s) => s?.addMessage || (() => {}));
+  const addBotMessage = useMessageStore((s) => s?.addBotMessage || (() => {}));
   const removeMessage = useMessageStore((s) => s?.removeMessage || (() => {}));
   const setReplyDraft = useMessageStore((s) => s?.setReplyDraft || (() => {}));
   const replyDraft = useMessageStore((s) => s?.replyDraft || null);
@@ -170,6 +175,46 @@ const ChatCoreInner: React.FC<ChatCoreProps> = ({ onSendMessage, onError, isBotE
     setReplyDraft
   );
 
+  // AI логика
+  const handleAskAI = React.useCallback(async () => {
+    if (!AI_CONFIG.isAIConfigured) {
+      ToastAndroid.show('AI не настроен', ToastAndroid.SHORT);
+      return;
+    }
+
+    try {
+      // Получаем последние 15 сообщений для контекста
+      const recentMessages = messages.slice(-15).map(msg => ({
+        role: msg.sender === 'other' ? 'assistant' as const : 'user' as const,
+        text: msg.text || ''
+      }));
+
+      // Добавляем временное сообщение "AI думает..."
+      addBotMessage('🤔 AI думает...');
+
+      // Генерируем ответ
+      const reply = await generateReply({
+        messages: recentMessages,
+        systemInstructions: 'Ты полезный ассистент в мессенджере. Отвечай кратко и дружелюбно на русском языке.'
+      });
+
+      // Удаляем временное сообщение
+      const thinkingMessages = messages.filter(msg => msg.text.includes('AI думает'));
+      thinkingMessages.forEach(msg => removeMessage(msg.id));
+
+      // Добавляем ответ AI
+      addBotMessage(reply);
+
+    } catch (error) {
+      console.error('AI error:', error);
+      ToastAndroid.show('Ошибка AI, попробуйте снова', ToastAndroid.SHORT);
+      
+      // Удаляем временное сообщение при ошибке
+      const thinkingMessages = messages.filter(msg => msg.text.includes('AI думает'));
+      thinkingMessages.forEach(msg => removeMessage(msg.id));
+    }
+  }, [messages, addBotMessage, removeMessage]);
+
   // Критическая ошибка - показываем fallback
   if (hasCriticalError) {
     return <ChatCoreFallback error={errorMessage} />;
@@ -216,6 +261,8 @@ const ChatCoreInner: React.FC<ChatCoreProps> = ({ onSendMessage, onError, isBotE
             showMenu={showMenu}
             setShowMenu={setShowMenu}
             currentThemeData={currentThemeData}
+            chatId={chatId}
+            onAskAI={handleAskAI}
           />
         )}
 

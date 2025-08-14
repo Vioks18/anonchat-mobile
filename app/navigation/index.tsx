@@ -1,17 +1,23 @@
 import { createStackNavigator } from '@react-navigation/stack';
 import React from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
-import { handleInitialEmailLink } from '../auth/emailLink';
 import { useAuth } from '../hooks/useAuth';
-import { useEmailLinkListener } from '../hooks/useEmailLinkListener';
-import AuthEmailLinkScreen from '../screens/AuthEmailLinkScreen';
+import AuthLanding from '../screens/auth/AuthLanding';
+import ForgotPasswordScreen from '../screens/auth/ForgotPasswordScreen';
+import LoginScreen from '../screens/auth/LoginScreen';
+import SignUpScreen from '../screens/auth/SignUpScreen';
 import ChatListScreen from '../screens/ChatListScreen';
 import ChatScreen from '../screens/ChatScreen';
+import ProfileScreen from '../screens/ProfileScreen';
 
 export type RootStackParamList = {
-  AuthEmailLink: undefined;
+  AuthLanding: undefined;
+  Login: undefined;
+  SignUp: undefined;
+  ForgotPassword: undefined;
   ChatList: undefined;
   Chat: { chatId: string; title: string };
+  Profile: undefined;
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -22,11 +28,28 @@ const AppNavigator: React.FC = () => {
       initialRouteName="ChatList"
       screenOptions={{
         headerShown: false,
-        cardStyle: { backgroundColor: '#1a1a2e' }
+        cardStyle: { backgroundColor: '#1a1a2e' },
+        cardOverlayEnabled: false,
+        gestureEnabled: false,
+        animation: 'slide_from_right',
+        cardStyleInterpolator: ({ current }) => ({
+          cardStyle: {
+            backgroundColor: '#1a1a2e',
+            transform: [
+              {
+                translateX: current.progress.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [300, 0],
+                }),
+              },
+            ],
+          },
+        }),
       }}
     >
       <Stack.Screen name="ChatList" component={ChatListScreen} />
       <Stack.Screen name="Chat" component={ChatScreen} />
+      <Stack.Screen name="Profile" component={ProfileScreen} />
     </Stack.Navigator>
   );
 };
@@ -34,39 +57,38 @@ const AppNavigator: React.FC = () => {
 const AuthStack: React.FC = () => {
   return (
     <Stack.Navigator
-      initialRouteName="AuthEmailLink"
+      initialRouteName="AuthLanding"
       screenOptions={{
         headerShown: false,
-        cardStyle: { backgroundColor: '#1a1a2e' }
+        cardStyle: { backgroundColor: '#0b0d10' },
+        cardOverlayEnabled: false,
+        gestureEnabled: false
       }}
     >
-      <Stack.Screen name="AuthEmailLink" component={AuthEmailLinkScreen} />
+      <Stack.Screen name="AuthLanding" component={AuthLanding} />
+      <Stack.Screen name="Login" component={LoginScreen} />
+      <Stack.Screen name="SignUp" component={SignUpScreen} />
+      <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
     </Stack.Navigator>
   );
 };
 
 const RootNavigator: React.FC = () => {
-  const { user, initializing } = useAuth();
+  const { user, status } = useAuth();
 
-  // Listen for email link sign-in
-  useEmailLinkListener(() => {
-    // Email link sign-in completed, auth state will update automatically
-    if (__DEV__) console.log('🔗 Email link sign-in completed');
-  });
-
-  // Handle initial email link on app start
-  React.useEffect(() => {
-    handleInitialEmailLink().then((result) => {
-      if (result.ok && __DEV__) {
-        console.log('🔗 Initial email link sign-in completed');
-      }
+  if (__DEV__) {
+    console.log('🧭 Navigation state:', { 
+      status, 
+      hasUser: !!user, 
+      userId: user?.uid,
+      username: user?.username 
     });
-  }, []);
+  }
 
-  if (initializing) {
+  if (status === 'loading') {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#6c5ce7" />
+        <ActivityIndicator size="large" color="#86efac" />
       </View>
     );
   }
@@ -83,7 +105,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#1a1a2e',
+    backgroundColor: '#0b0d10',
   },
 });
 

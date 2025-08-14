@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
+import { AI_CONFIG } from '../../config/ai';
 
 interface HeaderBarProps {
   isSearching: boolean;
@@ -22,6 +23,8 @@ interface HeaderBarProps {
   showMenu: boolean;
   setShowMenu: (show: boolean) => void;
   currentThemeData: any;
+  chatId?: string;
+  onAskAI?: () => void;
 }
 
 const HeaderBar: React.FC<HeaderBarProps> = ({
@@ -37,6 +40,8 @@ const HeaderBar: React.FC<HeaderBarProps> = ({
   showMenu,
   setShowMenu,
   currentThemeData,
+  chatId,
+  onAskAI,
 }) => {
 
   return (
@@ -44,13 +49,24 @@ const HeaderBar: React.FC<HeaderBarProps> = ({
       {!isSearching ? (
         <>
           <Text style={styles.headerText}>Axora</Text>
-          <TouchableOpacity 
-            style={styles.menuButton}
-            onPress={() => setShowMenu(!showMenu)}
-            activeOpacity={0.7}
-          >
-            <Ionicons name="ellipsis-vertical" size={20} color="#fff" />
-          </TouchableOpacity>
+          <View style={styles.headerActions}>
+            {AI_CONFIG.isAIConfigured && chatId === 'ai-assistant' && onAskAI && (
+              <TouchableOpacity 
+                style={styles.aiButton}
+                onPress={onAskAI}
+                activeOpacity={0.7}
+              >
+                <Ionicons name="sparkles" size={20} color="#6c5ce7" />
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity 
+              style={styles.menuButton}
+              onPress={() => setShowMenu(!showMenu)}
+              activeOpacity={0.7}
+            >
+              <Ionicons name="ellipsis-vertical" size={20} color="#fff" />
+            </TouchableOpacity>
+          </View>
         </>
       ) : (
         <View style={styles.searchContainer}>
@@ -114,6 +130,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   menuButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "rgba(255,255,255,0.1)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  aiButton: {
     width: 36,
     height: 36,
     borderRadius: 18,

@@ -44,7 +44,7 @@ const UsernameGate: React.FC = () => {
   }
 
   // User has username, show chat list
-  return <ChatListScreen navigation={null} />;
+  return <ChatListScreen />;
 };
 
 const styles = StyleSheet.create({

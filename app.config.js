@@ -1,4 +1,7 @@
-module.exports = {
+import 'dotenv/config';
+
+export default ({ config }) => ({
+  ...config,
   expo: {
     name: "anonchat-mobile",
     slug: "anonchat-mobile",
@@ -27,28 +30,11 @@ module.exports = {
       // Актуальные настройки для стабильности
       enableJetifier: true,
       useAndroidX: true,
-      intentFilters: [
-        {
-          action: "VIEW",
-          category: ["BROWSABLE", "DEFAULT"],
-          data: [
-            {
-              scheme: "https",
-              host: "anonchat-axora.web.app",
-              pathPrefix: "/auth/links"
-            },
-            {
-              scheme: "https",
-              host: "anonchat-axora.firebaseapp.com",
-              pathPrefix: "/auth/links"
-            }
-          ]
-        }
-      ]
+
     },
     scheme: "anonchat",
     linking: {
-      prefixes: ["anonchat://", "https://anonchat-axora.web.app", "https://anonchat-axora.firebaseapp.com"]
+      prefixes: ["anonchat://"]
     },
     web: {
       bundler: "metro",
@@ -57,6 +43,17 @@ module.exports = {
     },
     plugins: [
       "expo-router",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "minSdkVersion": 24,
+            "targetSdkVersion": 35,
+            "compileSdkVersion": 35,
+            "kotlinVersion": "2.0.21"
+          }
+        }
+      ],
       [
         "expo-splash-screen",
         {
@@ -87,8 +84,9 @@ module.exports = {
     extra: {
       eas: {
         projectId: "57ef08f9-ca5c-4c83-a43f-0120a1dc474b"
-      }
+      },
+      GEMINI_API_KEY: process.env.GEMINI_API_KEY || null,
     },
-                           owner: "rckxs"
+    owner: "rckxs"
   }
-}; 
+}); 

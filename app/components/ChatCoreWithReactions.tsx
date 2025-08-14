@@ -7,6 +7,7 @@ interface ChatCoreWithReactionsProps {
   onError?: (error: Error) => void;
   isBotEnabled?: boolean;
   onToggleBot?: () => void;
+  chatId?: string;
 }
 
 const ChatCoreWithReactions: React.FC<ChatCoreWithReactionsProps> = (props) => {

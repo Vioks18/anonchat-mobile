@@ -5,7 +5,7 @@ import {
   Animated,
   StyleSheet,
   TextInput,
-  TouchableOpacity,
+  TouchableOpacity
 } from 'react-native';
 
 interface InputBarProps {

@@ -1,9 +1,21 @@
 {
   "firestore": {
-    "rules": "firestore.rules",
-    "indexes": "firestore.indexes.json"
+
+
+    "rules": "firebase/firestore.rules"
   },
-  "emulators": {
-    "singleProjectMode": true
+  "hosting": {
+    "public": "web",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "/auth/**",
+        "destination": "/auth/index.html"
+      }
+    ]
   }
 }

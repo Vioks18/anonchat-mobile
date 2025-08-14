@@ -1,6 +1,8 @@
 import { useFocusEffect } from '@react-navigation/native';
 import React, { useState } from 'react';
+import { View } from 'react-native';
 import ChatCoreWithReactions from '../components/ChatCoreWithReactions';
+import { ConfigBanner } from '../components/system/ConfigBanner';
 import { useAuth } from '../hooks/useAuth';
 import { useBotProvider } from '../hooks/useBotProvider';
 import { useDevBotCommands } from '../hooks/useDevBotCommands';
@@ -110,11 +112,15 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ route, navigation }) => {
   };
 
   return (
-    <ChatCoreWithReactions 
-      isBotEnabled={isBotEnabled}
-      onToggleBot={toggleBot}
-      onSendMessage={handleSendMessage}
-    />
+    <View style={{ flex: 1 }}>
+      <ChatCoreWithReactions 
+        isBotEnabled={isBotEnabled}
+        onToggleBot={toggleBot}
+        onSendMessage={handleSendMessage}
+        chatId={chatId}
+      />
+      <ConfigBanner />
+    </View>
   );
 };
 
