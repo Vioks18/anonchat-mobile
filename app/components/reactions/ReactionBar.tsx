@@ -23,6 +23,9 @@ const ReactionBar: React.FC<ReactionBarProps> = ({
   selectedMessageId,
   keyboardHeight = 0,
 }) => {
+  // Guard: early return if not visible or no anchor
+  if (!visible || !anchor) return null;
+
   const insets = useSafeAreaInsets();
   const { addReaction } = useMessageStore();
   const [measuredWidth, setMeasuredWidth] = React.useState(0);
@@ -73,13 +76,6 @@ const ReactionBar: React.FC<ReactionBarProps> = ({
       if (__DEV__) console.warn('⚠️ ReactionBar: selectedMessageId is null!');
     }
   };
-
-  if (!visible || !anchor) {
-    if (__DEV__) {
-      console.log('🔥 ReactionBar: not visible', { visible, anchor: !!anchor });
-    }
-    return null;
-  }
 
   // Адаптивные цвета для панели реакций
   const overlayColors = pickOverlayForBg(THEMES.dark.inputBg, 'dark');
